@@ -1,5 +1,5 @@
 (() => {
-    /* === Плагин RoundedMenu === */
+    /* === Плагин RoundedMenu + Reload + Parser === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -7,12 +7,12 @@
         try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
+    /* === Стили меню и кнопок === */
     function applyCustomMenuStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -42,7 +42,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -69,13 +68,11 @@
                 }
             }
 
-            /* === Новый фон для всей Лампы === */
             body {
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
 
-            /* === Иконки в шапке не должны темнеть при наведении === */
             .head__body svg,
             .head__body svg use {
                 fill: #fff !important;
@@ -83,20 +80,6 @@
                 transition: none !important;
             }
 
-            .head__body .selector.hover svg,
-            .head__body .selector.focus svg,
-            .head__body .selector.traverse svg {
-                fill: #fff !important;
-                color: #fff !important;
-            }
-
-            .head__body .selector.hover,
-            .head__body .selector.focus,
-            .head__body .selector.traverse {
-                color: inherit !important;
-            }
-
-            /* === Кнопка перезагрузки === */
             .m-reload-screen {
                 cursor: pointer !important;
             }
@@ -104,17 +87,33 @@
                 transform: rotate(180deg);
                 transition: transform 0.4s ease;
             }
+
+            /* === Стили кнопки Парсер === */
+            .parser-button {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
+                color: #fff;
+                border: 1px solid #666;
+                border-radius: 10px;
+                padding: 5px 12px;
+                font-size: 0.9em;
+                transition: background 0.25s ease;
+            }
+            .parser-button:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background applied');
+        logMenu('Menu styles applied');
     }
 
+    /* === Кнопка перезагрузки === */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
-
         const headActions = document.querySelector('.head__actions');
         if (!headActions) {
-            logMenu('head__actions not found, retrying...');
             setTimeout(addReloadButton, 1000);
             return;
         }
@@ -127,9 +126,7 @@
                 <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
             </svg>
         `;
-
         btn.addEventListener('click', () => {
-            logMenu('Reload button clicked');
             if (window.Lampa && typeof Lampa.Activity !== 'undefined') {
                 const active = Lampa.Activity.active();
                 if (active && active.activity && active.activity.url) {
@@ -139,30 +136,82 @@
                         title: active.activity.title,
                         component: active.activity.component
                     });
-                } else {
-                    location.reload();
-                }
-            } else {
-                location.reload();
-            }
+                } else location.reload();
+            } else location.reload();
         });
-
         headActions.appendChild(btn);
-        logMenu('Reload button added');
     }
 
+    /* === Добавляем пункт "Парсер" в окно торрентов === */
+    async function addParserSelector() {
+        const filterBar = document.querySelector('.torrent-filter');
+        if (!filterBar) return setTimeout(addParserSelector, 1000);
+
+        // уже есть — выходим
+        if (document.querySelector('.parser-button')) return;
+
+        // получаем список парсеров с jackett.js
+        let parsers = [];
+        try {
+            const res = await fetch('https://bylampa.github.io/jackett.js');
+            const text = await res.text();
+            const match = text.match(/Lampa\.Storage\.set\('jackett_parsers',\s*(\[[\s\S]*?\])\)/);
+            if (match) {
+                parsers = JSON.parse(match[1]);
+            }
+        } catch (e) {
+            console.warn('Не удалось загрузить список парсеров:', e);
+        }
+
+        // если не удалось получить — fallback
+        if (!parsers.length) {
+            parsers = [
+                { name: 'Jackett', url: 'https://bylampa.github.io/jackett.js' },
+                { name: 'Torlook', url: 'https://torlook.info' },
+                { name: 'Piratebay', url: 'https://pirateproxy.live' }
+            ];
+        }
+
+        const current = Lampa.Storage.get('parser_selected', parsers[0].name);
+
+        const btn = document.createElement('div');
+        btn.className = 'parser-button selector';
+        btn.innerHTML = `<span>Парсер:</span> <b>${current}</b>`;
+
+        btn.addEventListener('click', () => {
+            Lampa.Select.open({
+                title: 'Выберите парсер',
+                items: parsers.map(p => ({ title: p.name, url: p.url })),
+                onSelect: (sel) => {
+                    Lampa.Storage.set('parser_selected', sel.title);
+                    btn.querySelector('b').textContent = sel.title;
+                    Lampa.Noty.show(`Выбран парсер: ${sel.title}`);
+                    const active = Lampa.Activity.active();
+                    if (active) Lampa.Activity.replace(active.activity);
+                },
+                onBack: Lampa.Controller.toggle
+            });
+        });
+
+        filterBar.appendChild(btn);
+        logMenu('Parser selector added');
+    }
+
+    /* === Инициализация === */
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', function(event){
                 if(event.type === 'ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
+                    addParserSelector();
                 }
             });
         } else {
             document.addEventListener('DOMContentLoaded', () => {
                 applyCustomMenuStyles();
                 addReloadButton();
+                addParserSelector();
             });
         }
     }
@@ -172,9 +221,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.7',
+                version: '6.0',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка мягкой перезагрузки',
+                description: 'Скруглённое меню + перезагрузка + выбор парсера Jackett',
                 init: initMenuPlugin
             });
         } else {
@@ -183,61 +232,4 @@
     }
 
     registerMenu();
-
-
-    /* === Плагин MaxColor === */
-    const plugin_id_color = 'maxcolor';
-    const plugin_name_color = 'MaxColor';
-
-    const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
-    };
-
-    function logColor(...a) {
-        try { console.log(`[${plugin_name_color}]`, ...a); } catch (e) {}
-    }
-
-    function recolorSeedNumbers() {
-        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
-        seedBlocks.forEach(block => {
-            const span = block.querySelector('span');
-            if (!span) return;
-
-            const num = parseInt(span.textContent);
-            if (isNaN(num)) return;
-
-            let color = COLORS.low;
-            if (num > 10) color = COLORS.high;
-            else if (num >= 5) color = COLORS.mid;
-
-            span.style.color = color;
-            span.style.fontWeight = 'bold';
-        });
-    }
-
-    function startObserver() {
-        const obs = new MutationObserver(() => recolorSeedNumbers());
-        obs.observe(document.body, { childList: true, subtree: true });
-        recolorSeedNumbers();
-        logColor('Observer started (v2.0)');
-    }
-
-    function registerColor() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id_color,
-                name: plugin_name_color,
-                version: '2.0',
-                author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:" без свечения',
-                init: startObserver
-            });
-        } else {
-            startObserver();
-        }
-    }
-
-    registerColor();
 })();
