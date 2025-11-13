@@ -110,7 +110,7 @@
     }
 
     function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return; // уже добавлена
+        if (document.getElementById('MRELOAD')) return;
 
         const headActions = document.querySelector('.head__actions');
         if (!headActions) {
@@ -131,10 +131,19 @@
         btn.addEventListener('click', () => {
             logMenu('Reload button clicked');
             if (window.Lampa && typeof Lampa.Activity !== 'undefined') {
-                Lampa.Activity.render(); // обновляет активный экран
-                Lampa.Noty.show('Экран обновлён');
+                const active = Lampa.Activity.active();
+                if (active && active.activity && active.activity.url) {
+                    Lampa.Noty.show('Экран перезагружается...');
+                    Lampa.Activity.replace({
+                        url: active.activity.url,
+                        title: active.activity.title,
+                        component: active.activity.component
+                    });
+                } else {
+                    location.reload();
+                }
             } else {
-                location.reload(); // fallback
+                location.reload();
             }
         });
 
@@ -163,9 +172,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.6',
+                version: '5.7',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка перезагрузки',
+                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка мягкой перезагрузки',
                 init: initMenuPlugin
             });
         } else {
