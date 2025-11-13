@@ -22,7 +22,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,0.98) !important; /* ← менее прозрачный фон */
+                    background: rgba(54,54,54,0.98) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -64,7 +64,7 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                     border-radius: 1em !important;
                 }
             }
@@ -95,9 +95,51 @@
             .head__body .selector.traverse {
                 color: inherit !important;
             }
+
+            /* === Кнопка перезагрузки === */
+            .m-reload-screen {
+                cursor: pointer !important;
+            }
+            .m-reload-screen:hover svg {
+                transform: rotate(180deg);
+                transition: transform 0.4s ease;
+            }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles + dark background applied');
+    }
+
+    function addReloadButton() {
+        if (document.getElementById('MRELOAD')) return; // уже добавлена
+
+        const headActions = document.querySelector('.head__actions');
+        if (!headActions) {
+            logMenu('head__actions not found, retrying...');
+            setTimeout(addReloadButton, 1000);
+            return;
+        }
+
+        const btn = document.createElement('div');
+        btn.id = 'MRELOAD';
+        btn.className = 'head__action selector m-reload-screen';
+        btn.innerHTML = `
+            <svg fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.48">
+                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
+            </svg>
+        `;
+
+        btn.addEventListener('click', () => {
+            logMenu('Reload button clicked');
+            if (window.Lampa && typeof Lampa.Activity !== 'undefined') {
+                Lampa.Activity.render(); // обновляет активный экран
+                Lampa.Noty.show('Экран обновлён');
+            } else {
+                location.reload(); // fallback
+            }
+        });
+
+        headActions.appendChild(btn);
+        logMenu('Reload button added');
     }
 
     function initMenuPlugin() {
@@ -105,10 +147,14 @@
             Lampa.Listener.follow('app', function(event){
                 if(event.type === 'ready'){
                     applyCustomMenuStyles();
+                    addReloadButton();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
+            document.addEventListener('DOMContentLoaded', () => {
+                applyCustomMenuStyles();
+                addReloadButton();
+            });
         }
     }
 
@@ -117,9 +163,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.5',
+                version: '5.6',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс цвета иконок',
+                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка перезагрузки',
                 init: initMenuPlugin
             });
         } else {
