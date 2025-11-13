@@ -11,36 +11,14 @@
         style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Чистим встроенные рамки и тени === */
-                .card,
-                .card__view,
-                .card__img,
-                .card__poster,
-                .card__view img {
-                    border: none !important;
-                    outline: none !important;
-                    background: none !important;
-                    box-shadow: none !important;
-                }
-                .card.selector {
-                    outline: none !important;
-                    border: none !important;
-                }
-                .card::before,
-                .card::after,
-                .card__view::before {
-                    content: none !important;
-                    display: none !important;
-                }
-
-                /* === Контейнер постера: готовим для кольца === */
+                /* === Контейнер постера === */
                 .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
                     overflow: visible !important;
                 }
 
-                /* === Псевдо-элемент: градиентная рамка с прозрачным зазором === */
+                /* === Градиентное кольцо с прозрачным зазором === */
                 .card.selector.focus .card__view::after,
                 .card.selector.hover .card__view::after,
                 .card.selector.traverse .card__view::after {
@@ -48,30 +26,31 @@
                     position: absolute !important;
                     inset: -8px !important; /* зазор */
                     border-radius: calc(1em + 8px) !important;
-                    padding: 8px; /* толщина кольца */
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-                    background-clip: padding-box !important;
 
-                    /* делаем центр прозрачным */
-                    box-shadow: inset 0 0 0 9999px rgba(0,0,0,0) !important;
+                    /* маска: оставляем только кольцо */
+                    -webkit-mask:
+                        linear-gradient(#000 0 0) content-box,
+                        linear-gradient(#000 0 0);
+                    -webkit-mask-composite: xor;
+                    mask-composite: exclude;
 
                     pointer-events: none !important;
                     z-index: 2 !important;
                 }
 
-                /* === Меню: компактное, справа === */
+                /* === Меню и подменю === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
-                    left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -88,7 +67,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -97,18 +75,17 @@
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
-                .settings-folder.selector.hover,
-                .settings-folder.selector.traverse,
                 .settings-param.selector.focus,
-                .settings-param.selector.hover,
-                .settings-param.selector.traverse,
                 .settings-param__value.selector.focus,
-                .settings-param__value.selector.hover,
-                .settings-param__value.selector.traverse,
                 .selectbox-item.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-param.selector.hover,
+                .settings-param__value.selector.hover,
                 .selectbox-item.selector.hover,
+                .settings-folder.selector.traverse,
+                .settings-param.selector.traverse,
+                .settings-param__value.selector.traverse,
                 .selectbox-item.selector.traverse {
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
                     border-radius: 1em !important;
@@ -116,7 +93,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Gradient ring with gap applied');
+        log('Gradient ring applied');
     }
 
     function initPlugin() {
@@ -126,10 +103,8 @@
                     applyCustomStyles();
                 }
             });
-            log('Lampa listener attached');
         } else {
             document.addEventListener('DOMContentLoaded', applyCustomStyles);
-            log('Standalone mode');
         }
     }
 
@@ -138,12 +113,11 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.8',
+                version: '4.9',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с прозрачным зазором вокруг постера + градиентное выделение меню',
+                description: 'Градиентное кольцо с прозрачным зазором вокруг постера + градиентное меню',
                 init: initPlugin
             });
-            log('Registered with Lampa');
         } else {
             initPlugin();
         }
