@@ -1,7 +1,7 @@
 (() => {
     /* === Плагин RoundedMenu === */
     const plugin_id_menu = 'roundedmenu';
-    const plugin_name_menu = 'RoundedMenu';
+    const plugin_name_menu = 'maxxx'; // ← отображаемое имя
 
     function logMenu(...args) {
         try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
@@ -12,7 +12,6 @@
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -42,7 +41,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -89,7 +87,7 @@
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
                 id: plugin_id_menu,
-                name: plugin_name_menu,
+                name: plugin_name_menu, // ← имя отображения
                 version: '5.2',
                 author: 'maxi3219',
                 description: 'Скруглённое градиентное меню без изменений постеров',
@@ -105,12 +103,12 @@
 
     /* === Плагин MaxColor === */
     const plugin_id_color = 'maxcolor';
-    const plugin_name_color = 'MaxColor';
+    const plugin_name_color = 'maxxx'; // ← тоже отображается как maxxx
 
     const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
     };
 
     function logColor(...a) {
@@ -146,7 +144,7 @@
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
                 id: plugin_id_color,
-                name: plugin_name_color,
+                name: plugin_name_color, // ← имя отображения
                 version: '1.8',
                 author: 'maxi3219',
                 description: 'Окрашивает число после "Раздают:" без свечения',
