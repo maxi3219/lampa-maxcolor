@@ -11,7 +11,8 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                .settings__content {
+                .settings__content,
+                .selectbox__content {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -19,7 +20,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: #262829 !important;
+                    background: rgba(26, 42, 58, 0.98) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -30,7 +31,8 @@
                     z-index: 999 !important;
                 }
 
-                body.settings--open .settings__content {
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content {
                     transform: translateX(0) !important;
                 }
             }
@@ -48,7 +50,6 @@
             });
             log('Lampa listener attached');
         } else {
-            // Автономный режим, если Lampa не определена
             document.addEventListener('DOMContentLoaded', applyCustomStyles);
             log('Standalone mode');
         }
@@ -59,9 +60,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.0',
+                version: '1.1',
                 author: 'maxi3219',
-                description: 'Скруглённое меню настроек с отступом от правого края',
+                description: 'Скруглённое меню и источник с отступом от правого края',
                 init: initPlugin
             });
             log('Registered with Lampa');
