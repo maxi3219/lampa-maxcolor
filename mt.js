@@ -81,18 +81,24 @@
             .head__action.selector.notice--icon svg,
             .head__action.selector.notice--icon svg use,
             .head__action.selector.open--search svg,
-            .head__action.selector.open--search svg use {
+            .head__action.selector.open--search svg use,
+            #MRELOAD svg,
+            #MRELOAD svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
+                stroke: #ffffff !important;
             }
             .head__action.selector.open--settings:hover svg,
             .head__action.selector.open--settings:hover svg use,
             .head__action.selector.notice--icon:hover svg,
             .head__action.selector.notice--icon:hover svg use,
             .head__action.selector.open--search:hover svg,
-            .head__action.selector.open--search:hover svg use {
+            .head__action.selector.open--search:hover svg use,
+            #MRELOAD:hover svg,
+            #MRELOAD:hover svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
+                stroke: #ffffff !important;
             }
         `;
         document.head.appendChild(style);
@@ -116,9 +122,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.6',
+                version: '5.7',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок',
+                description: 'Скруглённое меню + тёмный фон + фикс иконок (settings, bell, search, reload)',
                 init: initMenuPlugin
             });
         } else {
