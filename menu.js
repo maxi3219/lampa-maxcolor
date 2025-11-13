@@ -11,7 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Плашка настроек */
+                /* === Плашки настроек и источников === */
                 .settings__content {
                     position: fixed !important;
                     top: 1em !important;
@@ -32,14 +32,12 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
-
                 body.settings--open .settings__content {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
 
-                /* ✅ Плашка источников */
                 .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
@@ -60,20 +58,17 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
-
                 body.selectbox--open .selectbox__content.layer--height {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
 
-                /* ✅ Пункты настроек */
                 .settings-folder.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse {
@@ -81,13 +76,11 @@
                     border-radius: 1em !important;
                 }
 
-                /* ✅ Пункты источников */
                 .selectbox-item.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
@@ -95,22 +88,46 @@
                     border-radius: 1em !important;
                 }
 
-                /* ✅ Карточки фильмов — градиентная тень при наведении */
-                .card.selector {
+                /* === Карточки: гашим встроенную белую рамку и переносим свечение на изображение === */
+
+                /* 1) Жёстко отключаем встроенную белую рамку (обычно рисуется псевдо-элементом на .card.selector) */
+                .card.selector::before,
+                .card.selector::after {
+                    content: none !important;
+                    display: none !important;
+                }
+
+                /* 2) Убираем любые бордеры/аутлайны у слоёв */
+                .card,
+                .card__view,
+                .card__img,
+                .card__title,
+                .card__age {
                     border: none !important;
                     outline: none !important;
                     box-shadow: none !important;
-                    border-radius: 1em !important;
-                    transition: box-shadow 0.3s ease !important;
                 }
 
-                .card.selector.focus,
-                .card.selector.hover,
-                .card.selector.traverse {
+                /* 3) Готовим визуальный контейнер изображения для свечения */
+                .card .card__view {
+                    position: relative !important;
+                    border-radius: 1em !important;
+                    overflow: visible !important; /* чтобы тень не обрезалась */
+                }
+
+                /* 4) Свечение вокруг ВСЕЙ карточки (именно блока с изображением), только в активных состояниях */
+                .card.selector.focus .card__view,
+                .card.selector.hover .card__view,
+                .card.selector.traverse .card__view {
                     box-shadow:
-                        0 0 0 3px transparent,
-                        0 0 12px rgba(96, 255, 189, 0.6),
-                        0 0 24px rgba(98, 163, 201, 0.4) !important;
+                        0 0 0 2px rgba(96, 255, 189, 0.9),
+                        0 0 16px rgba(96, 255, 189, 0.45),
+                        0 0 28px rgba(98, 163, 201, 0.35) !important;
+                }
+
+                /* Дополнительно: подчистим возможный внутренний контур на изображении */
+                .card__img {
+                    background: none !important;
                 }
             }
         `;
@@ -137,9 +154,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.8',
+                version: '2.9',
                 author: 'maxi3219',
-                description: 'Градиентная тень карточек, стилизованные плашки и пункты',
+                description: 'Единые плашки и корректное свечение вокруг карточек',
                 init: initPlugin
             });
             log('Registered with Lampa');
