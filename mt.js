@@ -96,19 +96,24 @@
         const btn = document.createElement('div');
         btn.className = 'simple-button simple-button--filter selector filter--parser';
         btn.id = 'parser-selectbox';
-        btn.innerHTML = `<span>Парсер</span><div id="parser-current">Jacred.xyz</div>`;
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
         container.appendChild(btn);
 
         const parsers = [
             'Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'
         ];
 
-        btn.addEventListener('click',()=>{
+        const openSelectbox = () => {
             if(document.body.classList.contains('selectbox--open')) document.body.classList.remove('selectbox--open');
             else document.body.classList.add('selectbox--open');
 
-            const menu = document.querySelector('.selectbox__content.layer--height');
-            if(!menu) return;
+            let menu = document.querySelector('#parser-menu');
+            if(!menu){
+                menu = document.createElement('div');
+                menu.id = 'parser-menu';
+                menu.className = 'selectbox__content layer--height';
+                document.body.appendChild(menu);
+            }
             menu.innerHTML = `
                 <div class="selectbox__head"><div class="selectbox__title">Выбрать парсер</div></div>
                 <div class="selectbox__body scroll scroll--mask scroll--over"><div class="scroll__content"><div class="scroll__body"></div></div></div>
@@ -121,7 +126,6 @@
                 item.addEventListener('click',()=>{
                     Lampa.Storage.set('parser_select',p);
                     document.getElementById('parser-current').textContent=p;
-                    // обновление списка торрентов через Lampa
                     try{
                         const active = Lampa.Activity.active();
                         if(active && active.activity && typeof active.activity.refresh==='function') active.activity.refresh();
@@ -130,7 +134,9 @@
                 });
                 body.appendChild(item);
             });
-        });
+        };
+
+        btn.addEventListener('click', openSelectbox);
     }
 
     function initMenuPlugin() {
@@ -153,7 +159,7 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function') {
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.6',author:'maxi3219',description:'Меню + зеленые раздающие + кнопка reload + кнопка парсер (корректно)',init:initMenuPlugin});
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.7',author:'maxi3219',description:'Меню + зеленые раздающие + кнопка reload + кнопка парсер всегда видна',init:initMenuPlugin});
         } else { initMenuPlugin(); }
     }
 
