@@ -34,25 +34,16 @@
                     display: none !important;
                 }
 
-                /* === Постер: ровный, с градиентной рамкой и прозрачным зазором === */
-                .card__img,
-                .card__poster,
-                .card__view img {
+                /* === Контейнер постера: рамка с зазором === */
+                .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
-                    z-index: 1 !important;
-                    overflow: hidden !important; /* фикс растягивания */
+                    overflow: visible !important;
                 }
 
-                .card.selector.focus .card__img::after,
-                .card.selector.hover .card__img::after,
-                .card.selector.traverse .card__img::after,
-                .card.selector.focus .card__poster::after,
-                .card.selector.hover .card__poster::after,
-                .card.selector.traverse .card__poster::after,
-                .card.selector.focus .card__view img::after,
-                .card.selector.hover .card__view img::after,
-                .card.selector.traverse .card__view img::after {
+                .card.selector.focus .card__view::after,
+                .card.selector.hover .card__view::after,
+                .card.selector.traverse .card__view::after {
                     content: "" !important;
                     position: absolute !important;
                     inset: -8px !important; /* зазор */
@@ -149,9 +140,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.4',
+                version: '4.5',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с прозрачным зазором + градиентное выделение всех пунктов меню',
+                description: 'Градиентная рамка с прозрачным зазором вокруг контейнера постера + градиентное выделение меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
