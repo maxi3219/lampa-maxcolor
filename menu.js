@@ -11,24 +11,24 @@
         style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Контейнер постера === */
+                /* === Контейнер постера: подготовка === */
                 .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
                     overflow: visible !important;
+                    isolation: isolate !important;
                 }
 
-                /* === Градиентное кольцо с прозрачным зазором === */
+                /* === Градиентная рамка с прозрачным зазором === */
                 .card.selector.focus .card__view::after,
                 .card.selector.hover .card__view::after,
                 .card.selector.traverse .card__view::after {
                     content: "" !important;
                     position: absolute !important;
-                    inset: -8px !important; /* зазор */
+                    inset: -8px !important;
                     border-radius: calc(1em + 8px) !important;
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
 
-                    /* маска: оставляем только кольцо */
                     -webkit-mask:
                         linear-gradient(#000 0 0) content-box,
                         linear-gradient(#000 0 0);
@@ -39,7 +39,32 @@
                     z-index: 2 !important;
                 }
 
-                /* === Меню и подменю === */
+                /* === Удаляем лишние рамки и тени === */
+                .card,
+                .card__view,
+                .card__img,
+                .card__poster,
+                .card__view img {
+                    border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    background: none !important;
+                }
+
+                .card.selector {
+                    outline: none !important;
+                    border: none !important;
+                }
+
+                .card::before,
+                .card::after,
+                .card__view::before,
+                .card__view::after {
+                    content: none !important;
+                    display: none !important;
+                }
+
+                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -60,6 +85,7 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
+
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content.layer--height {
                     transform: translateX(0) !important;
@@ -67,6 +93,7 @@
                     opacity: 1 !important;
                 }
 
+                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -75,17 +102,18 @@
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
+
                 .settings-folder.selector.focus,
-                .settings-param.selector.focus,
-                .settings-param__value.selector.focus,
-                .selectbox-item.selector.focus,
                 .settings-folder.selector.hover,
-                .settings-param.selector.hover,
-                .settings-param__value.selector.hover,
-                .selectbox-item.selector.hover,
                 .settings-folder.selector.traverse,
+                .settings-param.selector.focus,
+                .settings-param.selector.hover,
                 .settings-param.selector.traverse,
+                .settings-param__value.selector.focus,
+                .settings-param__value.selector.hover,
                 .settings-param__value.selector.traverse,
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
                     border-radius: 1em !important;
@@ -93,7 +121,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Gradient ring applied');
+        log('Gradient ring + menu styles applied');
     }
 
     function initPlugin() {
@@ -113,9 +141,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.9',
+                version: '5.0',
                 author: 'maxi3219',
-                description: 'Градиентное кольцо с прозрачным зазором вокруг постера + градиентное меню',
+                description: 'Градиентная рамка с прозрачным зазором вокруг постера + градиентное меню',
                 init: initPlugin
             });
         } else {
