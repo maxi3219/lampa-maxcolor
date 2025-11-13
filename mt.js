@@ -121,7 +121,7 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'5.8',author:'maxi3219',description:'Скруглённое меню + тёмный фон + кнопка перезагрузки + кнопка парсер',init:initMenuPlugin});
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'5.9',author:'maxi3219',description:'Скруглённое меню + тёмный фон + кнопка перезагрузки + кнопка парсер',init:initMenuPlugin});
         } else initMenuPlugin();
     }
 
@@ -153,57 +153,71 @@
     }
     registerColor();
 
-    /* === Кнопка Парсер === */
-    const PARSERS=[
-        {title:'Не выбран',url:''},
-        {title:'Jacred.xyz',url:'https://jacred.xyz'},
-        {title:'Jr.maxvol.pro',url:'https://jr.maxvol.pro'},
-        {title:'Jacred.my.to',url:'https://jacred.my.to'},
-        {title:'Laampa.app',url:'https://laampa.app'},
-        {title:'Jacred.pro',url:'https://jacred.pro'}
+    /* === Кнопка Парсер (безопасная версия) === */
+    const PARSERS = [
+        {title:'Не выбран', url:''},
+        {title:'Jacred.xyz', url:'https://jacred.xyz'},
+        {title:'Jr.maxvol.pro', url:'https://jr.maxvol.pro'},
+        {title:'Jacred.my.to', url:'https://jacred.my.to'},
+        {title:'Laampa.app', url:'https://laampa.app'},
+        {title:'Jacred.pro', url:'https://jacred.pro'}
     ];
 
-    function addParserButton(){
-        const filterBar=document.querySelector('.torrent-filter');
+    function addParserButton() {
+        const filterBar = document.querySelector('.torrent-filter');
         if(!filterBar) return setTimeout(addParserButton,500);
         if(document.querySelector('.parser-button')) return;
 
-        const current=Lampa.Storage.get('parser_selected',PARSERS[1].title);
-        const btn=document.createElement('div');
-        btn.className='parser-button selector';
-        btn.innerHTML=`<span>Парсер:</span> <b>${current}</b>`;
-        btn.addEventListener('click',()=>openParserMenu(btn));
+        const current = Lampa.Storage.get('parser_selected', PARSERS[1].title);
+        const btn = document.createElement('div');
+        btn.className = 'parser-button selector';
+        btn.innerHTML = `<span>Парсер:</span> <b>${current}</b>`;
+        btn.addEventListener('click', () => openParserMenu(btn));
         filterBar.appendChild(btn);
     }
 
     function openParserMenu(btn){
-        const items=PARSERS.map(p=>({title:p.title,subtitle:p.url,selected:Lampa.Storage.get('parser_selected')===p.title}));
+        if(!window.Lampa || !Lampa.Select) return;
+
+        const items = PARSERS.map(p => ({
+            title: p.title,
+            selected: Lampa.Storage.get('parser_selected') === p.title
+        }));
+
         Lampa.Select.open({
-            title:'Выберите парсер',
+            title: 'Выберите парсер',
             items,
-            onSelect:sel=>{
-                const chosen=PARSERS.find(x=>x.title===sel.title);
+            onSelect: sel => {
+                const chosen = PARSERS.find(x => x.title === sel.title);
                 if(!chosen) return;
-                Lampa.Storage.set('parser_selected',chosen.title);
-                btn.querySelector('b').textContent=chosen.title;
+                Lampa.Storage.set('parser_selected', chosen.title);
+                btn.querySelector('b').textContent = chosen.title;
                 Lampa.Noty.show(`Выбран парсер: ${chosen.title}`);
-                // обновляем только список торрентов
-                try{
-                    const active=Lampa.Activity.active();
-                    if(active && active.activity && active.activity.component==='torrents'){
-                        if(active.activity.source && typeof active.activity.source.search==='function'){
-                            active.activity.source.search(active.activity.query,res=>{
-                                if(res){
-                                    active.activity.results=res;
-                                    Lampa.Torrent.render(res);
-                                    recolorSeedNumbers();
-                                }
-                            });
-                        }
-                    }
-                }catch(e){console.error('Parser update error',e);}
+                updateTorrentList(chosen.title);
             },
-            onBack:Lampa.Controller.toggle
+            onBack: Lampa.Controller.toggle
         });
     }
+
+    function updateTorrentList(parserTitle){
+        try {
+            const active = Lampa.Activity.active();
+            if(!active || !active.activity || active.activity.component !== 'torrents') return;
+            const source = active.activity.source;
+            if(!source || typeof source.search !== 'function') return;
+            const query = active.activity.query || '';
+            source.search(query, res => {
+                if(res){
+                    active.activity.results = res;
+                    if(typeof Lampa.Torrent.render === 'function'){
+                        Lampa.Torrent.render(res);
+                    }
+                    recolorSeedNumbers();
+                }
+            });
+        } catch(e){
+            console.error('Parser update error', e);
+        }
+    }
+
 })();
