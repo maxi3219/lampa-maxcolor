@@ -1,15 +1,16 @@
 (() => {
+    window.plugin_name = 'maxxx'; // ← глобально доступное имя
+
     const plugin_id = 'maxxx';
-    const plugin_name = 'maxxx';
 
     const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
     };
 
     function log(...args) {
-        try { console.log(`[${plugin_name}]`, ...args); } catch (e) {}
+        try { console.log(`[${window.plugin_name}]`, ...args); } catch (e) {}
     }
 
     /* === Меню === */
@@ -23,13 +24,12 @@
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
-                    left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -53,22 +53,13 @@
                 .selectbox-item.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
-                    transition: background 0.25s ease !important;
                 }
 
                 .settings-folder.selector.focus,
-                .settings-folder.selector.hover,
-                .settings-folder.selector.traverse,
                 .settings-param.selector.focus,
-                .settings-param.selector.hover,
-                .settings-param.selector.traverse,
                 .settings-param__value.selector.focus,
-                .settings-param__value.selector.hover,
-                .settings-param__value.selector.traverse,
-                .selectbox-item.selector.focus,
-                .selectbox-item.selector.hover,
-                .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                .selectbox-item.selector.focus {
+                    background: rgba(96,96,96,0.8) !important;
                     border-radius: 1em !important;
                 }
             }
@@ -124,7 +115,7 @@
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: plugin_id,
-            name: plugin_name, // ← будет отображаться как "maxxx"
+            name: window.plugin_name, // ← теперь точно будет "maxxx"
             version: '6.0',
             author: 'maxi3219',
             description: 'Меню справа + окраска сидов',
