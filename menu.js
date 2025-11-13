@@ -8,50 +8,22 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-style';
+        style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                .card__view {
-                    position: relative !important;
-                    border-radius: 1em !important;
-                    overflow: visible !important;
-                    isolation: isolate !important;
-                }
-
-                .card.selector.focus .card__view::after,
-                .card.selector.hover .card__view::after,
-                .card.selector.traverse .card__view::after {
-                    content: "" !important;
-                    position: absolute !important;
-                    inset: 0 !important;
-                    border-radius: 1em !important;
-                    background: transparent !important;
-                    filter: drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 8px #60ffbd) drop-shadow(0 0 16px #62a3c9) !important;
-                    pointer-events: none !important;
-                    z-index: 2 !important;
-                }
-
-                .card__img,
-                .card__poster,
-                .card__view img {
-                    border-radius: 1em !important;
-                    outline: none !important;
-                    border: none !important;
-                    box-shadow: none !important;
-                    background: none !important;
-                }
-
+                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
+                    left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -69,6 +41,7 @@
                     opacity: 1 !important;
                 }
 
+                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -96,7 +69,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Drop-shadow ring applied');
+        log('Menu styles applied (no poster changes)');
     }
 
     function initPlugin() {
@@ -116,9 +89,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '5.1',
+                version: '5.2',
                 author: 'maxi3219',
-                description: 'Градиентная рамка через drop-shadow + меню с градиентом',
+                description: 'Скруглённое градиентное меню без изменений постеров',
                 init: initPlugin
             });
         } else {
