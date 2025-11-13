@@ -11,7 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* Окно настроек и selectbox */
+                /* Основная плашка настроек */
                 .settings__content,
                 .selectbox__content {
                     position: fixed !important;
@@ -21,7 +21,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,.959) !important; /* новый фон */
+                    background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -41,14 +41,44 @@
                     opacity: 1 !important;
                 }
 
+                /* Вторая плашка — источники */
+                .source__content,
+                .parser__content {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,.959) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+
+                body.source--open .source__content,
+                body.parser--open .parser__content {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
                 /* Пункты меню всегда скруглены */
                 .settings-folder.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
-                    transition: background 0.25s ease !important; /* убрали анимацию скругления */
+                    transition: background 0.25s ease !important;
                 }
 
-                /* Активные состояния: только фон-градиент */
+                /* Активные состояния */
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse {
@@ -57,7 +87,6 @@
                     background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
                     background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
                     border-radius: 1em !important;
-                    /* цвет текста не меняем, остаётся как по умолчанию */
                 }
             }
         `;
@@ -84,9 +113,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.9',
+                version: '2.0',
                 author: 'maxi3219',
-                description: 'Скруглённые пункты меню без смены цвета текста и новый фон',
+                description: 'Скруглённые плашки настроек и источников с градиентом',
                 init: initPlugin
             });
             log('Registered with Lampa');
