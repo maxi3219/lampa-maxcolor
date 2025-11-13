@@ -95,52 +95,23 @@
                     border-radius: 1em !important;
                 }
 
-                /* ============================= */
-                /* ✅ Карточки фильмов — исправление */
-                /* Убираем любую белую рамку/тень, чтобы не конфликтовала */
-                .card,
-                .card__view {
-                    border: none !important;
-                    box-shadow: none !important;
-                }
-
-                /* Контейнеры и визуальный блок карточки */
+                /* ✅ Карточки фильмов — градиентная тень при наведении */
                 .card.selector {
-                    position: relative !important;
-                }
-                .card .card__view {
-                    position: relative !important;
+                    border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                     border-radius: 1em !important;
-                    overflow: hidden !important; /* чтобы псевдо-рамка повторяла скругление */
+                    transition: box-shadow 0.3s ease !important;
                 }
 
-                /* Градиентная рамка по активным состояниям — на всю карточку (card__view) */
-                .card.selector.focus .card__view::after,
-                .card.selector.hover .card__view::after,
-                .card.selector.traverse .card__view::after {
-                    content: "" !important;
-                    position: absolute !important;
-                    inset: 0 !important;
-                    border-radius: 1em !important;
-                    padding: 2px !important; /* толщина рамки */
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-
-                    /* Оставляем только рамку, внутренность прозрачная */
-                    -webkit-mask:
-                        linear-gradient(#000 0 0) content-box,
-                        linear-gradient(#000 0 0) !important;
-                    -webkit-mask-composite: xor !important;
-                    mask-composite: exclude !important;
-
-                    pointer-events: none !important;
-                    z-index: 2 !important;
+                .card.selector.focus,
+                .card.selector.hover,
+                .card.selector.traverse {
+                    box-shadow:
+                        0 0 0 3px transparent,
+                        0 0 12px rgba(96, 255, 189, 0.6),
+                        0 0 24px rgba(98, 163, 201, 0.4) !important;
                 }
-
-                /* Небольшая поддержка hover мышью, если есть курсор */
-                .card:hover .card__view::after {
-                    padding: 2.2px !important;
-                }
-                /* ============================= */
             }
         `;
         document.head.appendChild(style);
@@ -166,9 +137,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.7',
+                version: '2.8',
                 author: 'maxi3219',
-                description: 'Единые плашки, градиентные пункты и корректная обводка карточек',
+                description: 'Градиентная тень карточек, стилизованные плашки и пункты',
                 init: initPlugin
             });
             log('Registered with Lampa');
