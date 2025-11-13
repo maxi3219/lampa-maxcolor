@@ -7,7 +7,7 @@
         try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
-    /* === Стили для меню и selectbox === */
+    /* === Стили меню === */
     function applyCustomMenuStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
@@ -101,6 +101,9 @@
                 transform: rotate(180deg);
                 transition: transform 0.4s ease;
             }
+
+            /* Кнопка Парсер в фильтрах */
+            .filter--parser { cursor:pointer; }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles applied');
@@ -109,12 +112,8 @@
     /* === Кнопка Reload === */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
-
         const headActions = document.querySelector('.head__actions');
-        if (!headActions) {
-            setTimeout(addReloadButton, 1000);
-            return;
-        }
+        if (!headActions) { setTimeout(addReloadButton, 1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
@@ -131,28 +130,38 @@
     /* === Кнопка Парсер === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
-        if (!container) {
-            setTimeout(addParserButton, 1000);
-            return;
-        }
+        if (!container) { setTimeout(addParserButton, 1000); return; }
         if (document.getElementById('parser-selectbox')) return;
 
-        const selectbox = document.createElement('div');
-        selectbox.className = 'simple-button simple-button--filter selector filter--parser';
-        selectbox.id = 'parser-selectbox';
-        selectbox.innerHTML = '<span>Парсер</span><div>Jacred.xyz</div>';
-        container.appendChild(selectbox);
+        const btn = document.createElement('div');
+        btn.className = 'simple-button simple-button--filter selector filter--parser';
+        btn.id = 'parser-selectbox';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">Jacred.xyz</div>`;
+        container.appendChild(btn);
 
-        const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+        const parsers = [
+            { title: 'Не выбран', value: 'none' },
+            { title: 'Jacred.xyz', value: 'jacred1' },
+            { title: 'Jr.maxvol.pro', value: 'jacred2' },
+            { title: 'Jacred.my.to', value: 'jacred3' },
+            { title: 'Lampa.app', value: 'jacred4' },
+            { title: 'Jacred.pro', value: 'jacred5' }
+        ];
 
-        selectbox.addEventListener('click', () => {
-            Lampa.Selectbox.open({
+        btn.addEventListener('click', () => {
+            if (!window.Lampa || !Lampa.Filtres) return;
+
+            Lampa.Filtres.show({
                 title: 'Выберите парсер',
-                array: parsers,
-                selected: 1,
-                onSelect: (index, value) => {
-                    selectbox.querySelector('div').textContent = value;
-                    refreshTorrentList(value);
+                noselected: false,
+                selected: Lampa.Storage.get('parser_select') || 'jacred1',
+                items: parsers.map(p => ({ title: p.title, value: p.value })),
+                onSelect: (selected) => {
+                    const item = parsers.find(p => p.value === selected);
+                    if (!item) return;
+                    Lampa.Storage.set('parser_select', item.value);
+                    document.getElementById('parser-current').textContent = item.title;
+                    refreshTorrentList(item.title);
                 }
             });
         });
@@ -192,9 +201,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '6.2',
+                version: '6.3',
                 author: 'maxi3219',
-                description: 'Меню + зеленые раздающие + кнопка reload + кнопка парсер (скругленное меню)',
+                description: 'Меню + зеленые раздающие + кнопка reload + кнопка парсер (без SCRIPT ERROR)',
                 init: initMenuPlugin
             });
         } else { initMenuPlugin(); }
