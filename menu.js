@@ -11,7 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Убираем белую рамку на всех слоях */
+                /* ✅ Убираем белую рамку и тени на всех слоях карточки */
                 .card,
                 .card__view,
                 .card__img {
@@ -21,7 +21,7 @@
                     background: none !important;
                 }
 
-                /* ✅ Отключаем псевдо-рамки */
+                /* ✅ Отключаем псевдо-элементы, которые могут рисовать рамку */
                 .card::before,
                 .card::after,
                 .card__view::before,
@@ -30,25 +30,23 @@
                     display: none !important;
                 }
 
-                /* ✅ Подготовка карточки */
-                .card.selector {
-                    position: relative !important;
+                /* ✅ Подготовка изображения */
+                .card__img {
                     border-radius: 1em !important;
-                    overflow: visible !important;
-                    z-index: 1 !important;
+                    transition: box-shadow 0.3s ease !important;
                 }
 
-                /* ✅ Градиентное свечение при наведении */
-                .card.selector.focus,
-                .card.selector.hover,
-                .card.selector.traverse {
+                /* ✅ Градиентная обводка вокруг изображения при активном состоянии карточки */
+                .card.selector.focus .card__img,
+                .card.selector.hover .card__img,
+                .card.selector.traverse .card__img {
                     box-shadow:
-                        0 0 0 2px rgba(96, 255, 189, 0.9),
-                        0 0 16px rgba(96, 255, 189, 0.45),
-                        0 0 28px rgba(98, 163, 201, 0.35) !important;
+                        0 0 0 4px rgba(96, 255, 189, 0.9),
+                        0 0 16px rgba(96, 255, 189, 0.6),
+                        0 0 32px rgba(98, 163, 201, 0.4) !important;
                 }
 
-                /* ✅ Плашки и пункты — как раньше */
+                /* ✅ Плашки настроек и источников */
                 .settings__content,
                 .selectbox__content.layer--height {
                     background: rgba(54,54,54,.959) !important;
@@ -57,6 +55,7 @@
                     padding: 0.5em !important;
                 }
 
+                /* ✅ Пункты меню и источников */
                 .settings-folder.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
@@ -98,9 +97,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.0',
+                version: '3.1',
                 author: 'maxi3219',
-                description: 'Градиентное свечение карточек, без белой рамки',
+                description: 'Градиентная обводка изображения карточки, без белой рамки',
                 init: initPlugin
             });
             log('Registered with Lampa');
