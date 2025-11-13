@@ -15,7 +15,7 @@
     /* === Меню === */
     function applyCustomMenuStyles() {
         const style = document.createElement('style');
-        style.id = 'maxxx-style-menu';
+        style.id = 'maxxx-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 .settings__content,
@@ -124,7 +124,7 @@
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: plugin_id,
-            name: plugin_name,
+            name: plugin_name, // ← будет отображаться как "maxxx"
             version: '6.0',
             author: 'maxi3219',
             description: 'Меню справа + окраска сидов',
