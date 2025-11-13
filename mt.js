@@ -14,7 +14,6 @@
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -44,7 +43,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -71,18 +69,17 @@
                 }
             }
 
-            /* === Новый фон для всей Лампы === */
             body {
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
 
-            /* === Фикс выравнивания кнопок в шапке === */
             .head__actions {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: flex-end !important;
             }
+
             .head__action {
                 display: inline-flex !important;
                 align-items: center !important;
@@ -91,7 +88,6 @@
                 flex-shrink: 0 !important;
             }
 
-            /* === Фикс: иконки всегда белые === */
             .head__action.selector svg,
             .head__action.selector svg use,
             #MRELOAD svg,
@@ -101,6 +97,7 @@
                 stroke: none !important;
                 outline: none !important;
             }
+
             .head__action.selector:hover svg,
             .head__action.selector:hover svg use,
             #MRELOAD:hover svg,
@@ -112,10 +109,9 @@
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background + button alignment applied');
+        logMenu('Menu styles applied');
     }
 
-    /* === Добавляем кнопку MRELOAD === */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const actions = document.querySelector('.head__actions');
@@ -125,9 +121,8 @@
         div.id = 'MRELOAD';
         div.className = 'head__action selector m-reload-screen';
         div.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22">
-                <path d="M12 4a8 8 0 0 1 7.45 5.06h-2.15a1 1 0 1 0 0 2h4a1 1 0 0 0 1-1v-4a1 1 0 1 0-2 0v1.38A9.99 9.99 0 1 0 22 12a1 1 0 1 0-2 0 8 8 0 1 1-8-8z"
-                      fill="#ffffff"></path>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+                <path fill="#ffffff" d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V8c2.76 0 5 2.24 5 5s-2.24 5-5 5a5.002 5.002 0 0 1-4.9-4H5.02a7.003 7.003 0 0 0 6.98 6c3.87 0 7-3.13 7-7 0-1.93-.78-3.68-2.35-5.65z"/>
             </svg>
         `;
         div.addEventListener('click', () => {
@@ -142,19 +137,8 @@
     }
 
     function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', function(event){
-                if(event.type === 'ready'){
-                    applyCustomMenuStyles();
-                    addReloadButton();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyCustomMenuStyles();
-                addReloadButton();
-            });
-        }
+        applyCustomMenuStyles();
+        addReloadButton();
     }
 
     function registerMenu() {
@@ -162,10 +146,18 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '6.0',
+                version: '6.1',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс кнопок + кнопка перезагрузки',
-                init: initMenuPlugin
+                description: 'Скруглённое меню + тёмный фон + кнопка перезагрузки',
+                init: () => {
+                    if (window.Lampa && typeof Lampa.Listener === 'object') {
+                        Lampa.Listener.follow('app', (event) => {
+                            if (event.type === 'ready') initMenuPlugin();
+                        });
+                    } else {
+                        document.addEventListener('DOMContentLoaded', initMenuPlugin);
+                    }
+                }
             });
         } else {
             initMenuPlugin();
@@ -180,9 +172,9 @@
     const plugin_name_color = 'MaxColor';
 
     const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
     };
 
     function logColor(...a) {
