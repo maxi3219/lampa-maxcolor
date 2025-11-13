@@ -7,25 +7,23 @@
     }
 
     function recolorSeeders(){
-        // находим все элементы, где написано "Раздают:"
-        document.querySelectorAll('*').forEach(el => {
-            if (el.textContent && el.textContent.trim().startsWith('Раздают:')) {
+        const elements = document.querySelectorAll('.torrent-item, .item, div, span, p');
+        elements.forEach(el => {
+            if (el.textContent && el.textContent.includes('Раздают:')) {
                 const match = el.textContent.match(/Раздают:\s*(\d+)/);
                 if (match) {
                     const count = parseInt(match[1]);
-                    let color = '#FF0000'; // по умолчанию красный
-                    if (count > 10) color = '#00FF00';     // зелёный
-                    else if (count >= 5) color = '#FFFF00'; // жёлтый
-
+                    let color = '#FF0000';
+                    if (count > 10) color = '#00FF00';
+                    else if (count >= 5) color = '#FFFF00';
                     el.style.color = color;
                     el.style.fontWeight = 'bold';
-                    el.style.textShadow = '0 0 6px ' + color;
+                    el.style.textShadow = `0 0 8px ${color}`;
                 }
             }
         });
     }
 
-    // MutationObserver — следим за изменениями DOM (когда Лампа подгружает релизы)
     function observeList(){
         const observer = new MutationObserver(() => recolorSeeders());
         observer.observe(document.body, { childList: true, subtree: true });
@@ -33,33 +31,21 @@
         recolorSeeders();
     }
 
-    // регистрация плагина в Lampa
-    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-        app.plugins.add({
-            id: plugin_id,
-            name: plugin_name,
-            author: 'User',
-            version: '1.0',
-            description: 'Подсвечивает количество раздающих неоновыми цветами',
-            init: observeList
-        });
-        log('registered');
-    } else {
-        // fallback если плагины ещё не инициализированы
-        log('waiting for Lampa...');
-        const interval = setInterval(() => {
-            if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-                clearInterval(interval);
-                app.plugins.add({
-                    id: plugin_id,
-                    name: plugin_name,
-                    author: 'User',
-                    version: '1.0',
-                    description: 'Подсвечивает количество раздающих неоновыми цветами',
-                    init: observeList
-                });
-                log('registered (delayed)');
-            }
-        }, 1000);
+    function register(){
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                author: 'User',
+                version: '1.1',
+                description: 'Подсвечивает количество раздающих неоновыми цветами',
+                init: observeList
+            });
+            log('registered');
+        } else {
+            setTimeout(register, 1000);
+        }
     }
+
+    register();
 })();
