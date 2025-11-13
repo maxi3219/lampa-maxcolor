@@ -87,7 +87,7 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер в torrent-filter по дизайну === */
+    /* === Кнопка Парсер в torrent-filter === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if(!container){ setTimeout(addParserButton,500); return; }
@@ -96,21 +96,23 @@
 
         const btn = document.createElement('div');
         btn.id = 'parser-selectbox';
-        btn.className = 'simple-button simple-button--filter selector filter--parser';
+        btn.className = 'simple-button simple-button--filter filter--parser'; // не .selector
         btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
         container.appendChild(btn);
 
         const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        const openSelect = () => {
+        const openSelect = (e) => {
+            e.stopPropagation();
             if(document.querySelector('#parser-menu')) return;
             const menu = document.createElement('div');
             menu.id = 'parser-menu';
             menu.className = 'selectbox__content layer--height';
+            const rect = btn.getBoundingClientRect();
             menu.style.position='absolute';
-            menu.style.top=btn.offsetTop+btn.offsetHeight+'px';
-            menu.style.left=btn.offsetLeft+'px';
-            menu.style.width=btn.offsetWidth+'px';
+            menu.style.top=rect.bottom+'px';
+            menu.style.left=rect.left+'px';
+            menu.style.width=rect.width+'px';
             menu.style.background='rgba(54,54,54,0.98)';
             menu.style.borderRadius='1em';
             menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
@@ -129,14 +131,14 @@
                     try{
                         const active=Lampa.Activity.active();
                         if(active && active.activity && typeof active.activity.refresh==='function') active.activity.refresh();
-                    }catch(e){console.error(e);}
+                    }catch(err){console.error(err);}
                     menu.remove();
                 });
                 menu.appendChild(item);
             });
 
-            document.addEventListener('click',e=>{
-                if(!btn.contains(e.target) && !menu.contains(e.target)){
+            document.addEventListener('click',ev=>{
+                if(!btn.contains(ev.target) && !menu.contains(ev.target)){
                     menu.remove();
                 }
             },{once:true});
@@ -165,7 +167,7 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.1',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер в фильтре',init:initMenuPlugin});
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.2',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
         } else { initMenuPlugin(); }
     }
 
