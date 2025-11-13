@@ -11,6 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
+                /* Окно настроек и selectbox — как в исходном коде */
                 .settings__content,
                 .selectbox__content {
                     position: fixed !important;
@@ -39,6 +40,24 @@
                     visibility: visible !important;  /* показываем */
                     opacity: 1 !important;           /* делаем видимым */
                 }
+
+                /* Базовое скругление пунктов меню */
+                .menu__item {
+                    border-radius: 0.6em !important;
+                    transition: background 0.25s ease, color 0.25s ease, border-radius 0.25s ease !important;
+                }
+
+                /* Активные состояния: градиент + скругление + цвет текста */
+                .menu__item.focus,
+                .menu__item.hover,
+                .menu__item.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -webkit-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
+                    color: #1b1b1b !important;
+                    border-radius: 1em !important; /* скругление при активном пункте */
+                }
             }
         `;
         document.head.appendChild(style);
@@ -64,9 +83,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.6',
+                version: '1.7',
                 author: 'maxi3219',
-                description: 'Скруглённое меню с отступом, скрытое полностью до открытия',
+                description: 'Скруглённое меню и активный градиент для пунктов меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
