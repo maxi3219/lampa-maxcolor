@@ -8,10 +8,10 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-style-fixed';
+        style.id = 'roundedmenu-gradient-ring';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Карточки === */
+                /* === Чистим встроенные рамки === */
                 .card,
                 .card__view,
                 .card__img,
@@ -22,13 +22,10 @@
                     box-shadow: none !important;
                     background: none !important;
                 }
-
-                /* Убираем вспышку белой рамки */
                 .card.selector {
                     outline: none !important;
                     border: none !important;
                 }
-
                 .card::before,
                 .card::after,
                 .card__view::before,
@@ -37,31 +34,43 @@
                     display: none !important;
                 }
 
+                /* === Подготовка изображения === */
                 .card__img,
                 .card__poster,
                 .card__view img {
+                    position: relative !important;
                     border-radius: 1em !important;
-                    transition: box-shadow 0.3s ease !important;
+                    z-index: 1 !important;
                 }
 
-                /* ✅ Яркая рамка с зазором */
-                .card.selector.focus .card__img,
-                .card.selector.hover .card__img,
-                .card.selector.traverse .card__img,
-                .card.selector.focus .card__poster,
-                .card.selector.hover .card__poster,
-                .card.selector.traverse .card__poster,
-                .card.selector.focus .card__view img,
-                .card.selector.hover .card__view img,
-                .card.selector.traverse .card__view img {
-                    outline: none !important; /* убираем белый контур */
-                    box-shadow:
-                        0 0 0 6px rgba(96, 255, 189, 0.9),
-                        0 0 16px rgba(96, 255, 189, 0.7),
-                        0 0 32px rgba(98, 163, 201, 0.6) !important;
+                /* === Градиентная рамка с зазором === */
+                .card.selector.focus .card__img::after,
+                .card.selector.hover .card__img::after,
+                .card.selector.traverse .card__img::after,
+                .card.selector.focus .card__poster::after,
+                .card.selector.hover .card__poster::after,
+                .card.selector.traverse .card__poster::after,
+                .card.selector.focus .card__view img::after,
+                .card.selector.hover .card__view img::after,
+                .card.selector.traverse .card__view img::after {
+                    content: "" !important;
+                    position: absolute !important;
+                    inset: -6px !important; /* зазор */
+                    border-radius: calc(1em + 6px) !important;
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+
+                    /* маска: оставляем только кольцо */
+                    -webkit-mask:
+                        linear-gradient(#000 0 0) content-box,
+                        linear-gradient(#000 0 0) !important;
+                    -webkit-mask-composite: xor !important;
+                    mask-composite: exclude !important;
+
+                    pointer-events: none !important;
+                    z-index: 2 !important;
                 }
 
-                /* === Меню: возвращаем исходный компактный стиль === */
+                /* === Меню: компактный стиль справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -83,7 +92,6 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
-
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content.layer--height {
                     transform: translateX(0) !important;
@@ -98,7 +106,6 @@
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse,
@@ -111,7 +118,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Fixed styles applied');
+        log('Gradient ring styles applied');
     }
 
     function initPlugin() {
@@ -133,9 +140,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.8',
+                version: '3.9',
                 author: 'maxi3219',
-                description: 'Убираем белую вспышку рамки и возвращаем компактное меню',
+                description: 'Градиентная рамка вокруг постера с зазором, как цвета при наведении',
                 init: initPlugin
             });
             log('Registered with Lampa');
