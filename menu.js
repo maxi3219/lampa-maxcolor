@@ -8,7 +8,7 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-gradient-gap';
+        style.id = 'roundedmenu-fixed-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 /* === Чистим встроенные рамки === */
@@ -19,7 +19,6 @@
                 .card__view img {
                     border: none !important;
                     outline: none !important;
-                    box-shadow: none !important;
                     background: none !important;
                 }
                 .card.selector {
@@ -34,40 +33,26 @@
                     display: none !important;
                 }
 
-                /* === Подготовка изображения === */
+                /* === Постер: яркая рамка с зазором через box-shadow === */
                 .card__img,
                 .card__poster,
                 .card__view img {
-                    position: relative !important;
                     border-radius: 1em !important;
-                    z-index: 1 !important;
+                    transition: box-shadow 0.3s ease !important;
                 }
-
-                /* === Градиентная рамка с зазором через псевдо-элемент === */
-                .card.selector.focus .card__img::after,
-                .card.selector.hover .card__img::after,
-                .card.selector.traverse .card__img::after,
-                .card.selector.focus .card__poster::after,
-                .card.selector.hover .card__poster::after,
-                .card.selector.traverse .card__poster::after,
-                .card.selector.focus .card__view img::after,
-                .card.selector.hover .card__view img::after,
-                .card.selector.traverse .card__view img::after {
-                    content: "" !important;
-                    position: absolute !important;
-                    inset: -8px !important; /* зазор */
-                    border-radius: calc(1em + 8px) !important;
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-
-                    /* маска: оставляем только кольцо */
-                    -webkit-mask:
-                        linear-gradient(#000 0 0) content-box,
-                        linear-gradient(#000 0 0) !important;
-                    -webkit-mask-composite: xor !important;
-                    mask-composite: exclude !important;
-
-                    pointer-events: none !important;
-                    z-index: 2 !important;
+                .card.selector.focus .card__img,
+                .card.selector.hover .card__img,
+                .card.selector.traverse .card__img,
+                .card.selector.focus .card__poster,
+                .card.selector.hover .card__poster,
+                .card.selector.traverse .card__poster,
+                .card.selector.focus .card__view img,
+                .card.selector.hover .card__view img,
+                .card.selector.traverse .card__view img {
+                    box-shadow:
+                        0 0 0 6px rgba(96, 255, 189, 0.9),
+                        0 0 16px rgba(96, 255, 189, 0.7),
+                        0 0 32px rgba(98, 163, 201, 0.6) !important;
                 }
 
                 /* === Меню: компактный стиль справа === */
@@ -99,7 +84,7 @@
                     opacity: 1 !important;
                 }
 
-                /* === Пункты меню и внутренних настроек === */
+                /* === Пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -108,7 +93,6 @@
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse,
@@ -127,7 +111,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Gradient gap + menu styles applied');
+        log('Fixed styles applied');
     }
 
     function initPlugin() {
@@ -149,9 +133,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.0',
+                version: '4.1',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с зазором вокруг постера + градиентное выделение во внутренних меню',
+                description: 'Яркая рамка постера с зазором + градиентное выделение во всех меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
