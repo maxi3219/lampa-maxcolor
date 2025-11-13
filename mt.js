@@ -75,20 +75,28 @@
                 color: #ffffff !important;
             }
 
-            /* === Фикс: иконка настроек всегда белая === */
+            /* === Фикс: иконки всегда белые === */
             .head__action.selector.open--settings svg,
-            .head__action.selector.open--settings svg use {
+            .head__action.selector.open--settings svg use,
+            .head__action.selector.notice--icon svg,
+            .head__action.selector.notice--icon svg use,
+            .head__action.selector.open--search svg,
+            .head__action.selector.open--search svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
             }
             .head__action.selector.open--settings:hover svg,
-            .head__action.selector.open--settings:hover svg use {
+            .head__action.selector.open--settings:hover svg use,
+            .head__action.selector.notice--icon:hover svg,
+            .head__action.selector.notice--icon:hover svg use,
+            .head__action.selector.open--search:hover svg,
+            .head__action.selector.open--search:hover svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background applied');
+        logMenu('Menu styles + dark background + icon fixes applied');
     }
 
     function initMenuPlugin() {
@@ -108,9 +116,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.5',
+                version: '5.6',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконки настроек',
+                description: 'Скруглённое меню + тёмный фон + фикс иконок',
                 init: initMenuPlugin
             });
         } else {
