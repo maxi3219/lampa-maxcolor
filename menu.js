@@ -8,68 +8,73 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-minimal-ring';
+        style.id = 'roundedmenu-final-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* Не трогаем .card и .card__view геометрию
-                   Лишь обеспечиваем позиционирование для псевдо-элемента */
-                .card .card__view {
-                    position: relative !important;
-                }
-
-                /* Ничего не меняем в размерах .card__img */
+                /* ✅ Убираем белую рамку и тени */
+                .card,
+                .card__view,
                 .card__img {
                     border: none !important;
                     outline: none !important;
-                    /* позиционирование нужно только для псевдо-элемента; это не влияет на поток */
-                    position: relative !important;
-                    border-radius: 1em !important;
+                    box-shadow: none !important;
+                    background: none !important;
                 }
 
-                /* Убираем настырные белые рамки, если они всё ещё приходят псевдо-элементами темы */
+                .card::before,
+                .card::after,
                 .card__view::before,
                 .card__view::after {
                     content: none !important;
                     display: none !important;
                 }
 
-                /* Приглушённая толстая обводка с зазором — только вокруг изображения.
-                   Появляется ТОЛЬКО в активных состояниях карточки. */
-                .card.selector.focus .card__img::after,
-                .card.selector.hover .card__img::after,
-                .card.selector.traverse .card__img::after {
-                    content: "" !important;
-                    position: absolute !important;
-
-                    /* Зазор: рамка «на расстоянии» от краёв постера */
-                    inset: -8px !important;
-
-                    /* Радиус рамки = радиус изображения + зазор */
-                    border-radius: calc(1em + 8px) !important;
-
-                    /* Приглушённый градиент (мягче и темнее) */
-                    background: linear-gradient(
-                        to right,
-                        rgba(76, 207, 160, 0.42),
-                        rgba(76, 138, 168, 0.36)
-                    ) !important;
-
-                    /* Маска-«кольцо»: оставляем только внешний контур, внутренняя часть прозрачная */
-                    -webkit-mask:
-                        linear-gradient(#000 0 0) content-box,
-                        linear-gradient(#000 0 0) !important;
-                    -webkit-mask-composite: xor !important;
-                    mask-composite: exclude !important;
-
-                    pointer-events: none !important;
-                    z-index: 2 !important;
+                /* ✅ Подготовка изображения */
+                .card__img {
+                    border-radius: 1em !important;
+                    transition: box-shadow 0.3s ease !important;
                 }
 
-                /* Остальные ваши стили (плашки/пункты) оставляем без изменений — если нужны, добавь ниже */
+                /* ✅ Приглушённая градиентная обводка с визуальным зазором */
+                .card.selector.focus .card__img,
+                .card.selector.hover .card__img,
+                .card.selector.traverse .card__img {
+                    box-shadow:
+                        0 0 0 6px rgba(76, 207, 160, 0.4),
+                        0 0 12px rgba(76, 207, 160, 0.3),
+                        0 0 24px rgba(76, 138, 168, 0.25) !important;
+                }
+
+                /* ✅ Плашки настроек и источников */
+                .settings__content,
+                .selectbox__content.layer--height {
+                    background: rgba(54,54,54,.959) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    padding: 0.5em !important;
+                }
+
+                /* ✅ Пункты меню и источников */
+                .settings-folder.selector,
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .settings-folder.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-folder.selector.traverse,
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    border-radius: 1em !important;
+                }
             }
         `;
         document.head.appendChild(style);
-        log('Minimal ring styles applied');
+        log('Final styles applied');
     }
 
     function initPlugin() {
@@ -91,9 +96,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.4',
+                version: '3.5',
                 author: 'maxi3219',
-                description: 'Толстая приглушённая обводка с зазором вокруг постера, без влияния на сетку',
+                description: 'Приглушённая обводка вокруг изображения карточки, без влияния на сетку',
                 init: initPlugin
             });
             log('Registered with Lampa');
