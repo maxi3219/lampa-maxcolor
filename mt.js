@@ -22,7 +22,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,0.98) !important;
+                    background: rgba(54,54,54,0.98) !important; /* ← менее прозрачный фон */
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -64,7 +64,7 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
                     border-radius: 1em !important;
                 }
             }
@@ -74,47 +74,9 @@
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
-
-            /* === Фикс: иконки всегда белые === */
-            .head__action.selector.open--settings svg,
-            .head__action.selector.open--settings svg use,
-            .head__action.selector.notice--icon svg,
-            .head__action.selector.notice--icon svg use,
-            .head__action.selector.open--search svg,
-            .head__action.selector.open--search svg use,
-            #MRELOAD svg,
-            #MRELOAD svg use {
-                color: #ffffff !important;
-                fill: #ffffff !important;
-            }
-            .head__action.selector.open--settings:hover svg,
-            .head__action.selector.open--settings:hover svg use,
-            .head__action.selector.notice--icon:hover svg,
-            .head__action.selector.notice--icon:hover svg use,
-            .head__action.selector.open--search:hover svg,
-            .head__action.selector.open--search:hover svg use,
-            #MRELOAD:hover svg,
-            #MRELOAD:hover svg use {
-                color: #ffffff !important;
-                fill: #ffffff !important;
-            }
-
-            /* === Фикс выравнивания кнопок в шапке === */
-            .head__actions {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: flex-end !important;
-            }
-            .head__action {
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                margin: 0 0.3em !important;
-                flex-shrink: 0 !important;
-            }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background + icon fixes applied');
+        logMenu('Menu styles + dark background applied');
     }
 
     function initMenuPlugin() {
@@ -134,9 +96,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.7',
+                version: '5.4',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок + выравнивание кнопок',
+                description: 'Скруглённое меню + тёмный фон',
                 init: initMenuPlugin
             });
         } else {
