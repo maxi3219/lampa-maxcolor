@@ -8,13 +8,15 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-final-style';
+        style.id = 'roundedmenu-enhanced-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Убираем белую рамку и тени */
+                /* ✅ Убираем белые рамки и тени */
                 .card,
                 .card__view,
-                .card__img {
+                .card__img,
+                .card__poster,
+                .card__view img {
                     border: none !important;
                     outline: none !important;
                     box-shadow: none !important;
@@ -30,22 +32,33 @@
                 }
 
                 /* ✅ Подготовка изображения */
-                .card__img {
+                .card__img,
+                .card__poster,
+                .card__view img {
                     border-radius: 1em !important;
-                    transition: box-shadow 0.3s ease !important;
+                    transition: box-shadow 0.3s ease, outline 0.3s ease !important;
                 }
 
-                /* ✅ Приглушённая градиентная обводка с визуальным зазором */
+                /* ✅ Градиентная рамка с зазором и свечением */
                 .card.selector.focus .card__img,
                 .card.selector.hover .card__img,
-                .card.selector.traverse .card__img {
+                .card.selector.traverse .card__img,
+                .card.selector.focus .card__poster,
+                .card.selector.hover .card__poster,
+                .card.selector.traverse .card__poster,
+                .card.selector.focus .card__view img,
+                .card.selector.hover .card__view img,
+                .card.selector.traverse .card__view img {
+                    outline: 3px solid transparent !important;
+                    outline-offset: 6px !important;
+                    border-radius: 1em !important;
                     box-shadow:
-                        0 0 0 6px rgba(76, 207, 160, 0.4),
-                        0 0 12px rgba(76, 207, 160, 0.3),
-                        0 0 24px rgba(76, 138, 168, 0.25) !important;
+                        0 0 0 4px rgba(76, 207, 160, 0.6),
+                        0 0 12px rgba(76, 207, 160, 0.5),
+                        0 0 24px rgba(76, 138, 168, 0.4) !important;
                 }
 
-                /* ✅ Плашки настроек и источников */
+                /* ✅ Плашки и пункты */
                 .settings__content,
                 .selectbox__content.layer--height {
                     background: rgba(54,54,54,.959) !important;
@@ -54,7 +67,6 @@
                     padding: 0.5em !important;
                 }
 
-                /* ✅ Пункты меню и источников */
                 .settings-folder.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
@@ -74,7 +86,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Final styles applied');
+        log('Enhanced styles applied');
     }
 
     function initPlugin() {
@@ -96,9 +108,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.5',
+                version: '3.6',
                 author: 'maxi3219',
-                description: 'Приглушённая обводка вокруг изображения карточки, без влияния на сетку',
+                description: 'Градиентная рамка с зазором и свечением, работает на CUB и TMDB',
                 init: initPlugin
             });
             log('Registered with Lampa');
