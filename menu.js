@@ -13,7 +13,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Окно настроек и selectbox */
+                /* Настройки и selectbox */
                 .settings__content,
                 .selectbox__content {
                     position: fixed !important;
@@ -43,30 +43,15 @@
                     opacity: 1 !important;
                 }
 
-                /* ✅ Меню слева */
-                .wrap__left {
-                    position: fixed !important;
-                    top: 0 !important;
-                    left: 1em !important;
-                    width: 22em !important;
-                    max-height: calc(100vh - 2em) !important;
-                    z-index: 1 !important;
-                    pointer-events: auto !important;
-                    opacity: 1 !important;
-                    visibility: visible !important;
-                }
-
-                .menu {
-                    width: 100% !important;
-                    max-width: 15em !important;
+                /* Меню */
+                .menu__content {
+                    background: rgba(26, 42, 58, 0.95) !important;
                     border-radius: 1.2em !important;
-                    margin: -2em 0 0 1em !important;
-                    background: rgba(54, 54, 54, 0.959) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.082) !important;
-                    padding: 0 !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+                    padding: 1em !important;
+                    backdrop-filter: blur(8px) !important;
                 }
 
-                /* ✅ Пункты меню */
                 .menu__item {
                     border-radius: 0.6em !important;
                     margin-bottom: 0.3em !important;
@@ -77,9 +62,6 @@
                 .menu__item.hover,
                 .menu__item.traverse {
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -webkit-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
                     color: #1b1b1b !important;
                     border-radius: 1em !important;
                 }
@@ -91,8 +73,10 @@
 
     function observeMenu() {
         const observer = new MutationObserver(() => {
-            const menu = document.querySelector('.menu');
-            if (menu) injectStyles();
+            const menu = document.querySelector('.menu__content');
+            if (menu) {
+                injectStyles();
+            }
         });
 
         observer.observe(document.body, {
@@ -112,9 +96,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.0',
+                version: '1.8',
                 author: 'maxi3219',
-                description: 'Кастомное меню: фон, градиент, скругление, отступы',
+                description: 'Скруглённое меню с градиентом и фоном, применяемое после загрузки',
                 init: initPlugin
             });
             log('Registered with Lampa');
