@@ -74,6 +74,18 @@
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
+
+            /* === Фикс: иконка настроек всегда белая === */
+            .head__action.selector.open--settings svg,
+            .head__action.selector.open--settings svg use {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+            }
+            .head__action.selector.open--settings:hover svg,
+            .head__action.selector.open--settings:hover svg use {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+            }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles + dark background applied');
@@ -96,9 +108,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.4',
+                version: '5.5',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон',
+                description: 'Скруглённое меню + тёмный фон + фикс иконки настроек',
                 init: initMenuPlugin
             });
         } else {
