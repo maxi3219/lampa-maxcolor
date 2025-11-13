@@ -3,9 +3,7 @@
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
-    function logMenu(...args) {
-        try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
-    }
+    function logMenu(...args) { try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e) {} }
 
     /* === Стили меню === */
     function applyCustomMenuStyles() {
@@ -34,14 +32,12 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
-
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content.layer--height {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
-
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -50,7 +46,6 @@
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse,
@@ -67,41 +62,12 @@
                     border-radius: 1em !important;
                 }
             }
-
-            body {
-                background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
-                color: #ffffff !important;
-            }
-
-            .head__body svg,
-            .head__body svg use {
-                fill: #fff !important;
-                color: #fff !important;
-                transition: none !important;
-            }
-
-            .head__body .selector.hover svg,
-            .head__body .selector.focus svg,
-            .head__body .selector.traverse svg {
-                fill: #fff !important;
-                color: #fff !important;
-            }
-
-            .head__body .selector.hover,
-            .head__body .selector.focus,
-            .head__body .selector.traverse {
-                color: inherit !important;
-            }
-
-            .m-reload-screen {
-                cursor: pointer !important;
-            }
-            .m-reload-screen:hover svg {
-                transform: rotate(180deg);
-                transition: transform 0.4s ease;
-            }
-
-            .filter--parser { cursor:pointer; }
+            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
+            .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
+            .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
+            .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
+            .m-reload-screen { cursor: pointer !important; }
+            .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles applied');
@@ -109,27 +75,23 @@
 
     /* === Кнопка Reload === */
     function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
+        if(document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
-        if (!headActions) { setTimeout(addReloadButton, 1000); return; }
+        if(!headActions){ setTimeout(addReloadButton,1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
-        btn.innerHTML = `
-            <svg fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.48">
-                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
-            </svg>
-        `;
-        btn.addEventListener('click', () => location.reload());
+        btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
+        btn.addEventListener('click',()=>location.reload());
         headActions.appendChild(btn);
     }
 
     /* === Кнопка Парсер в фильтрах === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
-        if (!container) { setTimeout(addParserButton, 1000); return; }
-        if (document.getElementById('parser-selectbox')) return;
+        if(!container){ setTimeout(addParserButton,1000); return; }
+        if(document.getElementById('parser-selectbox')) return;
 
         const btn = document.createElement('div');
         btn.className = 'simple-button simple-button--filter selector filter--parser';
@@ -138,66 +100,50 @@
         container.appendChild(btn);
 
         const parsers = [
-            { title: 'Не выбран', value: 'none' },
-            { title: 'Jacred.xyz', value: 'jacred1' },
-            { title: 'Jr.maxvol.pro', value: 'jacred2' },
-            { title: 'Jacred.my.to', value: 'jacred3' },
-            { title: 'Lampa.app', value: 'jacred4' },
-            { title: 'Jacred.pro', value: 'jacred5' }
+            'Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'
         ];
 
-        btn.addEventListener('click', () => {
-            const filterBtn = document.querySelector('.filter--sort');
-            if (!filterBtn) return;
-            // открываем стандартное меню сортировки
-            filterBtn.click();
+        btn.addEventListener('click',()=>{
+            if(document.body.classList.contains('selectbox--open')) document.body.classList.remove('selectbox--open');
+            else document.body.classList.add('selectbox--open');
 
-            // через небольшую задержку подставляем наши элементы
-            setTimeout(() => {
-                const menu = document.querySelector('.selectbox__body .scroll__body');
-                if (!menu) return;
-                menu.innerHTML = '';
-                parsers.forEach(p => {
-                    const item = document.createElement('div');
-                    item.className = 'selectbox-item selector' + (Lampa.Storage.get('parser_select') === p.value ? ' selected' : '');
-                    item.innerHTML = `<div class="selectbox-item__title">${p.title}</div>`;
-                    item.addEventListener('click', () => {
-                        // сохраняем выбор
-                        Lampa.Storage.set('parser_select', p.value);
-                        document.getElementById('parser-current').textContent = p.title;
-                        // обновляем торренты
-                        refreshTorrentList(p.title);
-                        // закрываем меню
-                        document.body.classList.remove('selectbox--open');
-                    });
-                    menu.appendChild(item);
+            const menu = document.querySelector('.selectbox__content.layer--height');
+            if(!menu) return;
+            menu.innerHTML = `
+                <div class="selectbox__head"><div class="selectbox__title">Выбрать парсер</div></div>
+                <div class="selectbox__body scroll scroll--mask scroll--over"><div class="scroll__content"><div class="scroll__body"></div></div></div>
+            `;
+            const body = menu.querySelector('.scroll__body');
+            parsers.forEach(p=>{
+                const item = document.createElement('div');
+                item.className = 'selectbox-item selector' + (Lampa.Storage.get('parser_select')===p?' selected':'');
+                item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
+                item.addEventListener('click',()=>{
+                    Lampa.Storage.set('parser_select',p);
+                    document.getElementById('parser-current').textContent=p;
+                    // обновление списка торрентов через Lampa
+                    try{
+                        const active = Lampa.Activity.active();
+                        if(active && active.activity && typeof active.activity.refresh==='function') active.activity.refresh();
+                    }catch(e){console.error(e);}
+                    document.body.classList.remove('selectbox--open');
                 });
-            }, 100);
+                body.appendChild(item);
+            });
         });
     }
 
-    /* === Обновление списка торрентов === */
-    function refreshTorrentList(parser) {
-        console.log('Выбран парсер:', parser);
-        const torrents = document.querySelectorAll('.torrent-item');
-        torrents.forEach(t => {
-            t.style.display = 'none';
-            setTimeout(() => t.style.display = 'flex', 50);
-        });
-    }
-
-    /* === Инициализация плагина === */
     function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
+        if(window.Lampa && typeof Lampa.Listener==='object') {
             Lampa.Listener.follow('app', event => {
-                if (event.type === 'ready') {
+                if(event.type==='ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
                     addParserButton();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded',()=>{
                 applyCustomMenuStyles();
                 addReloadButton();
                 addParserButton();
@@ -206,30 +152,23 @@
     }
 
     function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id_menu,
-                name: plugin_name_menu,
-                version: '6.4',
-                author: 'maxi3219',
-                description: 'Меню + зеленые раздающие + кнопка reload + кнопка парсер (рабочее)',
-                init: initMenuPlugin
-            });
+        if(window.app && app.plugins && typeof app.plugins.add==='function') {
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.6',author:'maxi3219',description:'Меню + зеленые раздающие + кнопка reload + кнопка парсер (корректно)',init:initMenuPlugin});
         } else { initMenuPlugin(); }
     }
 
     registerMenu();
 
     /* === Плагин MaxColor === */
-    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
+    const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
     function recolorSeedNumbers(){
-        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
+        const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block=>{
             const span = block.querySelector('span');
             if(!span) return;
-            const num = parseInt(span.textContent);
+            const num=parseInt(span.textContent);
             if(isNaN(num)) return;
-            let color = COLORS.low;
+            let color=COLORS.low;
             if(num>10) color=COLORS.high;
             else if(num>=5) color=COLORS.mid;
             span.style.color=color;
@@ -237,12 +176,11 @@
         });
     }
     function startObserver(){
-        const obs = new MutationObserver(()=>recolorSeedNumbers());
+        const obs=new MutationObserver(()=>recolorSeedNumbers());
         obs.observe(document.body,{childList:true,subtree:true});
         recolorSeedNumbers();
     }
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
         app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
     } else { startObserver(); }
-
 })();
