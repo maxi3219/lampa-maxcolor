@@ -11,7 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Убираем белую рамку и тени на всех слоях карточки */
+                /* ✅ Убираем белую рамку и тени */
                 .card,
                 .card__view,
                 .card__img {
@@ -21,7 +21,6 @@
                     background: none !important;
                 }
 
-                /* ✅ Отключаем псевдо-элементы, которые могут рисовать рамку */
                 .card::before,
                 .card::after,
                 .card__view::before,
@@ -32,21 +31,33 @@
 
                 /* ✅ Подготовка изображения */
                 .card__img {
+                    position: relative !important;
                     border-radius: 1em !important;
-                    transition: box-shadow 0.3s ease !important;
+                    z-index: 1 !important;
                 }
 
-                /* ✅ Градиентная обводка вокруг изображения при активном состоянии карточки */
-                .card.selector.focus .card__img,
-                .card.selector.hover .card__img,
-                .card.selector.traverse .card__img {
-                    box-shadow:
-                        0 0 0 4px rgba(96, 255, 189, 0.9),
-                        0 0 16px rgba(96, 255, 189, 0.6),
-                        0 0 32px rgba(98, 163, 201, 0.4) !important;
+                /* ✅ Градиентная рамка с зазором через псевдо-элемент */
+                .card.selector.focus .card__img::after,
+                .card.selector.hover .card__img::after,
+                .card.selector.traverse .card__img::after {
+                    content: "" !important;
+                    position: absolute !important;
+                    inset: -6px !important; /* зазор между рамкой и изображением */
+                    border-radius: 1.2em !important;
+                    background: linear-gradient(to right, #4ccfa0 1%, #4c8aa8 100%) !important;
+
+                    /* Маска: оставляем только рамку */
+                    -webkit-mask: 
+                        linear-gradient(#000 0 0) content-box, 
+                        linear-gradient(#000 0 0) !important;
+                    -webkit-mask-composite: xor !important;
+                    mask-composite: exclude !important;
+
+                    pointer-events: none !important;
+                    z-index: 2 !important;
                 }
 
-                /* ✅ Плашки настроек и источников */
+                /* ✅ Плашки и пункты — как раньше */
                 .settings__content,
                 .selectbox__content.layer--height {
                     background: rgba(54,54,54,.959) !important;
@@ -55,7 +66,6 @@
                     padding: 0.5em !important;
                 }
 
-                /* ✅ Пункты меню и источников */
                 .settings-folder.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
@@ -97,9 +107,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.1',
+                version: '3.2',
                 author: 'maxi3219',
-                description: 'Градиентная обводка изображения карточки, без белой рамки',
+                description: 'Приглушённая рамка с зазором вокруг изображения карточки',
                 init: initPlugin
             });
             log('Registered with Lampa');
