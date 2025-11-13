@@ -1,7 +1,13 @@
 (() => {
     const plugin_id_menu = 'roundedmenu';
+    const plugin_name_menu = 'RoundedMenu';
+
+    function logMenu(...args) {
+        try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
+    }
 
     function applyCustomMenuStyles() {
+        if (document.getElementById('roundedmenu-style')) return;
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
         style.innerHTML = `
@@ -10,7 +16,6 @@
                 color: #ffffff !important;
             }
 
-            /* Меню */
             @media screen and (min-width: 480px) {
                 .settings__content,
                 .selectbox__content.layer--height {
@@ -38,18 +43,26 @@
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
+
+                .settings-folder.selector,
+                .settings-param.selector,
+                .settings-param__value.selector,
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .settings-folder.selector.focus,
+                .settings-param.selector.focus,
+                .settings-param__value.selector.focus,
+                .selectbox-item.selector.focus {
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    border-radius: 1em !important;
+                }
             }
 
-            /* Градиент при наведении */
-            .settings-folder.selector.focus,
-            .settings-param.selector.focus,
-            .settings-param__value.selector.focus,
-            .selectbox-item.selector.focus {
-                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
-                border-radius: 1em !important;
-            }
-
-            /* Фикс: иконки всегда белые, без чёрной обводки */
+            /* фикс: иконки всегда белые, без чёрной обводки */
             .head__action.selector svg,
             .head__action.selector svg use {
                 color: #ffffff !important;
@@ -66,15 +79,12 @@
             }
         `;
         document.head.appendChild(style);
+        logMenu('Menu styles + dark background applied');
     }
 
     /* Добавляем кнопку MRELOAD */
-    function addReloadButton() {
+    function addReloadButton(actions) {
         if (document.getElementById('MRELOAD')) return;
-
-        const actions = document.querySelector('.head__actions');
-        if (!actions) return;
-
         const div = document.createElement('div');
         div.id = 'MRELOAD';
         div.className = 'head__action selector m-reload-screen';
@@ -85,20 +95,20 @@
         `;
         div.addEventListener('click', () => location.reload());
         actions.appendChild(div);
+        logMenu('Reload button added');
     }
 
-    /* Следим за появлением .head__actions */
     function observeHead() {
         const obs = new MutationObserver(() => {
             const actions = document.querySelector('.head__actions');
             if (actions && !document.getElementById('MRELOAD')) {
-                addReloadButton();
+                addReloadButton(actions);
             }
         });
         obs.observe(document.body, { childList: true, subtree: true });
     }
 
-    function initPlugin() {
+    function initMenuPlugin() {
         applyCustomMenuStyles();
         observeHead();
     }
@@ -107,12 +117,64 @@
         app.plugins.add({
             id: plugin_id_menu,
             name: plugin_name_menu,
-            version: '6.0',
+            version: '6.1',
             author: 'maxi3219',
             description: 'Меню + фон + фикс иконок + кнопка перезагрузки',
-            init: initPlugin
+            init: initMenuPlugin
         });
     } else {
-        initPlugin();
+        initMenuPlugin();
+    }
+
+    /* === Плагин MaxColor === */
+    const plugin_id_color = 'maxcolor';
+    const plugin_name_color = 'MaxColor';
+
+    const COLORS = {
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
+    };
+
+    function logColor(...a) {
+        try { console.log(`[${plugin_name_color}]`, ...a); } catch (e) {}
+    }
+
+    function recolorSeedNumbers() {
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block => {
+            const span = block.querySelector('span');
+            if (!span) return;
+
+            const num = parseInt(span.textContent);
+            if (isNaN(num)) return;
+
+            let color = COLORS.low;
+            if (num > 10) color = COLORS.high;
+            else if (num >= 5) color = COLORS.mid;
+
+            span.style.color = color;
+            span.style.fontWeight = 'bold';
+        });
+    }
+
+    function startObserver() {
+        const obs = new MutationObserver(() => recolorSeedNumbers());
+        obs.observe(document.body, { childList: true, subtree: true });
+        recolorSeedNumbers();
+        logColor('Observer started (v2.0)');
+    }
+
+    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+        app.plugins.add({
+            id: plugin_id_color,
+            name: plugin_name_color,
+            version: '2.0',
+            author: 'maxi3219',
+            description: 'Окрашивает число после "Раздают:" без свечения',
+            init: startObserver
+        });
+    } else {
+        startObserver();
     }
 })();
