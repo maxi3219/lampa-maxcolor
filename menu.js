@@ -11,7 +11,6 @@
         style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Контейнер постера: подготовка === */
                 .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
@@ -19,52 +18,29 @@
                     isolation: isolate !important;
                 }
 
-                /* === Градиентная рамка с прозрачным зазором === */
                 .card.selector.focus .card__view::after,
                 .card.selector.hover .card__view::after,
                 .card.selector.traverse .card__view::after {
                     content: "" !important;
                     position: absolute !important;
-                    inset: -8px !important;
-                    border-radius: calc(1em + 8px) !important;
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-
-                    -webkit-mask:
-                        linear-gradient(#000 0 0) content-box,
-                        linear-gradient(#000 0 0);
-                    -webkit-mask-composite: xor;
-                    mask-composite: exclude;
-
+                    inset: 0 !important;
+                    border-radius: 1em !important;
+                    background: transparent !important;
+                    filter: drop-shadow(0 0 0 rgba(0,0,0,0)) drop-shadow(0 0 8px #60ffbd) drop-shadow(0 0 16px #62a3c9) !important;
                     pointer-events: none !important;
                     z-index: 2 !important;
                 }
 
-                /* === Удаляем лишние рамки и тени === */
-                .card,
-                .card__view,
                 .card__img,
                 .card__poster,
                 .card__view img {
-                    border: none !important;
+                    border-radius: 1em !important;
                     outline: none !important;
+                    border: none !important;
                     box-shadow: none !important;
                     background: none !important;
                 }
 
-                .card.selector {
-                    outline: none !important;
-                    border: none !important;
-                }
-
-                .card::before,
-                .card::after,
-                .card__view::before,
-                .card__view::after {
-                    content: none !important;
-                    display: none !important;
-                }
-
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -93,7 +69,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -121,7 +96,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Gradient ring + menu styles applied');
+        log('Drop-shadow ring applied');
     }
 
     function initPlugin() {
@@ -141,9 +116,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '5.0',
+                version: '5.1',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с прозрачным зазором вокруг постера + градиентное меню',
+                description: 'Градиентная рамка через drop-shadow + меню с градиентом',
                 init: initPlugin
             });
         } else {
