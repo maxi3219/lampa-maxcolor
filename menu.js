@@ -8,7 +8,7 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-final-style';
+        style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 /* === Чистим встроенные рамки и тени === */
@@ -41,6 +41,7 @@
                     position: relative !important;
                     border-radius: 1em !important;
                     z-index: 1 !important;
+                    overflow: hidden !important; /* фикс растягивания */
                 }
 
                 .card.selector.focus .card__img::after,
@@ -148,7 +149,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.3',
+                version: '4.4',
                 author: 'maxi3219',
                 description: 'Градиентная рамка с прозрачным зазором + градиентное выделение всех пунктов меню',
                 init: initPlugin
