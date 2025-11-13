@@ -11,7 +11,7 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Убираем белую рамку и тени */
+                /* === Базовая чистка рамок/теней === */
                 .card,
                 .card__view,
                 .card__img {
@@ -20,7 +20,6 @@
                     box-shadow: none !important;
                     background: none !important;
                 }
-
                 .card::before,
                 .card::after,
                 .card__view::before,
@@ -29,26 +28,37 @@
                     display: none !important;
                 }
 
-                /* ✅ Подготовка изображения */
-                .card__img {
+                /* === Геометрия карточки (фикс, чтобы не тянуло) === */
+                .card .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
+                    overflow: hidden !important; /* вернуть, чтобы контент не «раздувал» вид */
+                }
+                .card__img {
+                    display: block !important;     /* убрать inline-артефакты */
+                    width: 100% !important;        /* вписать в карточку */
+                    height: auto !important;       /* сохранить пропорции */
+                    border-radius: inherit !important;
+                    position: relative !important; /* для псевдо-элемента */
                     z-index: 1 !important;
                 }
 
-                /* ✅ Градиентная рамка с зазором через псевдо-элемент */
+                /* === Приглушённая обводка с зазором только вокруг изображения === */
                 .card.selector.focus .card__img::after,
                 .card.selector.hover .card__img::after,
                 .card.selector.traverse .card__img::after {
                     content: "" !important;
                     position: absolute !important;
-                    inset: -6px !important; /* зазор между рамкой и изображением */
-                    border-radius: 1.2em !important;
-                    background: linear-gradient(to right, #4ccfa0 1%, #4c8aa8 100%) !important;
+                    /* зазор вокруг изображения (рамка «на расстоянии») */
+                    inset: -6px !important;
+                    border-radius: calc(1em + 6px) !important;
 
-                    /* Маска: оставляем только рамку */
-                    -webkit-mask: 
-                        linear-gradient(#000 0 0) content-box, 
+                    /* приглушённый градиент */
+                    background: linear-gradient(to right, rgba(76, 207, 160, 0.55), rgba(76, 138, 168, 0.45)) !important;
+
+                    /* маска: оставить только кольцо рамки, без заливки */
+                    -webkit-mask:
+                        linear-gradient(#000 0 0) content-box,
                         linear-gradient(#000 0 0) !important;
                     -webkit-mask-composite: xor !important;
                     mask-composite: exclude !important;
@@ -57,7 +67,7 @@
                     z-index: 2 !important;
                 }
 
-                /* ✅ Плашки и пункты — как раньше */
+                /* === Плашки и пункты как раньше (без изменений логики) === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     background: rgba(54,54,54,.959) !important;
@@ -65,14 +75,12 @@
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
                 }
-
                 .settings-folder.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse,
@@ -107,9 +115,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.2',
+                version: '3.3',
                 author: 'maxi3219',
-                description: 'Приглушённая рамка с зазором вокруг изображения карточки',
+                description: 'Приглушённая рамка с зазором вокруг изображения, без растягивания карточек',
                 init: initPlugin
             });
             log('Registered with Lampa');
