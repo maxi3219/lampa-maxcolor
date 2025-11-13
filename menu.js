@@ -60,9 +60,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1',
+                version: '1.2',
                 author: 'maxi3219',
-                description: 'Скруглённое меню и источник с отступом от правого края',
+                description: 'Скруглённое меню и источник с отступом от правого края, скрытые по умолчанию',
                 init: initPlugin
             });
             log('Registered with Lampa');
