@@ -7,12 +7,12 @@
         try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
+    /* === Стили для меню и selectbox === */
     function applyCustomMenuStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* Меню и selectbox */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -73,6 +73,7 @@
                 color: #ffffff !important;
             }
 
+            /* Иконки не темнеют */
             .head__body svg,
             .head__body svg use {
                 fill: #fff !important;
@@ -102,9 +103,10 @@
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background applied');
+        logMenu('Menu styles applied');
     }
 
+    /* === Кнопка Reload === */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
 
@@ -126,13 +128,13 @@
         headActions.appendChild(btn);
     }
 
+    /* === Кнопка Парсер === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if (!container) {
             setTimeout(addParserButton, 1000);
             return;
         }
-
         if (document.getElementById('parser-selectbox')) return;
 
         const selectbox = document.createElement('div');
@@ -144,48 +146,19 @@
         const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
         selectbox.addEventListener('click', () => {
-            if (document.querySelector('.selectbox--parser')) return;
-
-            const menu = document.createElement('div');
-            menu.className = 'selectbox__content layer--height selectbox--parser';
-            menu.style.minWidth = selectbox.offsetWidth + 'px';
-
-            menu.innerHTML = `<div class="scroll scroll--mask scroll--over">
-                <div class="scroll__content layer--wheight">
-                    <div class="scroll__body">
-                        ${parsers.map(p => `<div class="selectbox-item selector${p==='Jacred.xyz'?' selected':''}">${p}</div>`).join('')}
-                    </div>
-                </div>
-            </div>`;
-            document.body.appendChild(menu);
-
-            const rect = selectbox.getBoundingClientRect();
-            menu.style.top = rect.bottom + 'px';
-            menu.style.left = rect.left + 'px';
-
-            const clickOutside = (e) => {
-                if (!menu.contains(e.target) && e.target!==selectbox) {
-                    menu.remove();
-                    document.removeEventListener('click', clickOutside);
+            Lampa.Selectbox.open({
+                title: 'Выберите парсер',
+                array: parsers,
+                selected: 1,
+                onSelect: (index, value) => {
+                    selectbox.querySelector('div').textContent = value;
+                    refreshTorrentList(value);
                 }
-            };
-            document.addEventListener('click', clickOutside);
-
-            menu.querySelectorAll('.selectbox-item.selector').forEach(item => {
-                item.addEventListener('click', () => {
-                    selectbox.querySelector('div').textContent = item.textContent;
-
-                    // выделение выбранного
-                    menu.querySelectorAll('.selectbox-item.selector').forEach(i=>i.classList.remove('selected'));
-                    item.classList.add('selected');
-
-                    // обновление торрентов
-                    refreshTorrentList(item.textContent);
-                });
             });
         });
     }
 
+    /* === Обновление списка торрентов === */
     function refreshTorrentList(parser) {
         console.log('Выбран парсер:', parser);
         const torrents = document.querySelectorAll('.torrent-item');
@@ -195,6 +168,7 @@
         });
     }
 
+    /* === Инициализация плагина === */
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', event => {
@@ -218,7 +192,7 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '6.1',
+                version: '6.2',
                 author: 'maxi3219',
                 description: 'Меню + зеленые раздающие + кнопка reload + кнопка парсер (скругленное меню)',
                 init: initMenuPlugin
