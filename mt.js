@@ -12,7 +12,6 @@
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -22,9 +21,9 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,0.98) !important; /* ← менее прозрачный фон */
+                    background: rgba(54,54,54,0.98) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -42,7 +41,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -64,18 +62,17 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                     border-radius: 1em !important;
                 }
             }
 
-            /* === Новый фон для всей Лампы === */
             body {
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
 
-            /* === Фикс: иконки всегда белые === */
+            /* фикс: иконки всегда белые */
             .head__action.selector.open--settings svg,
             .head__action.selector.open--settings svg use,
             .head__action.selector.notice--icon svg,
@@ -105,15 +102,44 @@
         logMenu('Menu styles + dark background + icon fixes applied');
     }
 
+    /* === Добавляем кнопку MRELOAD === */
+    function addReloadButton() {
+        if (document.getElementById('MRELOAD')) return; // уже есть
+
+        const head = document.querySelector('.head');
+        if (!head) return;
+
+        const div = document.createElement('div');
+        div.id = 'MRELOAD';
+        div.className = 'head__action selector m-reload-screen';
+        div.innerHTML = `
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
+            </svg>
+        `;
+
+        // действие при клике — перезагрузка
+        div.addEventListener('click', () => {
+            location.reload();
+        });
+
+        head.appendChild(div);
+        logMenu('Reload button added');
+    }
+
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', function(event){
                 if(event.type === 'ready'){
                     applyCustomMenuStyles();
+                    addReloadButton();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
+            document.addEventListener('DOMContentLoaded', () => {
+                applyCustomMenuStyles();
+                addReloadButton();
+            });
         }
     }
 
@@ -122,9 +148,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.7',
+                version: '5.8',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок (settings, bell, search, reload)',
+                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка перезагрузки',
                 init: initMenuPlugin
             });
         } else {
@@ -140,9 +166,9 @@
     const plugin_name_color = 'MaxColor';
 
     const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
     };
 
     function logColor(...a) {
