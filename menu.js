@@ -8,7 +8,7 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-style-fix';
+        style.id = 'roundedmenu-style-fixed';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 /* === Карточки === */
@@ -23,6 +23,12 @@
                     background: none !important;
                 }
 
+                /* Убираем вспышку белой рамки */
+                .card.selector {
+                    outline: none !important;
+                    border: none !important;
+                }
+
                 .card::before,
                 .card::after,
                 .card__view::before,
@@ -35,10 +41,10 @@
                 .card__poster,
                 .card__view img {
                     border-radius: 1em !important;
-                    transition: box-shadow 0.3s ease, outline 0.3s ease !important;
+                    transition: box-shadow 0.3s ease !important;
                 }
 
-                /* ✅ Яркая обводка с зазором */
+                /* ✅ Яркая рамка с зазором */
                 .card.selector.focus .card__img,
                 .card.selector.hover .card__img,
                 .card.selector.traverse .card__img,
@@ -48,26 +54,41 @@
                 .card.selector.focus .card__view img,
                 .card.selector.hover .card__view img,
                 .card.selector.traverse .card__view img {
-                    outline: 3px solid transparent !important;
-                    outline-offset: 6px !important; /* зазор */
-                    border-radius: 1em !important;
+                    outline: none !important; /* убираем белый контур */
                     box-shadow:
-                        0 0 0 4px rgba(96, 255, 189, 0.9),
+                        0 0 0 6px rgba(96, 255, 189, 0.9),
                         0 0 16px rgba(96, 255, 189, 0.7),
                         0 0 32px rgba(98, 163, 201, 0.6) !important;
                 }
 
-                /* === Менюшка (фикс высоты) === */
+                /* === Меню: возвращаем исходный компактный стиль === */
                 .settings__content,
                 .selectbox__content.layer--height {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
 
-                    /* компактный вид */
-                    max-height: 70vh !important; /* ограничение высоты */
-                    overflow-y: auto !important; /* прокрутка */
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
 
                 /* === Пункты меню и источников === */
@@ -90,7 +111,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Styles applied: bright outline + compact menu');
+        log('Fixed styles applied');
     }
 
     function initPlugin() {
@@ -112,9 +133,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.7',
+                version: '3.8',
                 author: 'maxi3219',
-                description: 'Яркая обводка постера с зазором + компактное меню',
+                description: 'Убираем белую вспышку рамки и возвращаем компактное меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
