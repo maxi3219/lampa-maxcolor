@@ -8,12 +8,11 @@
     }
 
     function applyCustomMenuStyles() {
-        if (document.getElementById('roundedmenu-style-menuonly')) return;
-
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
+                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -23,9 +22,9 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,0.98) !important;
+                    background: rgba(54,54,54,0.98) !important; /* ← менее прозрачный фон */
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -43,6 +42,7 @@
                     opacity: 1 !important;
                 }
 
+                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -64,81 +64,31 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
                     border-radius: 1em !important;
                 }
             }
 
+            /* === Новый фон для всей Лампы === */
             body {
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
-
-            .head__actions {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: flex-end !important;
-            }
-
-            .head__action {
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                margin: 0 0.3em !important;
-                flex-shrink: 0 !important;
-            }
-
-            .head__action.selector svg,
-            .head__action.selector svg use,
-            #MRELOAD svg,
-            #MRELOAD svg use {
-                color: #ffffff !important;
-                fill: #ffffff !important;
-                stroke: none !important;
-                outline: none !important;
-            }
-
-            .head__action.selector:hover svg,
-            .head__action.selector:hover svg use,
-            #MRELOAD:hover svg,
-            #MRELOAD:hover svg use {
-                color: #ffffff !important;
-                fill: #ffffff !important;
-                stroke: none !important;
-                outline: none !important;
-            }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles applied');
-    }
-
-    function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
-        const actions = document.querySelector('.head__actions');
-        if (!actions) return;
-
-        const div = document.createElement('div');
-        div.id = 'MRELOAD';
-        div.className = 'head__action selector m-reload-screen';
-        div.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
-                <path fill="#ffffff" d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V8c2.76 0 5 2.24 5 5s-2.24 5-5 5a5.002 5.002 0 0 1-4.9-4H5.02a7.003 7.003 0 0 0 6.98 6c3.87 0 7-3.13 7-7 0-1.93-.78-3.68-2.35-5.65z"/>
-            </svg>
-        `;
-        div.addEventListener('click', () => {
-            try {
-                window.location.reload();
-            } catch (e) {
-                window.location.assign(window.location.href);
-            }
-        });
-        actions.appendChild(div);
-        logMenu('Reload button added');
+        logMenu('Menu styles + dark background applied');
     }
 
     function initMenuPlugin() {
-        applyCustomMenuStyles();
-        addReloadButton();
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', function(event){
+                if(event.type === 'ready'){
+                    applyCustomMenuStyles();
+                }
+            });
+        } else {
+            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
+        }
     }
 
     function registerMenu() {
@@ -146,18 +96,10 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '6.1',
+                version: '5.4',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + кнопка перезагрузки',
-                init: () => {
-                    if (window.Lampa && typeof Lampa.Listener === 'object') {
-                        Lampa.Listener.follow('app', (event) => {
-                            if (event.type === 'ready') initMenuPlugin();
-                        });
-                    } else {
-                        document.addEventListener('DOMContentLoaded', initMenuPlugin);
-                    }
-                }
+                description: 'Скруглённое меню + тёмный фон',
+                init: initMenuPlugin
             });
         } else {
             initMenuPlugin();
@@ -172,9 +114,9 @@
     const plugin_name_color = 'MaxColor';
 
     const COLORS = {
-        low: '#ff3333',
-        mid: '#ffcc00',
-        high: '#00ff00'
+        low: '#ff3333',   // <5 — красный
+        mid: '#ffcc00',   // 5–10 — жёлтый
+        high: '#00ff00'   // >10 — зелёный
     };
 
     function logColor(...a) {
