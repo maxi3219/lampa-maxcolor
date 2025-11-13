@@ -1,15 +1,12 @@
-(function(){
-    // Проверка, что Lampa загружена
-    if (!window.Lampa) return;
+(() => {
+    const plugin_id = 'roundedmenu';
+    const plugin_name = 'RoundedMenu';
 
-    // Ждём полной загрузки интерфейса
-    Lampa.Listener.follow('app', function(event){
-        if(event.type === 'ready'){
-            applyCustomStyles();
-        }
-    });
+    function log(...args) {
+        try { console.log(`[${plugin_name}]`, ...args); } catch (e) {}
+    }
 
-    function applyCustomStyles(){
+    function applyCustomStyles() {
         const style = document.createElement('style');
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
@@ -39,6 +36,39 @@
             }
         `;
         document.head.appendChild(style);
-        console.log('[Rounded Settings Menu] Custom styles applied');
+        log('Custom styles applied');
     }
+
+    function initPlugin() {
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', function(event){
+                if(event.type === 'ready'){
+                    applyCustomStyles();
+                }
+            });
+            log('Lampa listener attached');
+        } else {
+            // Автономный режим, если Lampa не определена
+            document.addEventListener('DOMContentLoaded', applyCustomStyles);
+            log('Standalone mode');
+        }
+    }
+
+    function register() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                version: '1.0',
+                author: 'maxi3219',
+                description: 'Скруглённое меню настроек с отступом от правого края',
+                init: initPlugin
+            });
+            log('Registered with Lampa');
+        } else {
+            initPlugin();
+        }
+    }
+
+    register();
 })();
