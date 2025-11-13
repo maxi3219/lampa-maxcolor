@@ -22,7 +22,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(54,54,54,0.98) !important; /* ← менее прозрачный фон */
+                    background: rgba(54,54,54,0.98) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -64,7 +64,7 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                     border-radius: 1em !important;
                 }
             }
@@ -74,9 +74,62 @@
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
+
+            /* === Фикс выравнивания кнопок в шапке === */
+            .head__actions {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+            }
+            .head__action {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                margin: 0 0.3em !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* === Фикс: иконки всегда белые === */
+            .head__action.selector svg,
+            .head__action.selector svg use,
+            #MRELOAD svg,
+            #MRELOAD svg use {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+                stroke: none !important;
+                outline: none !important;
+            }
+            .head__action.selector:hover svg,
+            .head__action.selector:hover svg use,
+            #MRELOAD:hover svg,
+            #MRELOAD:hover svg use {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+                stroke: none !important;
+                outline: none !important;
+            }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background applied');
+        logMenu('Menu styles + dark background + button alignment applied');
+    }
+
+    /* === Добавляем кнопку MRELOAD === */
+    function addReloadButton() {
+        if (document.getElementById('MRELOAD')) return;
+        const actions = document.querySelector('.head__actions');
+        if (!actions) return;
+
+        const div = document.createElement('div');
+        div.id = 'MRELOAD';
+        div.className = 'head__action selector m-reload-screen';
+        div.innerHTML = `
+            <svg viewBox="0 0 24 24">
+                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
+            </svg>
+        `;
+        div.addEventListener('click', () => location.reload());
+        actions.appendChild(div);
+        logMenu('Reload button added');
     }
 
     function initMenuPlugin() {
@@ -84,10 +137,14 @@
             Lampa.Listener.follow('app', function(event){
                 if(event.type === 'ready'){
                     applyCustomMenuStyles();
+                    addReloadButton();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
+            document.addEventListener('DOMContentLoaded', () => {
+                applyCustomMenuStyles();
+                addReloadButton();
+            });
         }
     }
 
@@ -96,9 +153,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.4',
+                version: '5.8',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон',
+                description: 'Скруглённое меню + тёмный фон + фикс кнопок + кнопка перезагрузки',
                 init: initMenuPlugin
             });
         } else {
