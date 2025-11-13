@@ -11,11 +11,12 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
+                /* ✅ Стили для settings/selectbox */
                 .settings__content,
                 .selectbox__content {
                     position: fixed !important;
                     top: 1em !important;
-                    right: 1em !important; /* отступ от правого края */
+                    right: 1em !important;
                     left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
@@ -29,15 +30,41 @@
                     transform: translateX(100%) !important;
                     transition: transform 0.3s ease, opacity 0.3s ease !important;
                     z-index: 999 !important;
-                    visibility: hidden !important;   /* скрываем */
-                    opacity: 0 !important;           /* делаем прозрачным */
+                    visibility: hidden !important;
+                    opacity: 0 !important;
                 }
 
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content {
                     transform: translateX(0) !important;
-                    visibility: visible !important;  /* показываем */
-                    opacity: 1 !important;           /* делаем видимым */
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                /* ✅ Кастомизация меню */
+                .menu__content {
+                    background: rgba(26, 42, 58, 0.95) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+                    padding: 1em !important;
+                    backdrop-filter: blur(8px);
+                }
+
+                .menu__item {
+                    border-radius: 0.6em !important;
+                    margin-bottom: 0.3em;
+                    transition: background 0.3s ease, border-radius 0.3s ease;
+                }
+
+                .menu__item.focus,
+                .menu__item.hover,
+                .menu__item.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -webkit-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
+                    color: #1b1b1b !important;
+                    border-radius: 1em !important;
                 }
             }
         `;
@@ -64,9 +91,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.6',
+                version: '1.7',
                 author: 'maxi3219',
-                description: 'Скруглённое меню с отступом, скрытое полностью до открытия',
+                description: 'Скруглённое меню с градиентом, фоном и скрытием',
                 init: initPlugin
             });
             log('Registered with Lampa');
