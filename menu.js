@@ -8,7 +8,7 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-gradient-ring';
+        style.id = 'roundedmenu-gradient-gap';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 /* === Чистим встроенные рамки === */
@@ -43,7 +43,7 @@
                     z-index: 1 !important;
                 }
 
-                /* === Градиентная рамка с зазором === */
+                /* === Градиентная рамка с зазором через псевдо-элемент === */
                 .card.selector.focus .card__img::after,
                 .card.selector.hover .card__img::after,
                 .card.selector.traverse .card__img::after,
@@ -55,8 +55,8 @@
                 .card.selector.traverse .card__view img::after {
                     content: "" !important;
                     position: absolute !important;
-                    inset: -6px !important; /* зазор */
-                    border-radius: calc(1em + 6px) !important;
+                    inset: -8px !important; /* зазор */
+                    border-radius: calc(1em + 8px) !important;
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
 
                     /* маска: оставляем только кольцо */
@@ -99,16 +99,25 @@
                     opacity: 1 !important;
                 }
 
-                /* === Пункты меню и источников === */
+                /* === Пункты меню и внутренних настроек === */
                 .settings-folder.selector,
+                .settings-param.selector,
+                .settings-param__value.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
+
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse,
+                .settings-param.selector.focus,
+                .settings-param.selector.hover,
+                .settings-param.selector.traverse,
+                .settings-param__value.selector.focus,
+                .settings-param__value.selector.hover,
+                .settings-param__value.selector.traverse,
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
@@ -118,7 +127,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Gradient ring styles applied');
+        log('Gradient gap + menu styles applied');
     }
 
     function initPlugin() {
@@ -140,9 +149,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.9',
+                version: '4.0',
                 author: 'maxi3219',
-                description: 'Градиентная рамка вокруг постера с зазором, как цвета при наведении',
+                description: 'Градиентная рамка с зазором вокруг постера + градиентное выделение во внутренних меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
