@@ -37,8 +37,14 @@
                     visibility: hidden !important;
                     opacity: 0 !important;
                 }
+
+                /* исправленные селекторы для открытия */
                 body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
+                body.selectbox--open .selectbox__content.layer--height,
+                .settings__content.active,
+                .selectbox__content.layer--height.active,
+                .settings__content.open,
+                .selectbox__content.layer--height.open {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
@@ -62,16 +68,20 @@
                 }
             }
 
-            /* фикс: иконки всегда белые, без чёрной обводки */
+            /* фикс: иконки всегда белые */
             .head__action.selector svg,
-            .head__action.selector svg use {
+            .head__action.selector svg use,
+            #MRELOAD svg,
+            #MRELOAD svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
                 stroke: none !important;
                 outline: none !important;
             }
             .head__action.selector:hover svg,
-            .head__action.selector:hover svg use {
+            .head__action.selector:hover svg use,
+            #MRELOAD:hover svg,
+            #MRELOAD:hover svg use {
                 color: #ffffff !important;
                 fill: #ffffff !important;
                 stroke: none !important;
@@ -117,7 +127,7 @@
         app.plugins.add({
             id: plugin_id_menu,
             name: plugin_name_menu,
-            version: '6.1',
+            version: '6.2',
             author: 'maxi3219',
             description: 'Меню + фон + фикс иконок + кнопка перезагрузки',
             init: initMenuPlugin
