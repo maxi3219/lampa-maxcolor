@@ -6,7 +6,6 @@
         try { console.log(`[${plugin_name}]`, ...args); } catch (e) {}
     }
 
-    // Собираем все CSS-переменные текущей темы
     function exportTheme() {
         const styles = getComputedStyle(document.documentElement);
         const vars = {};
@@ -20,7 +19,6 @@
         log('Theme exported to localStorage');
     }
 
-    // Применяем сохранённые переменные
     function importTheme() {
         const json = localStorage.getItem('theme_backup');
         if (!json) {
@@ -38,23 +36,38 @@
         }
     }
 
-    // Добавляем кнопки в меню настроек
+    function createButton(label, onClick) {
+        const btn = document.createElement('div');
+        btn.className = 'settings-item';
+        btn.innerText = label;
+        btn.style.cursor = 'pointer';
+        btn.style.padding = '1em';
+        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+        btn.style.margin = '0.5em 0';
+        btn.style.borderRadius = '0.5em';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.tabIndex = 0;
+        btn.onclick = onClick;
+        return btn;
+    }
+
     function addButtons() {
-        const panel = document.querySelector('.settings__content');
-        if (!panel) return;
+        const tryInsert = () => {
+            const panel = document.querySelector('.settings__content');
+            if (!panel) {
+                setTimeout(tryInsert, 500); // ждём появления панели
+                return;
+            }
 
-        const exportBtn = document.createElement('div');
-        exportBtn.className = 'settings-item';
-        exportBtn.innerText = 'Сохранить тему';
-        exportBtn.onclick = exportTheme;
+            const exportBtn = createButton('Сохранить тему', exportTheme);
+            const importBtn = createButton('Загрузить тему', importTheme);
 
-        const importBtn = document.createElement('div');
-        importBtn.className = 'settings-item';
-        importBtn.innerText = 'Загрузить тему';
-        importBtn.onclick = importTheme;
+            panel.appendChild(exportBtn);
+            panel.appendChild(importBtn);
+            log('Buttons added');
+        };
 
-        panel.appendChild(exportBtn);
-        panel.appendChild(importBtn);
+        tryInsert();
     }
 
     function initPlugin() {
@@ -76,7 +89,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.0',
+                version: '1.1',
                 author: 'maxi3219',
                 description: 'Автоматический экспорт/импорт темы через localStorage',
                 init: initPlugin
