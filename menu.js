@@ -94,6 +94,16 @@
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
                     border-radius: 1em !important;
                 }
+
+                /* Карточки фильмов с градиентной рамкой */
+                .card,
+                .card__view {
+                    border: 2px solid transparent !important;
+                    border-radius: 1em !important;
+                    background-image: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    background-origin: border-box !important;
+                    background-clip: content-box, border-box !important;
+                }
             }
         `;
         document.head.appendChild(style);
@@ -119,9 +129,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.3',
+                version: '2.4',
                 author: 'maxi3219',
-                description: 'Скруглённые плашки настроек и источников с градиентом',
+                description: 'Скруглённые плашки, градиентные пункты и рамки карточек фильмов',
                 init: initPlugin
             });
             log('Registered with Lampa');
