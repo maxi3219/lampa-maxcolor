@@ -95,31 +95,52 @@
                     border-radius: 1em !important;
                 }
 
-                /* ✅ Карточки фильмов — базовое состояние */
-                .card.selector {
-                    position: relative !important;
-                    border-radius: 1em !important;
-                    overflow: visible !important;
-                    border: 1px solid rgba(255,255,255,0.12) !important;
-                    transition: border-color 0.2s ease !important;
+                /* ============================= */
+                /* ✅ Карточки фильмов — исправление */
+                /* Убираем любую белую рамку/тень, чтобы не конфликтовала */
+                .card,
+                .card__view {
+                    border: none !important;
+                    box-shadow: none !important;
                 }
 
-                /* ✅ Градиентная рамка при наведении/фокусе */
-                .card.selector.focus::before,
-                .card.selector.hover::before,
-                .card.selector.traverse::before {
+                /* Контейнеры и визуальный блок карточки */
+                .card.selector {
+                    position: relative !important;
+                }
+                .card .card__view {
+                    position: relative !important;
+                    border-radius: 1em !important;
+                    overflow: hidden !important; /* чтобы псевдо-рамка повторяла скругление */
+                }
+
+                /* Градиентная рамка по активным состояниям — на всю карточку (card__view) */
+                .card.selector.focus .card__view::after,
+                .card.selector.hover .card__view::after,
+                .card.selector.traverse .card__view::after {
                     content: "" !important;
                     position: absolute !important;
                     inset: 0 !important;
                     border-radius: 1em !important;
-                    padding: 2px !important;
+                    padding: 2px !important; /* толщина рамки */
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-                    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+
+                    /* Оставляем только рамку, внутренность прозрачная */
+                    -webkit-mask:
+                        linear-gradient(#000 0 0) content-box,
+                        linear-gradient(#000 0 0) !important;
                     -webkit-mask-composite: xor !important;
                     mask-composite: exclude !important;
+
                     pointer-events: none !important;
                     z-index: 2 !important;
                 }
+
+                /* Небольшая поддержка hover мышью, если есть курсор */
+                .card:hover .card__view::after {
+                    padding: 2.2px !important;
+                }
+                /* ============================= */
             }
         `;
         document.head.appendChild(style);
@@ -145,9 +166,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.6',
+                version: '2.7',
                 author: 'maxi3219',
-                description: 'Скруглённые плашки, градиентные пункты и рамка карточек при наведении',
+                description: 'Единые плашки, градиентные пункты и корректная обводка карточек',
                 init: initPlugin
             });
             log('Registered with Lampa');
