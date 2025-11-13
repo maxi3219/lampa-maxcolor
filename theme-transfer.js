@@ -16,7 +16,7 @@
             }
         }
         localStorage.setItem('theme_backup', JSON.stringify(vars));
-        log('Theme exported to localStorage');
+        log('Theme saved to localStorage');
     }
 
     function importTheme() {
@@ -30,7 +30,7 @@
             for (const key in vars) {
                 document.documentElement.style.setProperty(key, vars[key]);
             }
-            log('Theme imported from localStorage');
+            log('Theme applied from localStorage');
         } catch (e) {
             log('Error parsing theme JSON');
         }
@@ -46,42 +46,40 @@
         btn.style.margin = '0.5em 0';
         btn.style.borderRadius = '0.5em';
         btn.style.background = 'rgba(255,255,255,0.05)';
-        btn.tabIndex = 0;
         btn.onclick = onClick;
         return btn;
     }
 
-    function addButtons() {
-        const tryInsert = () => {
-            const panel = document.querySelector('.settings__content');
-            if (!panel) {
-                setTimeout(tryInsert, 500); // ждём появления панели
-                return;
-            }
+    function injectButtons() {
+        const panel = document.querySelector('.settings__content');
+        if (!panel || panel.querySelector('[data-theme-transfer]')) return;
 
-            const exportBtn = createButton('Сохранить тему', exportTheme);
-            const importBtn = createButton('Загрузить тему', importTheme);
+        const exportBtn = createButton('Сохранить тему', exportTheme);
+        const importBtn = createButton('Загрузить тему', importTheme);
 
-            panel.appendChild(exportBtn);
-            panel.appendChild(importBtn);
-            log('Buttons added');
-        };
+        exportBtn.setAttribute('data-theme-transfer', 'true');
+        importBtn.setAttribute('data-theme-transfer', 'true');
 
-        tryInsert();
+        panel.appendChild(exportBtn);
+        panel.appendChild(importBtn);
+        log('Buttons injected');
+    }
+
+    function observeSettingsPanel() {
+        const observer = new MutationObserver(() => {
+            injectButtons();
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        log('MutationObserver started');
     }
 
     function initPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', function(event){
-                if(event.type === 'ready'){
-                    addButtons();
-                }
-            });
-            log('Lampa listener attached');
-        } else {
-            document.addEventListener('DOMContentLoaded', addButtons);
-            log('Standalone mode');
-        }
+        observeSettingsPanel();
     }
 
     function register() {
@@ -89,9 +87,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1',
+                version: '1.2',
                 author: 'maxi3219',
-                description: 'Автоматический экспорт/импорт темы через localStorage',
+                description: 'Автоматический экспорт/импорт темы через localStorage с гарантированной вставкой кнопок',
                 init: initPlugin
             });
             log('Registered with Lampa');
