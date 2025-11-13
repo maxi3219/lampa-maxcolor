@@ -7,28 +7,30 @@
     }
 
     function recolorSeeders(){
-        const elements = document.querySelectorAll('.torrent-item, .item, div, span, p');
-        elements.forEach(el => {
-            if (el.textContent && el.textContent.includes('Раздают:')) {
-                const match = el.textContent.match(/Раздают:\s*(\d+)/);
+        // Ищем все элементы, где есть слово "Раздают"
+        const seeders = document.querySelectorAll('*');
+        seeders.forEach(el => {
+            if (el.childElementCount === 0 && /Раздают:/i.test(el.textContent)) {
+                const match = el.textContent.match(/Раздают:\s*(\d+)/i);
                 if (match) {
                     const count = parseInt(match[1]);
-                    let color = '#FF0000';
-                    if (count > 10) color = '#00FF00';
-                    else if (count >= 5) color = '#FFFF00';
+                    let color;
+                    if (count > 10) color = '#00FF00';        // ярко-зелёный
+                    else if (count >= 5) color = '#FFFF33';   // неоново-жёлтый
+                    else color = '#FF0033';                   // неоново-красный
                     el.style.color = color;
                     el.style.fontWeight = 'bold';
-                    el.style.textShadow = `0 0 8px ${color}`;
+                    el.style.textShadow = `0 0 10px ${color}`;
                 }
             }
         });
     }
 
-    function observeList(){
+    function startObserver(){
         const observer = new MutationObserver(() => recolorSeeders());
         observer.observe(document.body, { childList: true, subtree: true });
-        log('observer active');
         recolorSeeders();
+        log('Observer started and recoloring active');
     }
 
     function register(){
@@ -36,12 +38,12 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                author: 'User',
-                version: '1.1',
-                description: 'Подсвечивает количество раздающих неоновыми цветами',
-                init: observeList
+                version: '1.2',
+                author: 'maxi3219',
+                description: 'Неоновая подсветка количества раздающих в списке торрентов',
+                init: startObserver
             });
-            log('registered');
+            log('Registered successfully');
         } else {
             setTimeout(register, 1000);
         }
