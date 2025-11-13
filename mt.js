@@ -64,13 +64,19 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← чуть менее яркий градиент */
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← затемнённый градиент */
                     border-radius: 1em !important;
                 }
             }
+
+            /* === Новый фон для всей Лампы === */
+            body {
+                background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
+                color: #ffffff !important;
+            }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles applied');
+        logMenu('Menu styles + dark background applied');
     }
 
     function initMenuPlugin() {
@@ -90,9 +96,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.3',
+                version: '5.4',
                 author: 'maxi3219',
-                description: 'Скруглённое меню с затемнённым градиентом',
+                description: 'Скруглённое меню + тёмный фон',
                 init: initMenuPlugin
             });
         } else {
@@ -139,7 +145,7 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        logColor('Observer started (v1.9)');
+        logColor('Observer started (v2.0)');
     }
 
     function registerColor() {
@@ -147,7 +153,7 @@
             app.plugins.add({
                 id: plugin_id_color,
                 name: plugin_name_color,
-                version: '1.9',
+                version: '2.0',
                 author: 'maxi3219',
                 description: 'Окрашивает число после "Раздают:" без свечения',
                 init: startObserver
