@@ -74,6 +74,27 @@
                 background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
                 color: #ffffff !important;
             }
+
+            /* === Иконки в шапке не должны темнеть при наведении === */
+            .head__body svg,
+            .head__body svg use {
+                fill: #fff !important;
+                color: #fff !important;
+                transition: none !important;
+            }
+
+            .head__body .selector.hover svg,
+            .head__body .selector.focus svg,
+            .head__body .selector.traverse svg {
+                fill: #fff !important;
+                color: #fff !important;
+            }
+
+            .head__body .selector.hover,
+            .head__body .selector.focus,
+            .head__body .selector.traverse {
+                color: inherit !important;
+            }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles + dark background applied');
@@ -96,9 +117,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.4',
+                version: '5.5',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон',
+                description: 'Скруглённое меню + тёмный фон + фикс цвета иконок',
                 init: initMenuPlugin
             });
         } else {
