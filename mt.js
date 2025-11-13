@@ -1,5 +1,5 @@
 (() => {
-    /* === Плагин RoundedMenu + MaxColor + ReloadButton + ParserSelectBox === */
+    /* === Плагин RoundedMenu + MaxColor + ReloadButton + ParserButton === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -72,6 +72,20 @@
             .head__body .selector.traverse{color: inherit !important;}
             .m-reload-screen{cursor:pointer !important;}
             .m-reload-screen:hover svg{transform:rotate(180deg);transition: transform 0.4s ease;}
+            .torrent-filter .simple-button.parser-btn{
+                margin-left:0.5em;
+                padding:0.2em 0.5em;
+                border-radius:0.8em;
+                background:linear-gradient(to right,#4dd9a0,#4d8fa8);
+                color:#fff;
+                cursor:pointer;
+                display:flex;
+                align-items:center;
+                transition:background 0.25s ease;
+            }
+            .torrent-filter .simple-button.parser-btn:hover{
+                background:linear-gradient(to right,#4d8fa8,#4dd9a0);
+            }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles applied');
@@ -102,35 +116,36 @@
         headActions.appendChild(btn);
     }
 
-    /* === Список парсеров через SelectBox === */
+    /* === Парсер рядом с фильтром === */
     const PARSERS = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Laampa.app','Jacred.pro'];
 
-    function addParserSelectBox(){
-        const headBody = document.querySelector('.head__body');
-        if(!headBody) return setTimeout(addParserSelectBox,500);
-        if(document.getElementById('PARSER_SELECT')) return;
+    function addParserButton(){
+        const filterBar = document.querySelector('.torrent-filter');
+        if(!filterBar) return setTimeout(addParserButton,500);
+        if(filterBar.querySelector('.parser-btn')) return;
 
         const btn = document.createElement('div');
-        btn.id = 'PARSER_SELECT';
-        btn.className = 'head__action selector';
-        btn.innerHTML = '<div>Парсер</div>';
+        btn.className = 'simple-button parser-btn selector';
+        const current = Lampa.Storage.get('parser_selected',PARSERS[1]);
+        btn.innerHTML = `<span>Парсер: ${current}</span>`;
+
         btn.addEventListener('click',()=>{
             if(!window.Lampa || !Lampa.Select) return;
-            const current = Lampa.Storage.get('parser_selected',PARSERS[1]);
-            const items = PARSERS.map(title=>({title,selected:title===current}));
+            const items = PARSERS.map(title=>({title,selected:title===Lampa.Storage.get('parser_selected',PARSERS[1])}));
             Lampa.Select.open({
                 title:'Выберите парсер',
                 items,
                 onSelect:sel=>{
-                    const chosen = sel.title;
-                    Lampa.Storage.set('parser_selected',chosen);
-                    Lampa.Noty.show(`Выбран парсер: ${chosen}`);
-                    updateTorrentList(chosen);
+                    Lampa.Storage.set('parser_selected',sel.title);
+                    btn.querySelector('span').textContent = `Парсер: ${sel.title}`;
+                    Lampa.Noty.show(`Выбран парсер: ${sel.title}`);
+                    updateTorrentList(sel.title);
                 },
                 onBack:Lampa.Controller.toggle
             });
         });
-        headBody.insertBefore(btn, headBody.querySelector('.head__actions'));
+
+        filterBar.appendChild(btn);
     }
 
     function updateTorrentList(parserTitle){
@@ -173,20 +188,20 @@
                 if(e.type==='ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
-                    addParserSelectBox();
+                    addParserButton();
                 }
             });
         } else {
             document.addEventListener('DOMContentLoaded',()=>{
                 applyCustomMenuStyles();
                 addReloadButton();
-                addParserSelectBox();
+                addParserButton();
             });
         }
         startObserver();
     }
 
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
-        app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.1',author:'maxi3219',description:'Меню, MaxColor, Reload и Парсер через SelectBox',init:initPlugin});
+        app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.2',author:'maxi3219',description:'Меню, MaxColor, Reload и Парсер рядом с фильтром',init:initPlugin});
     } else initPlugin();
 })();
