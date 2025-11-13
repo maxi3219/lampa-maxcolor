@@ -13,28 +13,22 @@
     }
 
     function recolorSeedNumbers() {
-        // Находим все блоки статистики
-        const stats = document.querySelectorAll('.torrent__stat');
+        // Находим все блоки раздающих
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
 
-        stats.forEach(stat => {
-            // Ищем текст "Раздают"
-            if (stat.textContent.includes('Раздают')) {
-                const spans = stat.querySelectorAll('span');
-                if (spans.length >= 1) {
-                    const labelNode = stat.childNodes[0]; // текст "Раздают:"
-                    const seedNode = spans[0];            // число раздающих
+        seedBlocks.forEach(block => {
+            const span = block.querySelector('span');
+            if (!span) return;
 
-                    const num = parseInt(seedNode.textContent);
-                    if (isNaN(num)) return;
+            const num = parseInt(span.textContent);
+            if (isNaN(num)) return;
 
-                    let color = COLORS.low;
-                    if (num > 10) color = COLORS.high;
-                    else if (num >= 5) color = COLORS.mid;
+            let color = COLORS.low;
+            if (num > 10) color = COLORS.high;
+            else if (num >= 5) color = COLORS.mid;
 
-                    seedNode.style.color = color;
-                    seedNode.style.fontWeight = 'bold';
-                }
-            }
+            span.style.color = color;
+            span.style.fontWeight = 'bold';
         });
     }
 
