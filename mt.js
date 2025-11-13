@@ -1,12 +1,13 @@
 (() => {
-    const plugin_id = 'roundedmenu';
-    const plugin_name = 'RoundedMenu';
+    /* === Плагин RoundedMenu === */
+    const plugin_id_menu = 'roundedmenu';
+    const plugin_name_menu = 'RoundedMenu';
 
-    function log(...args) {
-        try { console.log(`[${plugin_name}]`, ...args); } catch (e) {}
+    function logMenu(...args) {
+        try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
-    function applyCustomStyles() {
+    function applyCustomMenuStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
@@ -69,35 +70,92 @@
             }
         `;
         document.head.appendChild(style);
-        log('Menu styles applied (no poster changes)');
+        logMenu('Menu styles applied');
     }
 
-    function initPlugin() {
+    function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', function(event){
                 if(event.type === 'ready'){
-                    applyCustomStyles();
+                    applyCustomMenuStyles();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', applyCustomStyles);
+            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
         }
     }
 
-    function register() {
+    function registerMenu() {
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
-                id: plugin_id,
-                name: plugin_name,
+                id: plugin_id_menu,
+                name: plugin_name_menu,
                 version: '5.2',
                 author: 'maxi3219',
                 description: 'Скруглённое градиентное меню без изменений постеров',
-                init: initPlugin
+                init: initMenuPlugin
             });
         } else {
-            initPlugin();
+            initMenuPlugin();
         }
     }
 
-    register();
+    registerMenu();
+
+
+    /* === Плагин MaxColor === */
+    const plugin_id_color = 'maxcolor';
+    const plugin_name_color = 'MaxColor';
+
+    const COLORS = {
+        low: '#ff3333',   // <5 — красный
+        mid: '#ffcc00',   // 5–10 — жёлтый
+        high: '#00ff00'   // >10 — зелёный
+    };
+
+    function logColor(...a) {
+        try { console.log(`[${plugin_name_color}]`, ...a); } catch (e) {}
+    }
+
+    function recolorSeedNumbers() {
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block => {
+            const span = block.querySelector('span');
+            if (!span) return;
+
+            const num = parseInt(span.textContent);
+            if (isNaN(num)) return;
+
+            let color = COLORS.low;
+            if (num > 10) color = COLORS.high;
+            else if (num >= 5) color = COLORS.mid;
+
+            span.style.color = color;
+            span.style.fontWeight = 'bold';
+        });
+    }
+
+    function startObserver() {
+        const obs = new MutationObserver(() => recolorSeedNumbers());
+        obs.observe(document.body, { childList: true, subtree: true });
+        recolorSeedNumbers();
+        logColor('Observer started (v1.8)');
+    }
+
+    function registerColor() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id_color,
+                name: plugin_name_color,
+                version: '1.8',
+                author: 'maxi3219',
+                description: 'Окрашивает число после "Раздают:" без свечения',
+                init: startObserver
+            });
+        } else {
+            startObserver();
+        }
+    }
+
+    registerColor();
 })();
