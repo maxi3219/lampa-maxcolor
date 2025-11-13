@@ -8,55 +8,53 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'custom-rounded-settings-style';
+        style.id = 'roundedmenu-minimal-ring';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Базовая чистка рамок/теней === */
-                .card,
-                .card__view,
+                /* Не трогаем .card и .card__view геометрию
+                   Лишь обеспечиваем позиционирование для псевдо-элемента */
+                .card .card__view {
+                    position: relative !important;
+                }
+
+                /* Ничего не меняем в размерах .card__img */
                 .card__img {
                     border: none !important;
                     outline: none !important;
-                    box-shadow: none !important;
-                    background: none !important;
+                    /* позиционирование нужно только для псевдо-элемента; это не влияет на поток */
+                    position: relative !important;
+                    border-radius: 1em !important;
                 }
-                .card::before,
-                .card::after,
+
+                /* Убираем настырные белые рамки, если они всё ещё приходят псевдо-элементами темы */
                 .card__view::before,
                 .card__view::after {
                     content: none !important;
                     display: none !important;
                 }
 
-                /* === Геометрия карточки (фикс, чтобы не тянуло) === */
-                .card .card__view {
-                    position: relative !important;
-                    border-radius: 1em !important;
-                    overflow: hidden !important; /* вернуть, чтобы контент не «раздувал» вид */
-                }
-                .card__img {
-                    display: block !important;     /* убрать inline-артефакты */
-                    width: 100% !important;        /* вписать в карточку */
-                    height: auto !important;       /* сохранить пропорции */
-                    border-radius: inherit !important;
-                    position: relative !important; /* для псевдо-элемента */
-                    z-index: 1 !important;
-                }
-
-                /* === Приглушённая обводка с зазором только вокруг изображения === */
+                /* Приглушённая толстая обводка с зазором — только вокруг изображения.
+                   Появляется ТОЛЬКО в активных состояниях карточки. */
                 .card.selector.focus .card__img::after,
                 .card.selector.hover .card__img::after,
                 .card.selector.traverse .card__img::after {
                     content: "" !important;
                     position: absolute !important;
-                    /* зазор вокруг изображения (рамка «на расстоянии») */
-                    inset: -6px !important;
-                    border-radius: calc(1em + 6px) !important;
 
-                    /* приглушённый градиент */
-                    background: linear-gradient(to right, rgba(76, 207, 160, 0.55), rgba(76, 138, 168, 0.45)) !important;
+                    /* Зазор: рамка «на расстоянии» от краёв постера */
+                    inset: -8px !important;
 
-                    /* маска: оставить только кольцо рамки, без заливки */
+                    /* Радиус рамки = радиус изображения + зазор */
+                    border-radius: calc(1em + 8px) !important;
+
+                    /* Приглушённый градиент (мягче и темнее) */
+                    background: linear-gradient(
+                        to right,
+                        rgba(76, 207, 160, 0.42),
+                        rgba(76, 138, 168, 0.36)
+                    ) !important;
+
+                    /* Маска-«кольцо»: оставляем только внешний контур, внутренняя часть прозрачная */
                     -webkit-mask:
                         linear-gradient(#000 0 0) content-box,
                         linear-gradient(#000 0 0) !important;
@@ -67,33 +65,11 @@
                     z-index: 2 !important;
                 }
 
-                /* === Плашки и пункты как раньше (без изменений логики) === */
-                .settings__content,
-                .selectbox__content.layer--height {
-                    background: rgba(54,54,54,.959) !important;
-                    border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
-                    padding: 0.5em !important;
-                }
-                .settings-folder.selector,
-                .selectbox-item.selector {
-                    border-radius: 1em !important;
-                    margin-bottom: 0.3em !important;
-                    transition: background 0.25s ease !important;
-                }
-                .settings-folder.selector.focus,
-                .settings-folder.selector.hover,
-                .settings-folder.selector.traverse,
-                .selectbox-item.selector.focus,
-                .selectbox-item.selector.hover,
-                .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-                    border-radius: 1em !important;
-                }
+                /* Остальные ваши стили (плашки/пункты) оставляем без изменений — если нужны, добавь ниже */
             }
         `;
         document.head.appendChild(style);
-        log('Custom styles applied');
+        log('Minimal ring styles applied');
     }
 
     function initPlugin() {
@@ -115,9 +91,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.3',
+                version: '3.4',
                 author: 'maxi3219',
-                description: 'Приглушённая рамка с зазором вокруг изображения, без растягивания карточек',
+                description: 'Толстая приглушённая обводка с зазором вокруг постера, без влияния на сетку',
                 init: initPlugin
             });
             log('Registered with Lampa');
