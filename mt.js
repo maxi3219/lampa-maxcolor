@@ -1,5 +1,5 @@
 (() => {
-    /* === Плагин RoundedMenu === */
+    /* === Плагин RoundedMenu + Reload + Парсер === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -99,6 +99,26 @@
                 transform: rotate(180deg);
                 transition: transform 0.4s ease;
             }
+
+            /* Парсер меню */
+            .filter--parser {
+                margin-left: 0.5em !important;
+            }
+            .parser-menu {
+                position: absolute;
+                z-index: 9999;
+                background: rgba(54,54,54,0.98);
+                border-radius: 1em;
+                padding: 0.5em;
+                min-width: 120px;
+            }
+            .parser-menu .selectbox-item {
+                padding: 0.3em 0.5em;
+                cursor: pointer;
+            }
+            .parser-menu .selectbox-item:hover {
+                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%);
+            }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles + dark background applied');
@@ -109,7 +129,6 @@
 
         const headActions = document.querySelector('.head__actions');
         if (!headActions) {
-            logMenu('head__actions not found, retrying...');
             setTimeout(addReloadButton, 1000);
             return;
         }
@@ -123,26 +142,79 @@
             </svg>
         `;
 
-        btn.addEventListener('click', () => {
-            logMenu('Reload button clicked');
-            location.reload();
-        });
+        btn.addEventListener('click', () => location.reload());
 
         headActions.appendChild(btn);
-        logMenu('Reload button added');
+    }
+
+    function addParserButton() {
+        const container = document.querySelector('.torrent-filter');
+        if(!container){
+            setTimeout(addParserButton,1000);
+            return;
+        }
+        if(document.getElementById('parser-button')) return;
+
+        const btn = document.createElement('div');
+        btn.className = 'simple-button simple-button--filter selector filter--parser';
+        btn.id = 'parser-button';
+        btn.innerHTML = '<span>Парсер</span><div>Jacred.xyz</div>';
+        container.appendChild(btn);
+
+        const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+
+        btn.addEventListener('click', ()=>{
+            if(document.querySelector('.parser-menu')){
+                document.querySelector('.parser-menu').remove();
+            }
+
+            const menu = document.createElement('div');
+            menu.className='parser-menu';
+            menu.innerHTML = parsers.map(p=>`<div class="selectbox-item">${p}</div>`).join('');
+            document.body.appendChild(menu);
+
+            const rect = btn.getBoundingClientRect();
+            menu.style.top = rect.bottom + 'px';
+            menu.style.left = rect.left + 'px';
+
+            document.addEventListener('click', function closeMenu(e){
+                if(!menu.contains(e.target) && e.target!==btn){
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+
+            menu.querySelectorAll('.selectbox-item').forEach(item=>{
+                item.addEventListener('click', ()=>{
+                    btn.querySelector('div').textContent = item.textContent;
+                    menu.remove();
+                    refreshTorrentList(item.textContent);
+                });
+            });
+        });
+    }
+
+    function refreshTorrentList(parser){
+        console.log('Выбран парсер:', parser);
+        const torrents = document.querySelectorAll('.torrent-item');
+        torrents.forEach(t=>{
+            t.style.display='none';
+            setTimeout(()=>t.style.display='flex',50);
+        });
+        // Здесь можно добавить логику реального запроса торрентов через выбранный парсер
     }
 
     function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', event => {
-                if(event.type === 'ready'){
+        if(window.Lampa && typeof Lampa.Listener==='object'){
+            Lampa.Listener.follow('app', event=>{
+                if(event.type==='ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
                     addParserButton();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', ()=>{
                 applyCustomMenuStyles();
                 addReloadButton();
                 addParserButton();
@@ -151,13 +223,13 @@
     }
 
     function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+        if(window.app && app.plugins && typeof app.plugins.add==='function'){
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.8',
+                version: '5.9',
                 author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + кнопка парсер + reload',
+                description: 'Меню + зеленые раздающие + кнопка reload + кнопка парсер',
                 init: initMenuPlugin
             });
         } else {
@@ -168,13 +240,7 @@
     registerMenu();
 
     /* === Плагин MaxColor === */
-    const plugin_id_color = 'maxcolor';
-    const plugin_name_color = 'MaxColor';
-
     const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
-
-    function logColor(...a){ try{ console.log(`[${plugin_name_color}]`, ...a) }catch(e){} }
-
     function recolorSeedNumbers(){
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block=>{
@@ -189,89 +255,13 @@
             span.style.fontWeight='bold';
         });
     }
-
     function startObserver(){
         const obs = new MutationObserver(()=>recolorSeedNumbers());
         obs.observe(document.body,{childList:true,subtree:true});
         recolorSeedNumbers();
-        logColor('Observer started (v2.0)');
     }
-
-    function registerColor(){
-        if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({
-                id: plugin_id_color,
-                name: plugin_name_color,
-                version: '2.0',
-                author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:" без свечения',
-                init: startObserver
-            });
-        } else { startObserver(); }
-    }
-
-    registerColor();
-
-    /* === Плагин Парсер для торрентов через DOM === */
-    function addParserButton(){
-        const container = document.querySelector('.torrent-filter');
-        if(!container){
-            setTimeout(addParserButton,1000);
-            return;
-        }
-
-        if(document.getElementById('parser-button')) return;
-
-        const btn = document.createElement('div');
-        btn.className = 'simple-button simple-button--filter selector filter--parser';
-        btn.id = 'parser-button';
-        btn.innerHTML = '<span>Парсер</span><div>Jacred.xyz</div>';
-        container.appendChild(btn);
-
-        const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
-
-        btn.addEventListener('click', ()=>{
-            const menu = document.createElement('div');
-            menu.className='selectbox__content layer--height';
-            menu.style.position='absolute';
-            menu.style.zIndex='9999';
-            menu.style.background='rgba(54,54,54,0.98)';
-            menu.style.borderRadius='1em';
-            menu.style.padding='0.5em';
-            menu.style.top=btn.getBoundingClientRect().bottom+'px';
-            menu.style.left=btn.getBoundingClientRect().left+'px';
-            menu.innerHTML = parsers.map(p=>`<div class="selectbox-item selector">${p}</div>`).join('');
-
-            document.body.appendChild(menu);
-
-            const closeMenu = e=>{
-                if(!menu.contains(e.target) && e.target!==btn){
-                    menu.remove();
-                    document.removeEventListener('click',closeMenu);
-                }
-            };
-            document.addEventListener('click',closeMenu);
-
-            menu.querySelectorAll('.selectbox-item').forEach(item=>{
-                item.addEventListener('click',()=>{
-                    btn.querySelector('div').textContent = item.textContent;
-                    menu.remove();
-                    // Обновление списка торрентов через DOM
-                    refreshTorrentList(item.textContent);
-                });
-            });
-        });
-    }
-
-    function refreshTorrentList(parser){
-        console.log('Выбран парсер:',parser);
-        const torrents = document.querySelectorAll('.torrent-item');
-        torrents.forEach(t=>{
-            // Здесь можно добавить фильтрацию или обновление по выбранному парсеру
-            // Пока просто перерисовываем элементы (эффект обновления)
-            t.style.display='none';
-            setTimeout(()=>t.style.display='flex',50);
-        });
-    }
+    if(window.app && app.plugins && typeof app.plugins.add==='function'){
+        app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
+    } else { startObserver(); }
 
 })();
