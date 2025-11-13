@@ -1,17 +1,18 @@
 (() => {
-    /* === Плагин RoundedMenu + MaxColor + ParserButton === */
+    /* === Плагин RoundedMenu + MaxColor + ReloadButton + ParserInSettings === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
-    function logMenu(...args) { try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e){} }
+    function logMenu(...args){try{console.log(`[${plugin_name_menu}]`,...args);}catch(e){}}
 
-    function applyCustomMenuStyles() {
-        const style = document.createElement('style');
-        style.id = 'roundedmenu-style-menuonly';
-        style.innerHTML = `
-            @media screen and (min-width: 480px) {
+    /* === Стили меню === */
+    function applyCustomMenuStyles(){
+        const style=document.createElement('style');
+        style.id='roundedmenu-style-menuonly';
+        style.innerHTML=`
+            @media screen and (min-width: 480px){
                 .settings__content,
-                .selectbox__content.layer--height {
+                .selectbox__content.layer--height{
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -32,7 +33,7 @@
                     opacity: 0 !important;
                 }
                 body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
+                body.selectbox--open .selectbox__content.layer--height{
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
@@ -40,7 +41,7 @@
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
-                .selectbox-item.selector {
+                .selectbox-item.selector{
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
@@ -56,39 +57,40 @@
                 .settings-param__value.selector.traverse,
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
-                .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                .selectbox-item.selector.traverse{
+                    background: linear-gradient(to right,#4dd9a0 1%,#4d8fa8 100%) !important;
                     border-radius: 1em !important;
                 }
             }
-            body { background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%) !important; color:#fff !important; }
-            .head__body svg,.head__body svg use { fill:#fff !important; color:#fff !important; transition:none !important; }
+            body{background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%) !important;color:#fff !important;}
+            .head__body svg,.head__body svg use{fill:#fff !important;color:#fff !important;transition:none !important;}
             .head__body .selector.hover svg,
             .head__body .selector.focus svg,
-            .head__body .selector.traverse svg { fill:#fff !important; color:#fff !important; }
+            .head__body .selector.traverse svg{fill:#fff !important;color:#fff !important;}
             .head__body .selector.hover,
             .head__body .selector.focus,
-            .head__body .selector.traverse { color: inherit !important; }
-            .m-reload-screen { cursor:pointer !important; }
-            .m-reload-screen:hover svg { transform:rotate(180deg); transition: transform 0.4s ease; }
-            .parser-button { cursor:pointer; display:flex; align-items:center; gap:6px; border:1px solid #666; border-radius:10px; padding:5px 12px; font-size:.9em; color:#fff; transition:background .25s ease; }
-            .parser-button:hover { background:rgba(255,255,255,.1); }
+            .head__body .selector.traverse{color: inherit !important;}
+            .m-reload-screen{cursor:pointer !important;}
+            .m-reload-screen:hover svg{transform:rotate(180deg);transition: transform 0.4s ease;}
+            .parser-select{cursor:pointer;}
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background applied');
+        logMenu('Menu styles applied');
     }
 
-    function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
-        const headActions = document.querySelector('.head__actions');
-        if (!headActions) { setTimeout(addReloadButton,1000); return; }
-        const btn = document.createElement('div');
+    /* === Кнопка перезагрузки === */
+    function addReloadButton(){
+        if(document.getElementById('MRELOAD')) return;
+        const headActions=document.querySelector('.head__actions');
+        if(!headActions){setTimeout(addReloadButton,1000);return;}
+        const btn=document.createElement('div');
         btn.id='MRELOAD';
         btn.className='head__action selector m-reload-screen';
         btn.innerHTML=`
             <svg fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.48">
                 <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
-            </svg>`;
+            </svg>
+        `;
         btn.addEventListener('click',()=>{
             if(window.Lampa && Lampa.Activity){
                 const act=Lampa.Activity.active();
@@ -101,41 +103,65 @@
         headActions.appendChild(btn);
     }
 
-    function initMenuPlugin() {
-        if (window.Lampa && Lampa.Listener) {
-            Lampa.Listener.follow('app', e=>{
-                if(e.type==='ready'){
-                    applyCustomMenuStyles();
-                    addReloadButton();
-                    addParserButton(); // подключаем кнопку Парсер
+    /* === Парсер в настройках === */
+    const PARSERS = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Laampa.app','Jacred.pro'];
+    function addParserToSettings(){
+        const body=document.querySelector('.settings__body .scroll__body');
+        if(!body) return setTimeout(addParserToSettings,500);
+        if(document.querySelector('.parser-select')) return;
+
+        const current=Lampa.Storage.get('parser_selected',PARSERS[1]);
+        const container=document.createElement('div');
+        container.className='settings-param selector parser-select';
+        container.dataset.type='select';
+        container.dataset.name='jackett_url_two';
+        container.innerHTML=`
+            <div class="settings-param__name">Каталог парсеров</div>
+            <div class="settings-param__value">${current}</div>
+            <div class="settings-param__descr">Нажмите для выбора парсера</div>
+        `;
+        container.addEventListener('click',()=>{
+            if(!window.Lampa || !Lampa.Select) return;
+            const items=PARSERS.map(title=>({title,selected:title===current}));
+            Lampa.Select.open({
+                title:'Выберите парсер',
+                items,
+                onSelect:sel=>{
+                    const chosen=sel.title;
+                    container.querySelector('.settings-param__value').textContent=chosen;
+                    Lampa.Storage.set('parser_selected',chosen);
+                    Lampa.Noty.show(`Выбран парсер: ${chosen}`);
+                    updateTorrentList(chosen);
+                },
+                onBack:Lampa.Controller.toggle
+            });
+        });
+        body.prepend(container);
+    }
+
+    function updateTorrentList(parserTitle){
+        try{
+            const active=Lampa.Activity.active();
+            if(!active||!active.activity||active.activity.component!=='torrents') return;
+            const source=active.activity.source;
+            if(!source||typeof source.search!=='function') return;
+            const query=active.activity.query||'';
+            source.search(query,res=>{
+                if(res){
+                    active.activity.results=res;
+                    if(typeof Lampa.Torrent.render==='function') Lampa.Torrent.render(res);
+                    recolorSeedNumbers();
                 }
             });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyCustomMenuStyles();
-                addReloadButton();
-                addParserButton();
-            });
-        }
+        }catch(e){console.error('Parser update error',e);}
     }
 
-    function registerMenu() {
-        if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'5.9',author:'maxi3219',description:'Скруглённое меню + тёмный фон + кнопка перезагрузки + кнопка парсер',init:initMenuPlugin});
-        } else initMenuPlugin();
-    }
-
-    registerMenu();
-
-    /* === Плагин MaxColor === */
-    const plugin_id_color='maxcolor';
-    const plugin_name_color='MaxColor';
+    /* === MaxColor: подсветка Раздающих === */
     const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
-    function logColor(...a){try{console.log(`[${plugin_name_color}]`,...a);}catch(e){}}
     function recolorSeedNumbers(){
         document.querySelectorAll('.torrent-item__seeds').forEach(block=>{
-            const span=block.querySelector('span'); if(!span)return;
-            const num=parseInt(span.textContent); if(isNaN(num))return;
+            const span=block.querySelector('span'); if(!span) return;
+            const num=parseInt(span.textContent); if(isNaN(num)) return;
             span.style.color=num>10?COLORS.high:num>=5?COLORS.mid:COLORS.low;
             span.style.fontWeight='bold';
         });
@@ -144,80 +170,33 @@
         const obs=new MutationObserver(()=>recolorSeedNumbers());
         obs.observe(document.body,{childList:true,subtree:true});
         recolorSeedNumbers();
-        logColor('Observer started (v2.0)');
-    }
-    function registerColor(){
-        if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_color,name:plugin_name_color,version:'2.0',author:'maxi3219',description:'Окрашивает число после "Раздают:" без свечения',init:startObserver});
-        } else startObserver();
-    }
-    registerColor();
-
-    /* === Кнопка Парсер (безопасная версия) === */
-    const PARSERS = [
-        {title:'Не выбран', url:''},
-        {title:'Jacred.xyz', url:'https://jacred.xyz'},
-        {title:'Jr.maxvol.pro', url:'https://jr.maxvol.pro'},
-        {title:'Jacred.my.to', url:'https://jacred.my.to'},
-        {title:'Laampa.app', url:'https://laampa.app'},
-        {title:'Jacred.pro', url:'https://jacred.pro'}
-    ];
-
-    function addParserButton() {
-        const filterBar = document.querySelector('.torrent-filter');
-        if(!filterBar) return setTimeout(addParserButton,500);
-        if(document.querySelector('.parser-button')) return;
-
-        const current = Lampa.Storage.get('parser_selected', PARSERS[1].title);
-        const btn = document.createElement('div');
-        btn.className = 'parser-button selector';
-        btn.innerHTML = `<span>Парсер:</span> <b>${current}</b>`;
-        btn.addEventListener('click', () => openParserMenu(btn));
-        filterBar.appendChild(btn);
     }
 
-    function openParserMenu(btn){
-        if(!window.Lampa || !Lampa.Select) return;
-
-        const items = PARSERS.map(p => ({
-            title: p.title,
-            selected: Lampa.Storage.get('parser_selected') === p.title
-        }));
-
-        Lampa.Select.open({
-            title: 'Выберите парсер',
-            items,
-            onSelect: sel => {
-                const chosen = PARSERS.find(x => x.title === sel.title);
-                if(!chosen) return;
-                Lampa.Storage.set('parser_selected', chosen.title);
-                btn.querySelector('b').textContent = chosen.title;
-                Lampa.Noty.show(`Выбран парсер: ${chosen.title}`);
-                updateTorrentList(chosen.title);
-            },
-            onBack: Lampa.Controller.toggle
-        });
-    }
-
-    function updateTorrentList(parserTitle){
-        try {
-            const active = Lampa.Activity.active();
-            if(!active || !active.activity || active.activity.component !== 'torrents') return;
-            const source = active.activity.source;
-            if(!source || typeof source.search !== 'function') return;
-            const query = active.activity.query || '';
-            source.search(query, res => {
-                if(res){
-                    active.activity.results = res;
-                    if(typeof Lampa.Torrent.render === 'function'){
-                        Lampa.Torrent.render(res);
-                    }
-                    recolorSeedNumbers();
+    /* === Инициализация === */
+    function initMenuPlugin(){
+        if(window.Lampa && Lampa.Listener){
+            Lampa.Listener.follow('app',e=>{
+                if(e.type==='ready'){
+                    applyCustomMenuStyles();
+                    addReloadButton();
+                    addParserToSettings();
                 }
             });
-        } catch(e){
-            console.error('Parser update error', e);
+        } else {
+            document.addEventListener('DOMContentLoaded',()=>{
+                applyCustomMenuStyles();
+                addReloadButton();
+                addParserToSettings();
+            });
         }
+        startObserver();
     }
 
+    function registerMenu(){
+        if(window.app && app.plugins && typeof app.plugins.add==='function'){
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'6.0',author:'maxi3219',description:'Меню, MaxColor, Reload и Parser в настройках',init:initMenuPlugin});
+        } else initMenuPlugin();
+    }
+
+    registerMenu();
 })();
