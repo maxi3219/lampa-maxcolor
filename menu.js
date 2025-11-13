@@ -21,7 +21,7 @@
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
-                    background: rgba(26, 42, 58, 0.98) !important;
+                    background: rgba(54,54,54,.959) !important; /* новый фон */
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
@@ -41,14 +41,14 @@
                     opacity: 1 !important;
                 }
 
-                /* Базовое оформление пунктов настроек */
+                /* Пункты меню всегда скруглены */
                 .settings-folder.selector {
-                    border-radius: 0.6em !important;
+                    border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
-                    transition: background 0.25s ease, color 0.25s ease, border-radius 0.25s ease !important;
+                    transition: background 0.25s ease !important; /* убрали анимацию скругления */
                 }
 
-                /* Активные состояния (hover/focus/traverse) */
+                /* Активные состояния: только фон-градиент */
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse {
@@ -56,8 +56,8 @@
                     background: -webkit-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
                     background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
                     background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
-                    color: #1b1b1b !important;
                     border-radius: 1em !important;
+                    /* цвет текста не меняем, остаётся как по умолчанию */
                 }
             }
         `;
@@ -84,9 +84,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.8',
+                version: '1.9',
                 author: 'maxi3219',
-                description: 'Скруглённые пункты настроек с градиентом при наведении',
+                description: 'Скруглённые пункты меню без смены цвета текста и новый фон',
                 init: initPlugin
             });
             log('Registered with Lampa');
