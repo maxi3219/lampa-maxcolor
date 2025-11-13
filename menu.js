@@ -8,10 +8,10 @@
 
     function applyCustomStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-enhanced-style';
+        style.id = 'roundedmenu-style-fix';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* ✅ Убираем белые рамки и тени */
+                /* === Карточки === */
                 .card,
                 .card__view,
                 .card__img,
@@ -31,7 +31,6 @@
                     display: none !important;
                 }
 
-                /* ✅ Подготовка изображения */
                 .card__img,
                 .card__poster,
                 .card__view img {
@@ -39,7 +38,7 @@
                     transition: box-shadow 0.3s ease, outline 0.3s ease !important;
                 }
 
-                /* ✅ Градиентная рамка с зазором и свечением */
+                /* ✅ Яркая обводка с зазором */
                 .card.selector.focus .card__img,
                 .card.selector.hover .card__img,
                 .card.selector.traverse .card__img,
@@ -50,23 +49,28 @@
                 .card.selector.hover .card__view img,
                 .card.selector.traverse .card__view img {
                     outline: 3px solid transparent !important;
-                    outline-offset: 6px !important;
+                    outline-offset: 6px !important; /* зазор */
                     border-radius: 1em !important;
                     box-shadow:
-                        0 0 0 4px rgba(76, 207, 160, 0.6),
-                        0 0 12px rgba(76, 207, 160, 0.5),
-                        0 0 24px rgba(76, 138, 168, 0.4) !important;
+                        0 0 0 4px rgba(96, 255, 189, 0.9),
+                        0 0 16px rgba(96, 255, 189, 0.7),
+                        0 0 32px rgba(98, 163, 201, 0.6) !important;
                 }
 
-                /* ✅ Плашки и пункты */
+                /* === Менюшка (фикс высоты) === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
+
+                    /* компактный вид */
+                    max-height: 70vh !important; /* ограничение высоты */
+                    overflow-y: auto !important; /* прокрутка */
                 }
 
+                /* === Пункты меню и источников === */
                 .settings-folder.selector,
                 .selectbox-item.selector {
                     border-radius: 1em !important;
@@ -86,7 +90,7 @@
             }
         `;
         document.head.appendChild(style);
-        log('Enhanced styles applied');
+        log('Styles applied: bright outline + compact menu');
     }
 
     function initPlugin() {
@@ -108,9 +112,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.6',
+                version: '3.7',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с зазором и свечением, работает на CUB и TMDB',
+                description: 'Яркая обводка постера с зазором + компактное меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
