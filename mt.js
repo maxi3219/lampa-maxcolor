@@ -64,7 +64,7 @@
                 .selectbox-item.selector.focus,
                 .selectbox-item.selector.hover,
                 .selectbox-item.selector.traverse {
-                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important; /* ← чуть менее яркий градиент */
                     border-radius: 1em !important;
                 }
             }
@@ -90,9 +90,9 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '5.2',
+                version: '5.3',
                 author: 'maxi3219',
-                description: 'Скруглённое градиентное меню без изменений постеров',
+                description: 'Скруглённое меню с затемнённым градиентом',
                 init: initMenuPlugin
             });
         } else {
@@ -139,7 +139,7 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        logColor('Observer started (v1.8)');
+        logColor('Observer started (v1.9)');
     }
 
     function registerColor() {
@@ -147,7 +147,7 @@
             app.plugins.add({
                 id: plugin_id_color,
                 name: plugin_name_color,
-                version: '1.8',
+                version: '1.9',
                 author: 'maxi3219',
                 description: 'Окрашивает число после "Раздают:" без свечения',
                 init: startObserver
