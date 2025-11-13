@@ -13,19 +13,32 @@
     }
 
     function recolorSeedNumbers() {
-        // ищем все элементы, содержащие именно "Раздают:"
-        const elements = document.querySelectorAll('*');
-        elements.forEach(el => {
-            const html = el.innerHTML;
-            if (!html || !/Раздают:\s*\d+/i.test(html)) return;
+        const elements = document.querySelectorAll('div, span, p, li');
 
-            el.innerHTML = html.replace(/(Раздают:\s*)(\d{1,5})/gi, (m, label, num) => {
-                const count = parseInt(num);
+        elements.forEach(el => {
+            const text = el.textContent.trim();
+
+            // ищем элементы, где есть "Раздают:" и число
+            if (/Раздают:\s*\d+/i.test(text)) {
+                const match = text.match(/Раздают:\s*(\d+)/i);
+                if (!match) return;
+
+                const num = parseInt(match[1]);
                 let color = COLORS.low;
-                if (count > 10) color = COLORS.high;
-                else if (count >= 5) color = COLORS.mid;
-                return `${label}<span style="color:${color}; font-weight:bold;">${num}</span>`;
-            });
+                if (num > 10) color = COLORS.high;
+                else if (num >= 5) color = COLORS.mid;
+
+                // чтобы не трогать уже обработанные элементы
+                if (el.dataset.maxcolor === 'done') return;
+
+                // заменяем ТОЛЬКО число после “Раздают:”
+                el.innerHTML = el.innerHTML.replace(
+                    /(Раздают:\s*)(\d+)/i,
+                    `$1<span style="color:${color}; font-weight:bold;">$2</span>`
+                );
+
+                el.dataset.maxcolor = 'done';
+            }
         });
     }
 
@@ -33,7 +46,7 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        log('Observer started (v1.6)');
+        log('Observer started (v1.7)');
     }
 
     function register() {
@@ -41,9 +54,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.6',
+                version: '1.7',
                 author: 'maxi3219',
-                description: 'Окрашивает только число после "Раздают:" (без свечения)',
+                description: 'Окрашивает только число после "Раздают:" без свечения',
                 init: startObserver
             });
             log('Registered with Lampa');
