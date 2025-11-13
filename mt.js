@@ -1,5 +1,3 @@
-var PLUGIN_NAME = 'maxxx'; // ← имя, которое Lampa покажет в списке
-
 (() => {
     const plugin_id = 'maxxx';
 
@@ -10,11 +8,12 @@ var PLUGIN_NAME = 'maxxx'; // ← имя, которое Lampa покажет в
     };
 
     function log(...args) {
-        try { console.log(`[${PLUGIN_NAME}]`, ...args); } catch (e) {}
+        try { console.log(`[${plugin_id}]`, ...args); } catch (e) {}
     }
 
     /* === Меню === */
     function applyCustomMenuStyles() {
+        if (document.getElementById('maxxx-style')) return;
         const style = document.createElement('style');
         style.id = 'maxxx-style';
         style.innerHTML = `
@@ -29,7 +28,7 @@ var PLUGIN_NAME = 'maxxx'; // ← имя, которое Lampa покажет в
                     overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -105,27 +104,15 @@ var PLUGIN_NAME = 'maxxx'; // ← имя, которое Lampa покажет в
 
     /* === Инициализация === */
     function initPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', function(event){
-                if(event.type === 'ready'){
-                    applyCustomMenuStyles();
-                    startObserver();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyCustomMenuStyles();
-                startObserver();
-            });
-        }
+        applyCustomMenuStyles();
+        startObserver();
     }
 
     /* === Регистрация === */
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: plugin_id,
-            name: PLUGIN_NAME, // ← имя берётся отсюда
-            version: '6.0',
+            version: '6.1',
             author: 'maxi3219',
             description: 'Меню справа + окраска сидов',
             init: initPlugin
