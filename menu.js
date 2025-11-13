@@ -28,19 +28,19 @@
                 }
                 .card::before,
                 .card::after,
-                .card__view::before,
-                .card__view::after {
+                .card__view::before {
                     content: none !important;
                     display: none !important;
                 }
 
-                /* === Контейнер постера: рамка с зазором === */
+                /* === Контейнер постера: готовим для кольца === */
                 .card__view {
                     position: relative !important;
                     border-radius: 1em !important;
                     overflow: visible !important;
                 }
 
+                /* === Псевдо-элемент: градиентная рамка с прозрачным зазором === */
                 .card.selector.focus .card__view::after,
                 .card.selector.hover .card__view::after,
                 .card.selector.traverse .card__view::after {
@@ -48,14 +48,12 @@
                     position: absolute !important;
                     inset: -8px !important; /* зазор */
                     border-radius: calc(1em + 8px) !important;
+                    padding: 8px; /* толщина кольца */
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    background-clip: padding-box !important;
 
-                    /* маска: вырезаем внутреннюю часть, оставляем кольцо */
-                    -webkit-mask: 
-                        linear-gradient(#000 0 0) content-box,
-                        linear-gradient(#000 0 0) !important;
-                    -webkit-mask-composite: destination-out !important;
-                    mask-composite: exclude !important;
+                    /* делаем центр прозрачным */
+                    box-shadow: inset 0 0 0 9999px rgba(0,0,0,0) !important;
 
                     pointer-events: none !important;
                     z-index: 2 !important;
@@ -140,9 +138,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.7',
+                version: '4.8',
                 author: 'maxi3219',
-                description: 'Градиентная рамка с прозрачным зазором вокруг контейнера постера + градиентное выделение меню',
+                description: 'Градиентная рамка с прозрачным зазором вокруг постера + градиентное выделение меню',
                 init: initPlugin
             });
             log('Registered with Lampa');
