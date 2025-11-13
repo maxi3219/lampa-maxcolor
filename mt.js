@@ -1,30 +1,34 @@
 (() => {
-    /* === Плагин RoundedMenu === */
-    const plugin_id_menu = 'roundedmenu';
-    const plugin_name_menu = 'RoundedMenu';
+    const plugin_id = 'maxxx';
 
-    function logMenu(...args) {
-        try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
+    const COLORS = {
+        low: '#ff3333',   // <5 — красный
+        mid: '#ffcc00',   // 5–10 — жёлтый
+        high: '#00ff00'   // >10 — зелёный
+    };
+
+    function log(...args) {
+        try { console.log(`[${plugin_id}]`, ...args); } catch (e) {}
     }
 
+    /* === Меню === */
     function applyCustomMenuStyles() {
+        if (document.getElementById('maxxx-style')) return;
         const style = document.createElement('style');
-        style.id = 'roundedmenu-style-menuonly';
+        style.id = 'maxxx-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
-                    left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,.959) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -42,7 +46,6 @@
                     opacity: 1 !important;
                 }
 
-                /* === Все пункты меню и подменю === */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -70,53 +73,10 @@
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles applied');
+        log('Menu styles applied');
     }
 
-    function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', function(event){
-                if(event.type === 'ready'){
-                    applyCustomMenuStyles();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', applyCustomMenuStyles);
-        }
-    }
-
-    function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id_menu,
-                name: plugin_name_menu,
-                version: '5.2',
-                author: 'maxi3219',
-                description: 'Скруглённое градиентное меню без изменений постеров',
-                init: initMenuPlugin
-            });
-        } else {
-            initMenuPlugin();
-        }
-    }
-
-    registerMenu();
-
-
-    /* === Плагин MaxColor === */
-    const plugin_id_color = 'maxcolor';
-    const plugin_name_color = 'MaxColor';
-
-    const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
-    };
-
-    function logColor(...a) {
-        try { console.log(`[${plugin_name_color}]`, ...a); } catch (e) {}
-    }
-
+    /* === Окраска сидов === */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -139,23 +99,25 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        logColor('Observer started (v1.8)');
+        log('Observer started');
     }
 
-    function registerColor() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id_color,
-                name: plugin_name_color,
-                version: '1.8',
-                author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:" без свечения',
-                init: startObserver
-            });
-        } else {
-            startObserver();
-        }
+    /* === Инициализация === */
+    function initPlugin() {
+        applyCustomMenuStyles();
+        startObserver();
     }
 
-    registerColor();
+    /* === Регистрация === */
+    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+        app.plugins.add({
+            id: plugin_id,
+            version: '6.1',
+            author: 'maxi3219',
+            description: 'Меню справа + окраска сидов',
+            init: initPlugin
+        });
+    } else {
+        initPlugin();
+    }
 })();
