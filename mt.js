@@ -68,9 +68,6 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .m-reload-screen { cursor: pointer !important; }
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
-            /* Парсер кнопка отдельно */
-            #parser-selectbox { cursor:pointer; display:inline-flex; align-items:center; margin-left:0.5em; padding:0.2em 0.5em; border-radius:1em; background:rgba(54,54,54,0.95); color:#fff; user-select:none; }
-            #parser-selectbox:hover { background:rgba(54,54,54,1); }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles applied');
@@ -90,46 +87,38 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер вне ререндерящейся зоны === */
+    /* === Кнопка Парсер в torrent-filter по дизайну === */
     function addParserButton() {
-        if(document.getElementById('parser-selectbox')) return;
         const container = document.querySelector('.torrent-filter');
-        if(!container){ setTimeout(addParserButton,1000); return; }
+        if(!container){ setTimeout(addParserButton,500); return; }
 
-        // создаём отдельный контейнер рядом
-        const wrapper = document.createElement('div');
-        wrapper.id = 'parser-wrapper';
-        wrapper.style.display = 'inline-block';
-        wrapper.style.marginLeft = '0.5em';
-        container.parentElement.insertBefore(wrapper, container.nextSibling);
+        if(container.querySelector('#parser-selectbox')) return;
 
         const btn = document.createElement('div');
         btn.id = 'parser-selectbox';
-        btn.className = 'selector';
-        btn.innerHTML = `<span>Парсер: </span><span id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</span>`;
-        wrapper.appendChild(btn);
+        btn.className = 'simple-button simple-button--filter selector filter--parser';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
+        container.appendChild(btn);
 
         const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        const openMenu = () => {
-            let menu = document.querySelector('#parser-menu');
-            if(!menu){
-                menu = document.createElement('div');
-                menu.id = 'parser-menu';
-                menu.className = 'selectbox__content layer--height';
-                menu.style.position='fixed';
-                menu.style.top='60px';
-                menu.style.right='1em';
-                menu.style.width='220px';
-                menu.style.maxHeight='400px';
-                menu.style.background='rgba(54,54,54,0.98)';
-                menu.style.borderRadius='1em';
-                menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
-                menu.style.overflowY='auto';
-                menu.style.zIndex='999';
-                document.body.appendChild(menu);
-            }
-            menu.innerHTML='';
+        const openSelect = () => {
+            if(document.querySelector('#parser-menu')) return;
+            const menu = document.createElement('div');
+            menu.id = 'parser-menu';
+            menu.className = 'selectbox__content layer--height';
+            menu.style.position='absolute';
+            menu.style.top=btn.offsetTop+btn.offsetHeight+'px';
+            menu.style.left=btn.offsetLeft+'px';
+            menu.style.width=btn.offsetWidth+'px';
+            menu.style.background='rgba(54,54,54,0.98)';
+            menu.style.borderRadius='1em';
+            menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
+            menu.style.zIndex='999';
+            menu.style.maxHeight='400px';
+            menu.style.overflowY='auto';
+            document.body.appendChild(menu);
+
             parsers.forEach(p=>{
                 const item = document.createElement('div');
                 item.className='selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
@@ -138,28 +127,27 @@
                     Lampa.Storage.set('parser_select',p);
                     document.getElementById('parser-current').textContent=p;
                     try{
-                        const active = Lampa.Activity.active();
+                        const active=Lampa.Activity.active();
                         if(active && active.activity && typeof active.activity.refresh==='function') active.activity.refresh();
                     }catch(e){console.error(e);}
-                    menu.style.display='none';
+                    menu.remove();
                 });
                 menu.appendChild(item);
             });
-            menu.style.display='block';
+
+            document.addEventListener('click',e=>{
+                if(!btn.contains(e.target) && !menu.contains(e.target)){
+                    menu.remove();
+                }
+            },{once:true});
         };
 
-        btn.addEventListener('click', openMenu);
-        document.addEventListener('click',(e)=>{
-            if(!btn.contains(e.target) && !document.querySelector('#parser-menu')?.contains(e.target)){
-                const m=document.querySelector('#parser-menu');
-                if(m) m.style.display='none';
-            }
-        });
+        btn.addEventListener('click',openSelect);
     }
 
     function initMenuPlugin() {
-        if(window.Lampa && typeof Lampa.Listener==='object') {
-            Lampa.Listener.follow('app', event => {
+        if(window.Lampa && typeof Lampa.Listener==='object'){
+            Lampa.Listener.follow('app', event=>{
                 if(event.type==='ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
@@ -176,8 +164,8 @@
     }
 
     function registerMenu() {
-        if(window.app && app.plugins && typeof app.plugins.add==='function') {
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.0',author:'maxi3219',description:'Меню + зеленые раздающие + кнопка reload + кнопка парсер всегда видна',init:initMenuPlugin});
+        if(window.app && app.plugins && typeof app.plugins.add==='function'){
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.1',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер в фильтре',init:initMenuPlugin});
         } else { initMenuPlugin(); }
     }
 
@@ -188,7 +176,7 @@
     function recolorSeedNumbers(){
         const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block=>{
-            const span = block.querySelector('span');
+            const span=block.querySelector('span');
             if(!span) return;
             const num=parseInt(span.textContent);
             if(isNaN(num)) return;
