@@ -11,44 +11,114 @@
         style.id = 'custom-rounded-settings-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                /* --- ваши текущие стили для плашек и пунктов --- */
+                /* ✅ Плашка настроек */
+                .settings__content {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,.959) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
 
-                /* Базовое состояние карточек: тонкая нейтральная рамка */
-                .card,
-                .card__view {
+                body.settings--open .settings__content {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                /* ✅ Плашка источников */
+                .selectbox__content.layer--height {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,.959) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+
+                body.selectbox--open .selectbox__content.layer--height {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                /* ✅ Пункты настроек */
+                .settings-folder.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .settings-folder.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-folder.selector.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    border-radius: 1em !important;
+                }
+
+                /* ✅ Пункты источников */
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
+                    border-radius: 1em !important;
+                }
+
+                /* ✅ Карточки фильмов — базовое состояние */
+                .card.selector {
                     position: relative !important;
                     border-radius: 1em !important;
+                    overflow: visible !important;
                     border: 1px solid rgba(255,255,255,0.12) !important;
                     transition: border-color 0.2s ease !important;
                 }
 
-                /* Активные состояния карточек: градиентная обводка через псевдо-элемент */
+                /* ✅ Градиентная рамка при наведении/фокусе */
                 .card.selector.focus::before,
                 .card.selector.hover::before,
-                .card.selector.traverse::before,
-                .card__view.selector.focus::before,
-                .card__view.selector.hover::before,
-                .card__view.selector.traverse::before {
+                .card.selector.traverse::before {
                     content: "" !important;
                     position: absolute !important;
                     inset: 0 !important;
                     border-radius: 1em !important;
-                    padding: 2px !important; /* толщина рамки */
+                    padding: 2px !important;
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-
-                    /* Маскирование, чтобы осталась только рамка, а контент внутри не перекрывался */
-                    -webkit-mask: 
-                        linear-gradient(#000 0 0) content-box, 
-                        linear-gradient(#000 0 0) !important;
+                    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
                     -webkit-mask-composite: xor !important;
                     mask-composite: exclude !important;
                     pointer-events: none !important;
-                }
-
-                /* Можно слегка усилить рамку по ховеру мышью (если есть) */
-                .card:hover::before,
-                .card__view:hover::before {
-                    padding: 2.5px !important;
+                    z-index: 2 !important;
                 }
             }
         `;
@@ -75,9 +145,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.5',
+                version: '2.6',
                 author: 'maxi3219',
-                description: 'Градиентная обводка карточек только при активном состоянии',
+                description: 'Скруглённые плашки, градиентные пункты и рамка карточек при наведении',
                 init: initPlugin
             });
             log('Registered with Lampa');
