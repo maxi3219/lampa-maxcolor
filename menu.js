@@ -15,7 +15,7 @@
                 .selectbox__content {
                     position: fixed !important;
                     top: 1em !important;
-                    right: 1em !important; /* ✅ Отступ от правого края */
+                    right: 1em !important; /* отступ от правого края */
                     left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
@@ -27,13 +27,17 @@
                     display: flex !important;
                     flex-direction: column !important;
                     transform: translateX(100%) !important;
-                    transition: transform 0.3s ease !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
                     z-index: 999 !important;
+                    visibility: hidden !important;   /* скрываем */
+                    opacity: 0 !important;           /* делаем прозрачным */
                 }
 
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content {
                     transform: translateX(0) !important;
+                    visibility: visible !important;  /* показываем */
+                    opacity: 1 !important;           /* делаем видимым */
                 }
             }
         `;
@@ -60,9 +64,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.5',
+                version: '1.6',
                 author: 'maxi3219',
-                description: 'Скруглённое меню с отступом от правого края и плавным появлением',
+                description: 'Скруглённое меню с отступом, скрытое полностью до открытия',
                 init: initPlugin
             });
             log('Registered with Lampa');
