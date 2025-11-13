@@ -1,5 +1,5 @@
 (() => {
-    /* === Плагин RoundedMenu === */
+    /* === Плагин RoundedMenu (меню + фон + иконки + MRELOAD) === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -8,11 +8,20 @@
     }
 
     function applyCustomMenuStyles() {
+        // не добавляем стиль повторно
+        if (document.getElementById('roundedmenu-style-menuonly')) return;
+
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
         style.innerHTML = `
+            /* Тёмный фон приложения */
+            body {
+                background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
+                color: #ffffff !important;
+            }
+
             @media screen and (min-width: 480px) {
-                /* === Меню: компактное, справа === */
+                /* Переоформление контейнеров меню: без скрытия по умолчанию */
                 .settings__content,
                 .selectbox__content.layer--height {
                     position: fixed !important;
@@ -24,25 +33,23 @@
                     overflow-y: auto !important;
                     background: rgba(54,54,54,0.98) !important;
                     border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
-                    transform: translateX(100%) !important;
-                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    will-change: transform, opacity, visibility;
                     z-index: 999 !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
                 }
 
+                /* Открытое состояние — двигаем на место без вмешательства в внутреннюю логику */
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content.layer--height {
-                    transform: translateX(0) !important;
-                    visibility: visible !important;
+                    transform: none !important;
                     opacity: 1 !important;
+                    visibility: visible !important;
                 }
 
-                /* === Все пункты меню и подменю === */
+                /* Пункты меню: скругление и плавный hover */
                 .settings-folder.selector,
                 .settings-param.selector,
                 .settings-param__value.selector,
@@ -69,19 +76,13 @@
                 }
             }
 
-            /* === Новый фон для всей Лампы === */
-            body {
-                background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
-                color: #ffffff !important;
-            }
-
-            /* === Фикс: иконки всегда белые === */
+            /* Иконки: фиксируем только нужные (не трогаем глобально .selector) */
             .head__action.selector.open--settings svg,
             .head__action.selector.open--settings svg use,
-            .head__action.selector.notice--icon svg,
-            .head__action.selector.notice--icon svg use,
             .head__action.selector.open--search svg,
             .head__action.selector.open--search svg use,
+            .head__action.selector.notice--icon svg,
+            .head__action.selector.notice--icon svg use,
             #MRELOAD svg,
             #MRELOAD svg use {
                 color: #ffffff !important;
@@ -89,12 +90,13 @@
                 stroke: none !important;
                 outline: none !important;
             }
+
             .head__action.selector.open--settings:hover svg,
             .head__action.selector.open--settings:hover svg use,
-            .head__action.selector.notice--icon:hover svg,
-            .head__action.selector.notice--icon:hover svg use,
             .head__action.selector.open--search:hover svg,
             .head__action.selector.open--search:hover svg use,
+            .head__action.selector.notice--icon:hover svg,
+            .head__action.selector.notice--icon:hover svg use,
             #MRELOAD:hover svg,
             #MRELOAD:hover svg use {
                 color: #ffffff !important;
@@ -104,20 +106,18 @@
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles + dark background + icon fixes applied');
+        logMenu('Styles applied (dark background, menu layout, icon fixes)');
     }
 
-    /* === Добавляем кнопку MRELOAD === */
-    function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
-        const actions = document.querySelector('.head__actions');
-        if (!actions) return;
+    // Добавляем кнопку MRELOAD только в .head__actions, без вмешательства в другие контейнеры
+    function addReloadButton(actions) {
+        if (!actions || document.getElementById('MRELOAD')) return;
 
         const div = document.createElement('div');
         div.id = 'MRELOAD';
         div.className = 'head__action selector m-reload-screen';
         div.innerHTML = `
-            <svg viewBox="0 0 24 24">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
             </svg>
         `;
@@ -126,20 +126,28 @@
         logMenu('Reload button added');
     }
 
-    function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', function(event){
-                if(event.type === 'ready'){
-                    applyCustomMenuStyles();
-                    addReloadButton();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyCustomMenuStyles();
-                addReloadButton();
-            });
+    function attachReloadButtonWhenReady() {
+        // Лёгкий наблюдатель: только ждём появления .head__actions и добавляем кнопку один раз
+        const obs = new MutationObserver(() => {
+            const actions = document.querySelector('.head__actions');
+            if (actions && !document.getElementById('MRELOAD')) {
+                addReloadButton(actions);
+                obs.disconnect();
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+
+        // На случай, если уже есть
+        const actionsNow = document.querySelector('.head__actions');
+        if (actionsNow && !document.getElementById('MRELOAD')) {
+            addReloadButton(actionsNow);
+            obs.disconnect();
         }
+    }
+
+    function initMenuPlugin() {
+        applyCustomMenuStyles();
+        attachReloadButtonWhenReady();
     }
 
     function registerMenu() {
@@ -147,10 +155,19 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '6.4',
-                author: 'maxi3219',
-                description: 'Скруглённое меню + тёмный фон + фикс иконок + кнопка перезагрузки',
-                init: initMenuPlugin
+                version: '6.5',
+                author: 'maxxx',
+                description: 'Скруглённое меню справа, тёмный фон, фикс иконок, кнопка перезагрузки',
+                init: () => {
+                    // в Lampa правильный момент — событие ready
+                    if (window.Lampa && typeof Lampa.Listener === 'object') {
+                        Lampa.Listener.follow('app', (event) => {
+                            if (event.type === 'ready') initMenuPlugin();
+                        });
+                    } else {
+                        document.addEventListener('DOMContentLoaded', initMenuPlugin);
+                    }
+                }
             });
         } else {
             initMenuPlugin();
@@ -159,20 +176,11 @@
 
     registerMenu();
 
-
-    /* === Плагин MaxColor === */
+    /* === Плагин MaxColor (сид-колор) === */
     const plugin_id_color = 'maxcolor';
     const plugin_name_color = 'MaxColor';
 
-    const COLORS = {
-        low: '#ff3333',
-        mid: '#ffcc00',
-        high: '#00ff00'
-    };
-
-    function logColor(...a) {
-        try { console.log(`[${plugin_name_color}]`, ...a); } catch (e) {}
-    }
+    const COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
@@ -192,5 +200,35 @@
         });
     }
 
-    function startObserver() {
-        const obs
+    function startSeedObserver() {
+        const obs = new MutationObserver(() => recolorSeedNumbers());
+        obs.observe(document.body, { childList: true, subtree: true });
+        recolorSeedNumbers();
+        try { console.log(`[${plugin_name_color}] Observer started (v2.0)`); } catch (e) {}
+    }
+
+    function registerColor() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id_color,
+                name: plugin_name_color,
+                version: '2.0',
+                author: 'maxxx',
+                description: 'Окраска числа после «Раздают:»',
+                init: () => {
+                    if (window.Lampa && typeof Lampa.Listener === 'object') {
+                        Lampa.Listener.follow('app', (event) => {
+                            if (event.type === 'ready') startSeedObserver();
+                        });
+                    } else {
+                        document.addEventListener('DOMContentLoaded', startSeedObserver);
+                    }
+                }
+            });
+        } else {
+            startSeedObserver();
+        }
+    }
+
+    registerColor();
+})();
