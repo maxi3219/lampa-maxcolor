@@ -13,31 +13,27 @@
     }
 
     function recolorSeedNumbers() {
-        const elements = document.querySelectorAll('div, span, p, li');
+        // Находим все блоки статистики
+        const stats = document.querySelectorAll('.torrent__stat');
 
-        elements.forEach(el => {
-            const text = el.textContent.trim();
+        stats.forEach(stat => {
+            // Ищем текст "Раздают"
+            if (stat.textContent.includes('Раздают')) {
+                const spans = stat.querySelectorAll('span');
+                if (spans.length >= 1) {
+                    const labelNode = stat.childNodes[0]; // текст "Раздают:"
+                    const seedNode = spans[0];            // число раздающих
 
-            // ищем элементы, где есть "Раздают:" и число
-            if (/Раздают:\s*\d+/i.test(text)) {
-                const match = text.match(/Раздают:\s*(\d+)/i);
-                if (!match) return;
+                    const num = parseInt(seedNode.textContent);
+                    if (isNaN(num)) return;
 
-                const num = parseInt(match[1]);
-                let color = COLORS.low;
-                if (num > 10) color = COLORS.high;
-                else if (num >= 5) color = COLORS.mid;
+                    let color = COLORS.low;
+                    if (num > 10) color = COLORS.high;
+                    else if (num >= 5) color = COLORS.mid;
 
-                // чтобы не трогать уже обработанные элементы
-                if (el.dataset.maxcolor === 'done') return;
-
-                // заменяем ТОЛЬКО число после “Раздают:”
-                el.innerHTML = el.innerHTML.replace(
-                    /(Раздают:\s*)(\d+)/i,
-                    `$1<span style="color:${color}; font-weight:bold;">$2</span>`
-                );
-
-                el.dataset.maxcolor = 'done';
+                    seedNode.style.color = color;
+                    seedNode.style.fontWeight = 'bold';
+                }
             }
         });
     }
@@ -46,7 +42,7 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        log('Observer started (v1.7)');
+        log('Observer started (v1.8)');
     }
 
     function register() {
@@ -54,7 +50,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.7',
+                version: '1.8',
                 author: 'maxi3219',
                 description: 'Окрашивает только число после "Раздают:" без свечения',
                 init: startObserver
