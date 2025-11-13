@@ -16,13 +16,14 @@
             }
         }
         localStorage.setItem('theme_backup', JSON.stringify(vars));
-        log('Theme saved to localStorage');
+        alert('Тема сохранена!');
+        log('Theme saved to localStorage:', vars);
     }
 
     function importTheme() {
         const json = localStorage.getItem('theme_backup');
         if (!json) {
-            log('No theme found in localStorage');
+            alert('Нет сохранённой темы');
             return;
         }
         try {
@@ -30,9 +31,11 @@
             for (const key in vars) {
                 document.documentElement.style.setProperty(key, vars[key]);
             }
-            log('Theme applied from localStorage');
+            alert('Тема применена!');
+            log('Theme applied from localStorage:', vars);
         } catch (e) {
-            log('Error parsing theme JSON');
+            alert('Ошибка при применении темы');
+            console.error(e);
         }
     }
 
@@ -46,6 +49,7 @@
         btn.style.margin = '0.5em 0';
         btn.style.borderRadius = '0.5em';
         btn.style.background = 'rgba(255,255,255,0.05)';
+        btn.setAttribute('data-theme-transfer', 'true');
         btn.onclick = onClick;
         return btn;
     }
@@ -56,9 +60,6 @@
 
         const exportBtn = createButton('Сохранить тему', exportTheme);
         const importBtn = createButton('Загрузить тему', importTheme);
-
-        exportBtn.setAttribute('data-theme-transfer', 'true');
-        importBtn.setAttribute('data-theme-transfer', 'true');
 
         panel.appendChild(exportBtn);
         panel.appendChild(importBtn);
@@ -87,9 +88,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.2',
+                version: '1.3',
                 author: 'maxi3219',
-                description: 'Автоматический экспорт/импорт темы через localStorage с гарантированной вставкой кнопок',
+                description: 'Экспорт и импорт темы через localStorage без ручного ввода',
                 init: initPlugin
             });
             log('Registered with Lampa');
