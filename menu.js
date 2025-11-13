@@ -12,8 +12,7 @@
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 /* Основная плашка настроек */
-                .settings__content,
-                .selectbox__content {
+                .settings__content {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -34,16 +33,14 @@
                     opacity: 0 !important;
                 }
 
-                body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content {
+                body.settings--open .settings__content {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
 
-                /* Вторая плашка — источники */
-                .source__content,
-                .parser__content {
+                /* Вторая плашка — источники (правильный селектор) */
+                body > div.selectbox.animate > div.selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -64,8 +61,7 @@
                     opacity: 0 !important;
                 }
 
-                body.source--open .source__content,
-                body.parser--open .parser__content {
+                body.selectbox--open div.selectbox.animate > div.selectbox__content.layer--height {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
@@ -113,9 +109,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.0',
+                version: '2.1',
                 author: 'maxi3219',
-                description: 'Скруглённые плашки настроек и источников с градиентом',
+                description: 'Скруглённые плашки настроек и источников с правильным селектором',
                 init: initPlugin
             });
             log('Registered with Lampa');
