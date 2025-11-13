@@ -15,14 +15,14 @@
                 .selectbox__content {
                     position: fixed !important;
                     top: 1em !important;
-                    right: 0 !important;
+                    right: 1em !important; /* ✅ Отступ от правого края */
                     left: auto !important;
                     width: 35% !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(26, 42, 58, 0.98) !important;
-                    border-radius: 1.2em 0 0 1.2em !important;
-                    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.8) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
                     padding: 0.5em !important;
                     display: flex !important;
                     flex-direction: column !important;
@@ -60,9 +60,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.4',
+                version: '1.5',
                 author: 'maxi3219',
-                description: 'Скруглённое меню и источник, аккуратно выезжающие с правого края',
+                description: 'Скруглённое меню с отступом от правого края и плавным появлением',
                 init: initPlugin
             });
             log('Registered with Lampa');
