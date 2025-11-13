@@ -1,133 +1,277 @@
 (() => {
+    /* === Плагин RoundedMenu === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
-    const PARSERS = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Laampa.app','Jacred.pro'];
-
     function logMenu(...args) {
-        try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e){}
+        try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
     function applyCustomMenuStyles() {
-        const style=document.createElement('style');
-        style.id='roundedmenu-style-menuonly';
-        style.innerHTML=`
-            body{background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%) !important;color:#fff !important;}
-            .torrent-filter .simple-button.parser-btn{
-                margin-left:0.5em;
-                padding:0.2em 0.5em;
-                border-radius:0.8em;
-                background:linear-gradient(to right,#4dd9a0,#4d8fa8);
-                color:#fff;
-                cursor:pointer;
-                display:flex;
-                align-items:center;
-                transition:background 0.25s ease;
+        const style = document.createElement('style');
+        style.id = 'roundedmenu-style-menuonly';
+        style.innerHTML = `
+            @media screen and (min-width: 480px) {
+                .settings__content,
+                .selectbox__content.layer--height {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,0.98) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                .settings-folder.selector,
+                .settings-param.selector,
+                .settings-param__value.selector,
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .settings-folder.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-folder.selector.traverse,
+                .settings-param.selector.focus,
+                .settings-param.selector.hover,
+                .settings-param.selector.traverse,
+                .settings-param__value.selector.focus,
+                .settings-param__value.selector.hover,
+                .settings-param__value.selector.traverse,
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    border-radius: 1em !important;
+                }
             }
-            .torrent-filter .simple-button.parser-btn:hover{
-                background:linear-gradient(to right,#4d8fa8,#4dd9a0);
+
+            body {
+                background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important;
+                color: #ffffff !important;
+            }
+
+            .head__body svg,
+            .head__body svg use {
+                fill: #fff !important;
+                color: #fff !important;
+                transition: none !important;
+            }
+
+            .head__body .selector.hover svg,
+            .head__body .selector.focus svg,
+            .head__body .selector.traverse svg {
+                fill: #fff !important;
+                color: #fff !important;
+            }
+
+            .head__body .selector.hover,
+            .head__body .selector.focus,
+            .head__body .selector.traverse {
+                color: inherit !important;
+            }
+
+            .m-reload-screen {
+                cursor: pointer !important;
+            }
+            .m-reload-screen:hover svg {
+                transform: rotate(180deg);
+                transition: transform 0.4s ease;
             }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles applied');
+        logMenu('Menu styles + dark background applied');
     }
 
-    function addParserButton() {
-        const filterBar = document.querySelector('.torrent-filter');
-        if(!filterBar) return setTimeout(addParserButton, 500);
-        if(filterBar.querySelector('.parser-btn')) return;
+    function addReloadButton() {
+        if (document.getElementById('MRELOAD')) return;
+
+        const headActions = document.querySelector('.head__actions');
+        if (!headActions) {
+            logMenu('head__actions not found, retrying...');
+            setTimeout(addReloadButton, 1000);
+            return;
+        }
 
         const btn = document.createElement('div');
-        btn.className = 'simple-button parser-btn selector';
-        const current = Lampa.Storage.get('parser_selected', PARSERS[1]);
-        btn.innerHTML = `<span>Парсер: ${current}</span>`;
+        btn.id = 'MRELOAD';
+        btn.className = 'head__action selector m-reload-screen';
+        btn.innerHTML = `
+            <svg fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" stroke-width="0.48">
+                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"></path>
+            </svg>
+        `;
 
         btn.addEventListener('click', () => {
-            logMenu('Parser button clicked');
-            const items = PARSERS.map(title => ({title, selected: title === Lampa.Storage.get('parser_selected', PARSERS[1])}));
-            if(!window.Lampa || !Lampa.Select) {
-                console.error('Lampa.Select не найден!');
-                return;
-            }
-
-            Lampa.Select.open({
-                title:'Выберите парсер',
-                items,
-                onSelect: sel => {
-                    Lampa.Storage.set('parser_selected', sel.title);
-                    btn.querySelector('span').textContent = `Парсер: ${sel.title}`;
-                    Lampa.Noty.show(`Выбран парсер: ${sel.title}`);
-                    debugUpdateTorrentList(sel.title);
-                },
-                onBack: Lampa.Controller.toggle
-            });
+            logMenu('Reload button clicked');
+            location.reload();
         });
 
-        filterBar.appendChild(btn);
+        headActions.appendChild(btn);
+        logMenu('Reload button added');
     }
 
-    function debugUpdateTorrentList(parserTitle) {
-        try {
-            const active = Lampa.Activity.active();
-            if(!active) {
-                console.warn('Активный экран не найден');
-                return;
-            }
-            console.log('Active screen:', active);
-
-            if(!active.activity || active.activity.component !== 'torrents') {
-                console.warn('Это не экран торрентов. component =', active.activity?.component);
-                return;
-            }
-
-            const source = active.activity.source;
-            console.log('Source object:', source);
-            console.log('Methods available:', Object.keys(source || {}));
-
-            if(source && typeof source.search === 'function') {
-                const query = active.activity.query || '';
-                logMenu(`Попытка обновить торренты с парсером: ${parserTitle}`);
-                source.search(query, res => {
-                    console.log('Результат search():', res);
-                    if(res) {
-                        active.activity.results = res;
-                        if(typeof Lampa.Torrent.render === 'function') Lampa.Torrent.render(res);
-                    }
-                });
-            } else {
-                console.warn('Метод search() не найден у source!');
-            }
-        } catch(e) {
-            console.error('Ошибка при обновлении торрентов:', e);
-        }
-    }
-
-    function initPlugin() {
-        if(window.Lampa && Lampa.Listener){
-            Lampa.Listener.follow('app', e => {
-                if(e.type === 'ready') {
+    function initMenuPlugin() {
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', event => {
+                if(event.type === 'ready'){
                     applyCustomMenuStyles();
+                    addReloadButton();
                     addParserButton();
                 }
             });
         } else {
             document.addEventListener('DOMContentLoaded', () => {
                 applyCustomMenuStyles();
+                addReloadButton();
                 addParserButton();
             });
         }
     }
 
-    if(window.app && app.plugins && typeof app.plugins.add === 'function') {
-        app.plugins.add({
-            id: plugin_id_menu,
-            name: plugin_name_menu,
-            version: 'debug-1.0',
-            author: 'maxi3219',
-            description: 'Отладка кнопки парсеров',
-            init: initPlugin
-        });
-    } else {
-        initPlugin();
+    function registerMenu() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id_menu,
+                name: plugin_name_menu,
+                version: '5.8',
+                author: 'maxi3219',
+                description: 'Скруглённое меню + тёмный фон + кнопка парсер + reload',
+                init: initMenuPlugin
+            });
+        } else {
+            initMenuPlugin();
+        }
     }
+
+    registerMenu();
+
+    /* === Плагин MaxColor === */
+    const plugin_id_color = 'maxcolor';
+    const plugin_name_color = 'MaxColor';
+
+    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
+
+    function logColor(...a){ try{ console.log(`[${plugin_name_color}]`, ...a) }catch(e){} }
+
+    function recolorSeedNumbers(){
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block=>{
+            const span = block.querySelector('span');
+            if(!span) return;
+            const num = parseInt(span.textContent);
+            if(isNaN(num)) return;
+            let color = COLORS.low;
+            if(num>10) color=COLORS.high;
+            else if(num>=5) color=COLORS.mid;
+            span.style.color=color;
+            span.style.fontWeight='bold';
+        });
+    }
+
+    function startObserver(){
+        const obs = new MutationObserver(()=>recolorSeedNumbers());
+        obs.observe(document.body,{childList:true,subtree:true});
+        recolorSeedNumbers();
+        logColor('Observer started (v2.0)');
+    }
+
+    function registerColor(){
+        if(window.app && app.plugins && typeof app.plugins.add==='function'){
+            app.plugins.add({
+                id: plugin_id_color,
+                name: plugin_name_color,
+                version: '2.0',
+                author: 'maxi3219',
+                description: 'Окрашивает число после "Раздают:" без свечения',
+                init: startObserver
+            });
+        } else { startObserver(); }
+    }
+
+    registerColor();
+
+    /* === Плагин Парсер для торрентов через DOM === */
+    function addParserButton(){
+        const container = document.querySelector('.torrent-filter');
+        if(!container){
+            setTimeout(addParserButton,1000);
+            return;
+        }
+
+        if(document.getElementById('parser-button')) return;
+
+        const btn = document.createElement('div');
+        btn.className = 'simple-button simple-button--filter selector filter--parser';
+        btn.id = 'parser-button';
+        btn.innerHTML = '<span>Парсер</span><div>Jacred.xyz</div>';
+        container.appendChild(btn);
+
+        const parsers = ['Не выбран','Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+
+        btn.addEventListener('click', ()=>{
+            const menu = document.createElement('div');
+            menu.className='selectbox__content layer--height';
+            menu.style.position='absolute';
+            menu.style.zIndex='9999';
+            menu.style.background='rgba(54,54,54,0.98)';
+            menu.style.borderRadius='1em';
+            menu.style.padding='0.5em';
+            menu.style.top=btn.getBoundingClientRect().bottom+'px';
+            menu.style.left=btn.getBoundingClientRect().left+'px';
+            menu.innerHTML = parsers.map(p=>`<div class="selectbox-item selector">${p}</div>`).join('');
+
+            document.body.appendChild(menu);
+
+            const closeMenu = e=>{
+                if(!menu.contains(e.target) && e.target!==btn){
+                    menu.remove();
+                    document.removeEventListener('click',closeMenu);
+                }
+            };
+            document.addEventListener('click',closeMenu);
+
+            menu.querySelectorAll('.selectbox-item').forEach(item=>{
+                item.addEventListener('click',()=>{
+                    btn.querySelector('div').textContent = item.textContent;
+                    menu.remove();
+                    // Обновление списка торрентов через DOM
+                    refreshTorrentList(item.textContent);
+                });
+            });
+        });
+    }
+
+    function refreshTorrentList(parser){
+        console.log('Выбран парсер:',parser);
+        const torrents = document.querySelectorAll('.torrent-item');
+        torrents.forEach(t=>{
+            // Здесь можно добавить фильтрацию или обновление по выбранному парсеру
+            // Пока просто перерисовываем элементы (эффект обновления)
+            t.style.display='none';
+            setTimeout(()=>t.style.display='flex',50);
+        });
+    }
+
 })();
