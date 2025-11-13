@@ -1,5 +1,5 @@
 (() => {
-    /* === Плагин RoundedMenu + Reload + Parser + SeedColor === */
+    /* === Плагин RoundedMenu + Reload + Parser + SeedColor (v8.1) === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -8,72 +8,51 @@
         try { console.log(`[${plugin_name_menu}]`, ...args); } catch (e) {}
     }
 
-    /* === Стили меню и иконок === */
+    /* === Стили меню и иконок (без ломки системных окон) === */
     function applyCustomStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
         style.innerHTML = `
-            @media screen and (min-width: 480px) {
-                .settings__content,
-                .selectbox__content.layer--height {
-                    position: fixed !important;
-                    top: 1em !important;
-                    right: 1em !important;
-                    width: 35% !important;
-                    background: rgba(54,54,54,0.98) !important;
-                    border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
-                    padding: 0.5em !important;
-                    transform: translateX(100%) !important;
-                    transition: transform .3s ease, opacity .3s ease !important;
-                    z-index: 999 !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                }
-                body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
-                    transform: translateX(0)!important;
-                    visibility: visible!important;
-                    opacity: 1!important;
-                }
-                .settings-folder.selector,
-                .settings-param.selector,
-                .settings-param__value.selector,
-                .selectbox-item.selector {
-                    border-radius: 1em!important;
-                    margin-bottom: 0.3em!important;
-                    transition: background .25s ease!important;
-                }
-                .settings-folder.selector.focus,
-                .settings-param.selector.focus,
-                .settings-param__value.selector.focus,
-                .selectbox-item.selector.focus {
-                    background: linear-gradient(to right,#4dd9a0 1%,#4d8fa8 100%)!important;
-                }
+            /* Без фиксирования, сохраняем работу системных окон */
+            .settings__content,
+            .selectbox__content.layer--height {
+                border-radius: 1em !important;
+                background: rgba(54,54,54,0.96) !important;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
             }
+
             body {
-                background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%)!important;
-                color:#fff!important;
+                background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%) !important;
+                color:#fff !important;
             }
+
             .head__body svg, .head__body svg use {
-                fill:#fff!important;
-                color:#fff!important;
-                transition:none!important;
+                fill:#fff !important;
+                color:#fff !important;
             }
-            .m-reload-screen { cursor:pointer!important; }
+
+            .m-reload-screen { cursor:pointer !important; }
             .m-reload-screen:hover svg {
                 transform:rotate(180deg);
                 transition:transform .4s ease;
             }
+
             .parser-button {
-                display:flex;align-items:center;gap:6px;cursor:pointer;
-                color:#fff;border:1px solid #666;border-radius:10px;
-                padding:5px 12px;font-size:.9em;transition:background .25s ease;
+                display:flex;
+                align-items:center;
+                gap:6px;
+                cursor:pointer;
+                color:#fff;
+                border:1px solid #666;
+                border-radius:10px;
+                padding:5px 12px;
+                font-size:.9em;
+                transition:background .25s ease;
             }
             .parser-button:hover { background:rgba(255,255,255,.1); }
         `;
         document.head.appendChild(style);
-        log('Custom styles applied');
+        log('Custom styles applied (safe mode)');
     }
 
     /* === Кнопка перезагрузки === */
@@ -150,7 +129,7 @@
         log('Parser button added');
     }
 
-    /* === Меню выбора парсера === */
+    /* === Меню выбора парсера (обновляет только список торрентов) === */
     function openParserMenu() {
         const items = PARSERS.map(p => ({
             title: p.title,
@@ -168,10 +147,10 @@
                 if (btn) btn.textContent = chosen.title;
                 Lampa.Noty.show(`Выбран парсер: ${chosen.title}`);
 
-                // обновляем только список торрентов
+                // обновляем только список торрентов без перезагрузки
                 try {
                     const active = Lampa.Activity.active();
-                    if (active && active.component && active.component === 'torrents') {
+                    if (active && active.activity && active.activity.component === 'torrents') {
                         if (active.activity.source && typeof active.activity.source.search === 'function') {
                             active.activity.source.search(active.activity.query, (results) => {
                                 if (results) {
@@ -185,7 +164,7 @@
                         }
                     }
                 } catch (e) {
-                    Lampa.Activity.replace(Lampa.Activity.active().activity);
+                    log('Parser update torrents error', e);
                 }
             },
             onBack: Lampa.Controller.toggle
@@ -205,7 +184,7 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '8.0',
+                version: '8.1',
                 author: 'maxi3219',
                 description: 'Скруглённое меню + Reload + выбор Jacred-парсера + подсветка раздающих',
                 init
