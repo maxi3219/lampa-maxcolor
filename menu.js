@@ -39,8 +39,8 @@
                     opacity: 1 !important;
                 }
 
-                /* Вторая плашка — источники (правильный селектор) */
-                body > div.selectbox.animate > div.selectbox__content.layer--height {
+                /* Вторая плашка — источники */
+                .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -61,27 +61,37 @@
                     opacity: 0 !important;
                 }
 
-                body.selectbox--open div.selectbox.animate > div.selectbox__content.layer--height {
+                body.selectbox--open .selectbox__content.layer--height {
                     transform: translateX(0) !important;
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
 
-                /* Пункты меню всегда скруглены */
+                /* Пункты настроек */
                 .settings-folder.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
 
-                /* Активные состояния */
                 .settings-folder.selector.focus,
                 .settings-folder.selector.hover,
                 .settings-folder.selector.traverse {
                     background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -webkit-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -o-linear-gradient(left, #60ffbd 1%, #62a3c9 100%) !important;
-                    background: -webkit-gradient(linear, left top, right top, color-stop(1%, #60ffbd), to(#62a3c9)) !important;
+                    border-radius: 1em !important;
+                }
+
+                /* Пункты источников */
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #60ffbd 1%, #62a3c9 100%) !important;
                     border-radius: 1em !important;
                 }
             }
@@ -109,9 +119,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.1',
+                version: '2.3',
                 author: 'maxi3219',
-                description: 'Скруглённые плашки настроек и источников с правильным селектором',
+                description: 'Скруглённые плашки настроек и источников с градиентом',
                 init: initPlugin
             });
             log('Registered with Lampa');
