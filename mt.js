@@ -78,9 +78,9 @@
 
     /* === Кнопка Reload === */
     function addReloadButton() {
-        if(document.getElementById('MRELOAD')) return;
+        if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
-        if(!headActions){ setTimeout(addReloadButton,1000); return; }
+        if (!headActions){ setTimeout(addReloadButton,1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
@@ -90,35 +90,57 @@
         headActions.appendChild(btn);
     }
 
-    /* === Парсеры и UI кнопки === */
-    const PARSERS = {
-        'Jacred.xyz': 'https://jacred.xyz/api/torrents',
-        'Jr.maxvol.pro': 'https://jr.maxvol.pro/api/torrents',
-        'Jacred.my.to': 'https://jacred.my.to/api/torrents',
-        'Lampa.app': 'https://lampa.app/api/torrents',
-        'Jacred.pro': 'https://jacred.pro/api/torrents'
-    };
+    /* === Каталог парсеров (как в pubtorr) === */
+    const parsersInfo = [
+        { base:'lampa_app',        name:'Lampa.app',        settings:{ url:'lampa.app',             key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_viewbox_dev', name:'Viewbox',        settings:{ url:'jacred.viewbox.dev',    key:'viewbox', parser_torrent_type:'jackett' } },
+        { base:'unknown',          name:'Unknown',          settings:{ url:'188.119.113.252:9117',  key:'1',       parser_torrent_type:'jackett' } },
+        { base:'trs_my_to',        name:'Trs.my.to',        settings:{ url:'trs.my.to:9118',        key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_my_to',     name:'Jacred.my.to',     settings:{ url:'jacred.my.to',          key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_xyz',       name:'Jacred.xyz',       settings:{ url:'jacred.xyz',            key:'',        parser_torrent_type:'jackett' } },
+        { base:'jac_red_ru',       name:'jac-red.ru',       settings:{ url:'jac-red.ru',            key:'',        parser_torrent_type:'jackett' } }
+    ];
 
+    function changeParser() {
+        const jackettUrlTwo = Lampa.Storage.get('lme_url_two'); // base
+        const selectedParser = parsersInfo.find(p => p.base === jackettUrlTwo);
+        if (selectedParser) {
+            const s = selectedParser.settings;
+            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
+            Lampa.Storage.set(type + '_url', s.url);
+            Lampa.Storage.set(type + '_key', s.key);
+            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
+        } else {
+            console.warn('Parser not found in parsersInfo for', jackettUrlTwo);
+        }
+    }
+
+    /* === Кнопка Парсер (автовставка при появлении torrent-filter) === */
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
+
+        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
+        const currentName = (parsersInfo.find(p => p.base === currentBase) || parsersInfo.find(p => p.base==='jacred_xyz')).name;
 
         const btn = document.createElement('div');
         btn.id = 'parser-selectbox';
         btn.className = 'simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select') || 'Jacred.xyz'}</div>`;
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentName}</div>`;
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', () => {
             Lampa.Select.show({
-                title: 'Выбор парсера',
-                items: Object.keys(PARSERS).map(p => ({
-                    title: p,
-                    selected: Lampa.Storage.get('parser_select') === p
+                title: 'Каталог парсеров',
+                items: parsersInfo.map(p => ({
+                    title: p.name,
+                    base: p.base,
+                    selected: Lampa.Storage.get('lme_url_two') === p.base
                 })),
                 onSelect: (a) => {
-                    Lampa.Storage.set('parser_select', a.title);
-                    const current = document.getElementById('parser-current');
-                    if (current) current.textContent = a.title;
+                    Lampa.Storage.set('lme_url_two', a.base); // сохраняем base
+                    changeParser(); // применяем настройки (url/key/type)
+                    const el = document.getElementById('parser-current');
+                    if (el) el.textContent = a.title;
                     try {
                         const active = Lampa.Activity.active();
                         if (active && active.activity && typeof active.activity.refresh === 'function') {
@@ -139,57 +161,40 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // первичная попытка
         const first = document.querySelector('.torrent-filter');
         if (first) mountParserButton(first);
     }
 
-    /* === Подмена источника торрентов === */
-    const origBuild = (Lampa && Lampa.Torrent && Lampa.Torrent.build) ? Lampa.Torrent.build : null;
-
-    function hookTorrentBuild() {
-        if (!origBuild || !Lampa || !Lampa.Torrent) return;
-        Lampa.Torrent.build = function(object){
-            try{
-                const parser = Lampa.Storage.get('parser_select') || 'Jacred.xyz';
-                if (PARSERS[parser]) {
-                    // Подменяем URL источника торрентов на выбранный парсер
-                    object.url = PARSERS[parser];
-                }
-            } catch(e){ console.error('Parser switch error:', e); }
-            return origBuild.call(this, object);
-        };
-    }
-
     function initMenuPlugin() {
-        if(window.Lampa && typeof Lampa.Listener==='object'){
-            Lampa.Listener.follow('app', event=>{
-                if(event.type==='ready'){
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', e => {
+                if (e.type === 'ready') {
                     applyCustomMenuStyles();
                     addReloadButton();
                     startParserObserver();
-                    hookTorrentBuild();
+                    // первичная установка парсера по сохранённому base
+                    changeParser();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded',()=>{
+            document.addEventListener('DOMContentLoaded', () => {
                 applyCustomMenuStyles();
                 addReloadButton();
                 startParserObserver();
-                hookTorrentBuild();
+                changeParser();
             });
         }
     }
 
     function registerMenu() {
-        if(window.app && app.plugins && typeof app.plugins.add==='function'){
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
-                id:plugin_id_menu,
-                name:plugin_name_menu,
-                version:'8.1',
-                author:'maxi3219',
-                description:'Меню + зеленые раздающие + reload + выбор парсера',
-                init:initMenuPlugin
+                id: plugin_id_menu,
+                name: plugin_name_menu,
+                version: '8.2',
+                author: 'maxi3219',
+                description: 'Меню + зеленые раздающие + reload + выбор парсера',
+                init: initMenuPlugin
             });
         } else { initMenuPlugin(); }
     }
@@ -197,37 +202,37 @@
     registerMenu();
 
     /* === Плагин MaxColor — перекраска сидов === */
-    const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
+    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
 
     function recolorSeedNumbers(){
-        const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block=>{
-            const span=block.querySelector('span');
+            const span = block.querySelector('span');
             if(!span) return;
-            const num=parseInt(span.textContent);
+            const num = parseInt(span.textContent);
             if(isNaN(num)) return;
-            let color=COLORS.low;
-            if(num>10) color=COLORS.high;
-            else if(num>=5) color=COLORS.mid;
-            span.style.color=color;
-            span.style.fontWeight='bold';
+            let color = COLORS.low;
+            if(num > 10) color = COLORS.high;
+            else if(num >= 5) color = COLORS.mid;
+            span.style.color = color;
+            span.style.fontWeight = 'bold';
         });
     }
 
     function startObserver(){
-        const obs=new MutationObserver(()=>recolorSeedNumbers());
+        const obs = new MutationObserver(()=>recolorSeedNumbers());
         obs.observe(document.body,{childList:true,subtree:true});
         recolorSeedNumbers();
     }
 
-    if(window.app && app.plugins && typeof app.plugins.add==='function'){
+    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
-            id:'maxcolor',
-            name:'MaxColor',
-            version:'2.0',
-            author:'maxi3219',
-            description:'Цвет раздающих',
-            init:startObserver
+            id: 'maxcolor',
+            name: 'MaxColor',
+            version: '2.0',
+            author: 'maxi3219',
+            description: 'Цвет раздающих',
+            init: startObserver
         });
     } else {
         startObserver();
