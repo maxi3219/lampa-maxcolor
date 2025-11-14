@@ -4,15 +4,15 @@
     const plugin_id = 'roundedmenu';
     const plugin_name = 'RoundedMenu';
 
-    const SEED_COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
+    const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
     const parsersInfo = [
-        { base:'jacred_xyz',         name:'Jacred.xyz',        settings:{ url:'jacred.xyz',           key:'',        parser_torrent_type:'jackett' } },
-        { base:'jr_maxvol_pro',      name:'Jr.maxvol.pro',     settings:{ url:'jr.maxvol.pro',        key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_my_to',       name:'Jacred.my.to',      settings:{ url:'jacred.my.to',         key:'',        parser_torrent_type:'jackett' } },
-        { base:'lampa_app',          name:'Lampa.app',         settings:{ url:'lampa.app',            key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_pro',         name:'Jacred.pro',        settings:{ url:'jacred.pro',           key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_viewbox_dev', name:'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
+        { base: 'jacred_xyz', name: 'Jacred.xyz', settings: { url: 'jacred.xyz', key: '', parser_torrent_type: 'jackett' } },
+        { base: 'jr_maxvol_pro', name: 'Jr.maxvol.pro', settings: { url: 'jr.maxvol.pro', key: '', parser_torrent_type: 'jackett' } },
+        { base: 'jacred_my_to', name: 'Jacred.my.to', settings: { url: 'jacred.my.to', key: '', parser_torrent_type: 'jackett' } },
+        { base: 'lampa_app', name: 'Lampa.app', settings: { url: 'lampa.app', key: '', parser_torrent_type: 'jackett' } },
+        { base: 'jacred_pro', name: 'Jacred.pro', settings: { url: 'jacred.pro', key: '', parser_torrent_type: 'jackett' } },
+        { base: 'jacred_viewbox_dev', name: 'Viewbox', settings: { url: 'jacred.viewbox.dev', key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
     function applyStyles() {
@@ -80,38 +80,25 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Скругление карточек торрентов и сохранение видимости значка просмотрено */
+            /* Только скругления (не трогаем белые рамки/тени/outline) */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
-                /* фон переносим на псевдоэлемент, чтобы не резать дочерние элементы */
-                background: transparent !important;
-            }
-            .torrent-item::before {
-                content: '' !important;
-                position: absolute !important;
-                inset: 0 !important;
                 background-color: rgba(0,0,0,0.3) !important;
-                border-radius: inherit !important;
-                z-index: 0 !important;
-                pointer-events: none !important;
-            }
-            /* содержимое поверх подложки */
-            .torrent-item > * {
-                position: relative !important;
-                z-index: 1 !important;
-            }
-            /* значок просмотрено выше всех и не обрезается */
-            .torrent-item__viewed {
-                position: absolute !important;
-                top: 8px !important;
-                right: 8px !important;
-                z-index: 2 !important;
             }
 
             .watched-history {
                 position: relative !important;
                 border-radius: 0.9em !important;
+            }
+
+            /* Значок "просмотрено" поверх подложки */
+            .torrent-item__viewed {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                z-index: 5 !important;
+                pointer-events: none !important;
             }
 
             /* Градиент при наведении на кнопки в блоке фильтров */
@@ -121,6 +108,27 @@
                 background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                 border-radius: 1em !important;
                 color: #fff !important;
+            }
+
+            /* Кнопки на карточке: увеличенное скругление и градиент при наведении */
+            .full-start-new__buttons .full-start__button.selector {
+                border-radius: 0.9em !important;
+                transition: background 0.25s ease, border-radius 0.25s ease !important;
+            }
+
+            .full-start-new__buttons .full-start__button.selector.hover,
+            .full-start-new__buttons .full-start__button.selector.focus,
+            .full-start-new__buttons .full-start__button.selector.traverse {
+                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                border-radius: 1.2em !important;
+                color: #fff !important;
+            }
+
+            .full-start-new__buttons .full-start__button.selector.hover svg,
+            .full-start-new__buttons .full-start__button.selector.focus svg,
+            .full-start-new__buttons .full-start__button.selector.traverse svg {
+                color: #fff !important;
+                fill: #fff !important;
             }
         `;
         document.head.appendChild(style);
@@ -243,9 +251,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.5',
+                version: '9.6',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + сохранение значка просмотрено',
+                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
