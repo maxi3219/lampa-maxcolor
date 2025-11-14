@@ -92,14 +92,14 @@
 
     /* === Каталог парсеров (как в pubtorr) === */
     const parsersInfo = [
-        { base:'lampa_app',        name:'Lampa.app',        settings:{ url:'lampa.app',             key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_viewbox_dev', name:'Viewbox',        settings:{ url:'jacred.viewbox.dev',    key:'viewbox', parser_torrent_type:'jackett' } },
-        { base:'unknown',          name:'Unknown',          settings:{ url:'188.119.113.252:9117',  key:'1',       parser_torrent_type:'jackett' } },
-        { base:'trs_my_to',        name:'Trs.my.to',        settings:{ url:'trs.my.to:9118',        key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_my_to',     name:'Jacred.my.to',     settings:{ url:'jacred.my.to',          key:'',        parser_torrent_type:'jackett' } },
-        { base:'jacred_xyz',       name:'Jacred.xyz',       settings:{ url:'jacred.xyz',            key:'',        parser_torrent_type:'jackett' } },
-        { base:'jac_red_ru',       name:'jac-red.ru',       settings:{ url:'jac-red.ru',            key:'',        parser_torrent_type:'jackett' } }
-    ];
+    { base: 'jacred_xyz',       name: 'Jacred.xyz',       settings: { url: 'jacred.xyz',            key: '',        parser_torrent_type: 'jackett' } },
+    { base: 'jr_maxvol_pro',    name: 'Jr.maxvol.pro',    settings: { url: 'jr.maxvol.pro',         key: '',        parser_torrent_type: 'jackett' } },
+    { base: 'jacred_my_to',     name: 'Jacred.my.to',     settings: { url: 'jacred.my.to',          key: '',        parser_torrent_type: 'jackett' } },
+    { base: 'lampa_app',        name: 'Lampa.app',        settings: { url: 'lampa.app',             key: '',        parser_torrent_type: 'jackett' } },
+    { base: 'jacred_pro',       name: 'Jacred.pro',       settings: { url: 'jacred.pro',            key: '',        parser_torrent_type: 'jackett' } },
+    { base: 'jacred_viewbox_dev', name: 'Viewbox',        settings: { url: 'jacred.viewbox.dev',    key: 'viewbox', parser_torrent_type: 'jackett' } }
+];
+
 
     function changeParser() {
         const jackettUrlTwo = Lampa.Storage.get('lme_url_two'); // base
