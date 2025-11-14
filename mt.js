@@ -102,11 +102,8 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        btn.addEventListener('click', e => {
-            e.stopPropagation();
-            if(document.querySelector('#parser-menu')) return;
-
-            // Создаем меню выбора парсеров
+        // Используем стандартный listener через trigger_click
+        btn.addEventListener('click', e=>{
             const menu = document.createElement('div');
             menu.id='parser-menu';
             menu.className='selectbox__content layer--height';
@@ -116,25 +113,24 @@
             menu.style.borderRadius='1em';
             menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
             menu.style.position='absolute';
-
             const rect = btn.getBoundingClientRect();
             menu.style.top = rect.bottom + 'px';
             menu.style.left = rect.left + 'px';
             menu.style.width = rect.width + 'px';
+            document.body.appendChild(menu);
 
             parsers.forEach(p=>{
                 const item = document.createElement('div');
                 item.className = 'selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
                 item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
-                item.addEventListener('click',()=>{
-                    Lampa.Storage.set('parser_select',p);
+                item.addEventListener('click', ()=>{
+                    Lampa.Storage.set('parser_select', p);
                     document.getElementById('parser-current').textContent = p;
 
-                    // Используем тот же механизм, что и у кнопки Фильтр
+                    // вызываем стандартный клик для обновления списка
                     const filterBtn = document.querySelector('.filter--filter');
                     if(filterBtn){
-                        const clickListener = getEventListeners(filterBtn).click[0].listener;
-                        clickListener({type:'click',target:filterBtn});
+                        filterBtn.dispatchEvent(new MouseEvent('click', {bubbles:true}));
                     }
 
                     menu.remove();
@@ -142,8 +138,7 @@
                 menu.appendChild(item);
             });
 
-            document.body.appendChild(menu);
-
+            // Закрываем при клике вне меню
             document.addEventListener('click', ev=>{
                 if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
             }, {once:true});
@@ -170,7 +165,14 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.5',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
+            app.plugins.add({
+                id:plugin_id_menu,
+                name:plugin_name_menu,
+                version:'8.0',
+                author:'maxi3219',
+                description:'Меню + зеленые раздающие + reload + кнопка парсер',
+                init:initMenuPlugin
+            });
         } else { initMenuPlugin(); }
     }
 
