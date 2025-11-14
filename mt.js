@@ -102,58 +102,48 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        // Обработчик кнопки
-        btn.addEventListener('click', e=>{
+        btn.addEventListener('click', e => {
             e.stopPropagation();
+            if(document.querySelector('#parser-menu')) return;
 
-            // Удаляем старое меню, если есть
-            const oldMenu = document.querySelector('#parser-menu');
-            if(oldMenu) oldMenu.remove();
-
-            // Стандартное меню Lampa
+            // Создаем меню выбора парсеров
             const menu = document.createElement('div');
             menu.id='parser-menu';
             menu.className='selectbox__content layer--height';
             menu.style.maxHeight='300px';
             menu.style.overflowY='auto';
+            menu.style.background='rgba(54,54,54,0.98)';
             menu.style.borderRadius='1em';
             menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
             menu.style.position='absolute';
+
             const rect = btn.getBoundingClientRect();
-            menu.style.top = (rect.bottom+5) + 'px';
+            menu.style.top = rect.bottom + 'px';
             menu.style.left = rect.left + 'px';
             menu.style.width = rect.width + 'px';
-            menu.style.background='rgba(54,54,54,0.98)';
-            document.body.appendChild(menu);
 
             parsers.forEach(p=>{
                 const item = document.createElement('div');
                 item.className = 'selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
                 item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
                 item.addEventListener('click',()=>{
-                    // Сохраняем
                     Lampa.Storage.set('parser_select',p);
-                    document.getElementById('parser-current').textContent=p;
+                    document.getElementById('parser-current').textContent = p;
 
-                    try{
-                        const active = Lampa.Activity.active();
-                        if(active && active.activity){
-                            // Обновляем источник парсера
-                            active.activity.settings = active.activity.settings || {};
-                            active.activity.settings.parser = p;
+                    // Используем тот же механизм, что и у кнопки Фильтр
+                    const filterBtn = document.querySelector('.filter--filter');
+                    if(filterBtn){
+                        const clickListener = getEventListeners(filterBtn).click[0].listener;
+                        clickListener({type:'click',target:filterBtn});
+                    }
 
-                            // Перезапуск активности с новым источником
-                            if(typeof active.activity.refresh==='function'){
-                                active.activity.refresh();
-                            }
-                        }
-                    } catch(e){ console.error(e);}
                     menu.remove();
                 });
                 menu.appendChild(item);
             });
 
-            // Закрываем меню при клике вне
+            document.body.appendChild(menu);
+
             document.addEventListener('click', ev=>{
                 if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
             }, {once:true});
