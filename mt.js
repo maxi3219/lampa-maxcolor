@@ -78,25 +78,34 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Торрент-карточки: только базовое скругление, рамки по умолчанию не трогаем */
+            /* Торрент-карточки: фон через псевдоэлемент со скруглением, значок просмотрено поверх */
             .torrent-item {
                 position: relative !important;
-                border-radius: 0.3em !important;
+                border-radius: 0.9em !important;
+                background: transparent !important;
+                overflow: visible !important; /* чтобы значок не обрезался */
+            }
+            .torrent-item::before {
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
                 background-color: rgba(0,0,0,0.3) !important;
+                border-radius: inherit !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+            }
+            .torrent-item > * { position: relative !important; z-index: 1 !important; }
+            .torrent-item__viewed {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                z-index: 2 !important;
+                pointer-events: none !important;
             }
 
             .watched-history {
                 position: relative !important;
                 border-radius: 0.9em !important;
-            }
-
-            /* Значок "просмотрено" поверх подложки */
-            .torrent-item__viewed {
-                position: absolute !important;
-                top: 8px !important;
-                right: 8px !important;
-                z-index: 5 !important;
-                pointer-events: none !important;
             }
 
             /* Градиент при наведении на кнопки фильтра */
@@ -113,7 +122,6 @@
                 border-radius: 1em !important;                   /* убираем квадратность в покое */
                 transition: background 0.18s ease !important;     /* не анимируем радиус */
             }
-
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
@@ -121,7 +129,6 @@
                 border-radius: 0.5em !important;                  /* меньшее скругление при наведении — без анимации */
                 color: #fff !important;
             }
-
             .full-start-new__buttons .full-start__button.selector.hover svg,
             .full-start-new__buttons .full-start__button.selector.focus svg,
             .full-start-new__buttons .full-start__button.selector.traverse svg {
@@ -143,22 +150,26 @@
         btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"/></svg>`;
 
         btn.addEventListener('hover:enter', () => {
-            const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
-            const isTV = /SmartTV|TV|Tizen|Web0S|NetCast|HbbTV|Android TV|AFTT|AFTM|AFTB/i.test(ua);
+            const href = window.location.href;
+            let triedReload = false;
 
-            if (isTV && window.Lampa && Lampa.Activity && typeof Lampa.Activity.active === 'function') {
-                const active = Lampa.Activity.active();
-                if (active && active.activity && typeof active.activity.refresh === 'function') {
-                    try { active.activity.refresh(); } catch (e) { try { location.reload(); } catch (_) {} }
-                } else {
-                    try { location.reload(); } catch (_) {}
-                }
-            } else {
-                try { location.reload(); } catch (_) {
-                    const active = Lampa.Activity.active && Lampa.Activity.active();
-                    if (active && active.activity && typeof active.activity.refresh === 'function') active.activity.refresh();
-                }
+            try {
+                triedReload = true;
+                window.location.reload();
+                // Если окружение игнорирует reload, ниже идут жесткие фоллбеки
+            } catch (e) {
+                // игнор
             }
+
+            // Фоллбек: жёсткая подмена URL (часто срабатывает в WebView на ТВ)
+            setTimeout(() => {
+                try {
+                    window.location.replace(href);
+                } catch (e) {
+                    // Последний фоллбек: прямое присвоение href
+                    try { window.location.href = href; } catch (_) {}
+                }
+            }, triedReload ? 250 : 0);
         });
 
         headActions.appendChild(btn);
@@ -268,9 +279,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.2',
+                version: '10.3',
                 author: 'maxi3219',
-                description: 'Меню + reload (ПК: перезагрузка, ТВ: refresh активности) + UI tweaks',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
