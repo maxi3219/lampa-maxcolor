@@ -15,7 +15,7 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // ===== Activity tracking (reliable torrents vs online detection) =====
+    // ===== Activity tracking and strict torrents/online detection =====
     const currentActivity = { component: '', source: '', type: '' };
 
     function trackActivity() {
@@ -31,25 +31,26 @@
     }
 
     function inTorrentsContext() {
-        // Hard rules first (exclude online), then include torrents, finally DOM fallback
         const comp = currentActivity.component;
         const src  = currentActivity.source;
         const typ  = currentActivity.type;
 
-        const isOnline = comp.includes('online') || src.includes('online');
-        if (isOnline) return false;
+        // Явный онлайн — исключаем сразу
+        if (comp.includes('online') || src.includes('online')) return false;
 
+        // Явные маркеры торрентов
         const isTorrentActivity =
             comp.includes('torrent') ||
-            src.includes('jackett')   ||
-            typ === 'torrents'        ||
+            src.includes('jackett') ||
+            src.includes('prowlarr') ||
+            typ === 'torrents' ||
             Lampa.Storage.get('parser_torrent_type') === 'jackett' ||
             Lampa.Storage.get('parser_torrent_type') === 'prowlarr';
 
-        // DOM fallback only if not clearly online
+        // Запасной вариант: наличие DOM блока фильтров торрентов, если это не онлайн
         const hasTorrentFilterDom = !!document.querySelector('.torrent-filter');
 
-        return isTorrentActivity || (hasTorrentFilterDom && !isOnline);
+        return isTorrentActivity || (hasTorrentFilterDom);
     }
 
     // ===== Styles =====
@@ -223,6 +224,9 @@
     }
 
     function openParserSelect() {
+        // Защита: не открывать меню в онлайне
+        if (!inTorrentsContext()) return;
+
         Promise.all(parsersInfo.map(async p => {
             const ok = await checkAvailability(p.settings.url);
             return { ...p, ok };
@@ -269,7 +273,7 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', () => {
-            if (inTorrentsContext()) openParserSelect();
+            openParserSelect();
         });
     }
 
@@ -318,7 +322,7 @@
                 if (label.includes('обновить')) {
                     b.addEventListener('hover:enter', (ev) => {
                         try { ev.stopPropagation(); } catch (e) {}
-                        if (inTorrentsContext()) openParserSelect();
+                        openParserSelect();
                     }, { once: true });
                 }
             });
@@ -383,7 +387,7 @@
     // ===== Boot & register =====
     function initMenuPlugin() {
         const boot = () => {
-            trackActivity();           // start tracking activity
+            trackActivity();           // отслеживаем активность для точной фильтрации
             applyStyles();
             addReloadButton();
             startParserObserver();
@@ -405,7 +409,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.8',
+                version: '10.9',
                 author: 'maxi3219',
                 description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
