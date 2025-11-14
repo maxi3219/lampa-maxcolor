@@ -257,63 +257,45 @@
     }
 
     function showParserList() {
-        // Проверяем доступность паралельно и затем показываем Select
-        Promise.all(parsersInfo.map(async p => {
-            const ok = await checkAvailability(p.settings.url);
-            return { ...p, ok };
-        }))
-        .then(statuses => {
-            const items = statuses.map(s => ({
-                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
-                base: s.base,
-                selected: Lampa.Storage.get('lme_url_two') === s.base
-            }));
+    Promise.all(parsersInfo.map(async p => {
+        const ok = await checkAvailability(p.settings.url);
+        return { ...p, ok };
+    }))
+    .then(statuses => {
+        const current = Lampa.Storage.get('lme_url_two');
 
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
+        const items = statuses.map(s => ({
+            title:
+                (current === s.base ? '✓ ' : '') +
+                `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
+            base: s.base
+        }));
 
+        Lampa.Select.show({
+            title: 'Каталог парсеров',
+            items,
+            onSelect: (a) => {
+                // сохранить выбранный парсер
+                Lampa.Storage.set('lme_url_two', a.base);
+                changeParser();
+
+                // обновление текста в меню
+                const el = document.getElementById('parser-current');
+                const picked = parsersInfo.find(p => p.base === a.base);
+                if (el && picked) el.textContent = picked.name;
+
+                // закрыть меню — это фикс “магнитности”
+                Lampa.Select.hide();
+
+                // обновить экран с небольшой задержкой
+                setTimeout(() => {
                     try {
                         const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                        if (active?.activity?.refresh) {
                             active.activity.refresh();
                         }
-                    } catch (err) { /* noop */ }
-                }
-            });
-        })
-        .catch(() => {
-            // если произошла ошибка при проверке доступности — всё равно показать список без цветов
-            const items = parsersInfo.map(p => ({
-                title: p.name,
-                base: p.base,
-                selected: Lampa.Storage.get('lme_url_two') === p.base
-            }));
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
-
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        }
-                    } catch (err) { /* noop */ }
-                }
-            });
-        });
+                    } catch (err) {}
+                }, 250);
     }
 
     /* ------------------------------------------------------------------------ */
