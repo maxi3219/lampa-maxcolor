@@ -7,22 +7,21 @@
     const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
     const parsersInfo = [
-        { base: 'jacred_xyz',        name: 'Jacred.xyz',      settings: { url: 'jacred.xyz',         key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'jr_maxvol_pro',     name: 'Jr.maxvol.pro',   settings: { url: 'jr.maxvol.pro',      key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'jacred_my_to',      name: 'Jacred.my.to',    settings: { url: 'jacred.my.to',       key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'lampa_app',         name: 'Lampa.app',       settings: { url: 'lampa.app',          key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'jacred_pro',        name: 'Jacred.pro',      settings: { url: 'jacred.pro',         key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
+        { base: 'jacred_xyz',         name: 'Jacred.xyz',        settings:{ url:'jacred.xyz',           key:'',        parser_torrent_type:'jackett' } },
+        { base: 'jr_maxvol_pro',      name: 'Jr.maxvol.pro',     settings:{ url:'jr.maxvol.pro',        key:'',        parser_torrent_type:'jackett' } },
+        { base: 'jacred_my_to',       name: 'Jacred.my.to',      settings:{ url:'jacred.my.to',         key:'',        parser_torrent_type:'jackett' } },
+        { base: 'lampa_app',          name: 'Lampa.app',         settings:{ url:'lampa.app',            key:'',        parser_torrent_type:'jackett' } },
+        { base: 'jacred_pro',         name: 'Jacred.pro',        settings:{ url:'jacred.pro',           key:'',        parser_torrent_type:'jackett' } },
+        { base: 'jacred_viewbox_dev', name: 'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
     ];
 
-    /* --- UI / CSS tweaks --- */
+    /* UI / CSS tweaks */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                .settings__content,
-                .selectbox__content.layer--height {
+                .settings__content, .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -48,26 +47,15 @@
                     visibility: visible !important;
                     opacity: 1 !important;
                 }
-                .settings-folder.selector,
-                .settings-param.selector,
-                .settings-param__value.selector,
-                .selectbox-item.selector {
+                .settings-folder.selector, .settings-param.selector, .settings-param__value.selector, .selectbox-item.selector {
                     border-radius: 1em !important;
                     margin-bottom: 0.3em !important;
                     transition: background 0.25s ease !important;
                 }
-                .settings-folder.selector.focus,
-                .settings-folder.selector.hover,
-                .settings-folder.selector.traverse,
-                .settings-param.selector.focus,
-                .settings-param.selector.hover,
-                .settings-param.selector.traverse,
-                .settings-param__value.selector.focus,
-                .settings-param__value.selector.hover,
-                .settings-param__value.selector.traverse,
-                .selectbox-item.selector.focus,
-                .selectbox-item.selector.hover,
-                .selectbox-item.selector.traverse {
+                .settings-folder.selector.focus, .settings-folder.selector.hover, .settings-folder.selector.traverse,
+                .settings-param.selector.focus, .settings-param.selector.hover, .settings-param.selector.traverse,
+                .settings-param__value.selector.focus, .settings-param__value.selector.hover, .settings-param__value.selector.traverse,
+                .selectbox-item.selector.focus, .selectbox-item.selector.hover, .selectbox-item.selector.traverse {
                     background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                     border-radius: 1em !important;
                 }
@@ -79,7 +67,7 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Торрент-карточки: фон через псевдоэлемент со скруглением, значок просмотрено поверх */
+            /* Torrent card background via pseudo element (preserve viewed icon) */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
@@ -96,32 +84,19 @@
                 pointer-events: none !important;
             }
             .torrent-item > * { position: relative !important; z-index: 1 !important; }
-            .torrent-item__viewed {
-                position: absolute !important;
-                top: 8px !important;
-                right: 8px !important;
-                z-index: 2 !important;
-                pointer-events: none !important;
-            }
+            .torrent-item__viewed { position: absolute !important; top: 8px !important; right: 8px !important; z-index: 2 !important; pointer-events: none !important; }
 
-            .watched-history {
-                position: relative !important;
-                border-radius: 0.9em !important;
-            }
+            .watched-history { position: relative !important; border-radius: 0.9em !important; }
 
-            .torrent-filter .selector.hover,
-            .torrent-filter .selector.focus,
-            .torrent-filter .selector.traverse {
+            /* filter buttons hover */
+            .torrent-filter .selector.hover, .torrent-filter .selector.focus, .torrent-filter .selector.traverse {
                 background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                 border-radius: 1em !important;
                 color: #fff !important;
             }
 
-            /* Кнопки на карточке: скругление в покое + мгновенное небольшое изменение на hover без анимации радиуса */
-            .full-start-new__buttons .full-start__button.selector {
-                border-radius: 1em !important;
-                transition: background 0.18s ease !important;
-            }
+            /* full-start buttons: base rounded, hover small rounded without animation */
+            .full-start-new__buttons .full-start__button.selector { border-radius: 1em !important; transition: background 0.18s ease !important; }
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
@@ -132,14 +107,16 @@
             .full-start-new__buttons .full-start__button.selector.hover svg,
             .full-start-new__buttons .full-start__button.selector.focus svg,
             .full-start-new__buttons .full-start__button.selector.traverse svg {
-                color: #fff !important;
-                fill: #fff !important;
+                color: #fff !important; fill: #fff !important;
             }
+
+            /* parser select button style */
+            .simple-button--filter.filter--parser { cursor: pointer !important; }
         `;
         document.head.appendChild(style);
     }
 
-    /* --- Reload button that forces hard reload with fallbacks --- */
+    /* Hard reload button with fallbacks */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -152,77 +129,63 @@
 
         btn.addEventListener('hover:enter', () => {
             const href = window.location.href;
-            let triedReload = false;
-
-            try {
-                triedReload = true;
-                window.location.reload();
-            } catch (e) {}
-
+            try { window.location.reload(); } catch (e) {}
             setTimeout(() => {
                 try { window.location.replace(href); } catch (e) {
                     try { window.location.href = href; } catch (_) {}
                 }
-            }, triedReload ? 250 : 0);
+            }, 250);
         });
 
         headActions.appendChild(btn);
     }
 
-    /* --- Parser selection UI helper --- */
-    function showParserMenu(reason) {
-        const statusesPromise = Promise.all(parsersInfo.map(async p => {
+    /* Show parser menu — items use colored span (green for available, red for unavailable) */
+    async function showParserMenu(reason) {
+        const statuses = await Promise.all(parsersInfo.map(async p => {
             const ok = await checkAvailability(p.settings.url);
             return { ...p, ok };
         }));
 
-        statusesPromise.then(statuses => {
-            const items = statuses.map(s => ({
-                title: `${s.name}${s.ok ? ' (OK)' : ' (Нет)'}`,
-                base: s.base,
-                ok: s.ok,
-                selected: Lampa.Storage.get('lme_url_two') === s.base
-            }));
+        const items = statuses.map(s => ({
+            title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
+            base: s.base,
+            selected: Lampa.Storage.get('lme_url_two') === s.base
+        }));
 
-            Lampa.Select.show({
-                title: `Каталог парсеров`,
-                subtitle: reason ? reason : '',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
-
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        } else {
-                            // fallback: force reload
-                            setTimeout(() => { try { window.location.reload(); } catch (_) { window.location.href = window.location.href; } }, 200);
-                        }
-                    } catch (err) { /* noop */ }
-                }
-            });
+        Lampa.Select.show({
+            title: 'Каталог парсеров',
+            subtitle: reason || '',
+            items,
+            onSelect: (a) => {
+                Lampa.Storage.set('lme_url_two', a.base);
+                applySelectedParser(a.base);
+                const el = document.getElementById('parser-current');
+                const picked = parsersInfo.find(p => p.base === a.base);
+                if (el && picked) el.textContent = picked.name;
+                try {
+                    const active = Lampa.Activity.active();
+                    if (active && active.activity && typeof active.activity.refresh === 'function') {
+                        active.activity.refresh();
+                    } else {
+                        setTimeout(() => { try { window.location.reload(); } catch (_) { window.location.href = window.location.href; } }, 200);
+                    }
+                } catch (err) { /* noop */ }
+            }
         });
     }
 
-    /* --- Change parser values in storage --- */
-    function changeParser() {
-        const selected = Lampa.Storage.get('lme_url_two');
-        const found = parsersInfo.find(p => p.base === selected);
-        if (found) {
-            const s = found.settings;
-            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
-            Lampa.Storage.set(type + '_url', s.url);
-            Lampa.Storage.set(type + '_key', s.key);
-            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
-        }
+    function applySelectedParser(base) {
+        const found = parsersInfo.find(p => p.base === base);
+        if (!found) return;
+        const s = found.settings;
+        const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
+        Lampa.Storage.set(type + '_url', s.url);
+        Lampa.Storage.set(type + '_key', s.key);
+        Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
     }
 
-    /* --- checkAvailability helper --- */
+    /* checkAvailability helper */
     async function checkAvailability(url) {
         try {
             await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
@@ -232,10 +195,9 @@
         }
     }
 
-    /* --- Mount parser selector button in the filter bar (existing behavior) --- */
+    /* Mount parser button in filter bar */
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
-
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
         const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
 
@@ -246,32 +208,25 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', async () => {
-            showParserMenu();
+            await showParserMenu();
         });
     }
 
-    /* --- Observer that detects parser connection error UI and opens parser menu --- */
+    /* Observe for UI error message and open parser menu automatically when matching text appears */
     function startErrorObserver() {
-        const SEARCH_TEXTS = [
-            'не удалось подключиться к парсеру',
-            'не удалось подключиться',
-            'ошибка парсера',
-            'parser connection failed',
-            'failed to connect to parser'
-        ];
+        const TARGET_TEXT = 'Ошибка подключения. Парсер не отвечает на запрос';
+        const ALT_TEXT = 'Здесь пусто Ошибка подключения. Парсер не отвечает на запрос';
 
-        const foundErrorText = (txt) => {
-            if (!txt) return false;
-            const lower = txt.toLowerCase();
-            return SEARCH_TEXTS.some(s => lower.indexOf(s) !== -1);
-        };
-
-        const handleNode = (node) => {
+        const checkNode = (node) => {
             try {
-                const text = node.innerText || node.textContent || '';
-                if (foundErrorText(text)) {
-                    // Немедленно показать меню выбора парсеров с подсказкой
-                    showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
+                const text = (node.innerText || node.textContent || '').trim();
+                if (!text) return;
+                if (text.indexOf(TARGET_TEXT) !== -1 || text.indexOf(ALT_TEXT) !== -1) {
+                    // avoid spamming: show menu once per detection by briefly marking node
+                    if (!node.__parser_menu_shown) {
+                        node.__parser_menu_shown = true;
+                        showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
+                    }
                 }
             } catch (e) {}
         };
@@ -280,20 +235,18 @@
             for (const m of muts) {
                 if (m.addedNodes && m.addedNodes.length) {
                     m.addedNodes.forEach(n => {
-                        if (n.nodeType === 1) handleNode(n);
-                        if (n.querySelectorAll) {
-                            n.querySelectorAll('*').forEach(el => handleNode(el));
-                        }
+                        if (n.nodeType === 1) checkNode(n);
+                        if (n.querySelectorAll) n.querySelectorAll('*').forEach(el => checkNode(el));
                     });
                 }
-                if (m.target && m.target.nodeType === 1) handleNode(m.target);
+                if (m.target && m.target.nodeType === 1) checkNode(m.target);
             }
         });
 
         obs.observe(document.body, { childList: true, subtree: true, characterData: true });
     }
 
-    /* --- Parser observer to mount button when filter appears --- */
+    /* Parser observer to mount button when filter appears */
     function startParserObserver() {
         const obs = new MutationObserver(() => {
             const container = document.querySelector('.torrent-filter');
@@ -302,12 +255,11 @@
             }
         });
         obs.observe(document.body, { childList: true, subtree: true });
-
         const first = document.querySelector('.torrent-filter');
         if (first) mountParserButton(first);
     }
 
-    /* --- Seed colorization --- */
+    /* Seed colorization */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -328,14 +280,16 @@
         recolorSeedNumbers();
     }
 
-    /* --- Init plugin --- */
+    /* Init plugin */
     function initMenuPlugin() {
         applyStyles();
         addReloadButton();
         startParserObserver();
         startErrorObserver();
         startSeedsObserver();
-        changeParser();
+        // apply currently selected parser to storage on start
+        const selected = Lampa.Storage.get('lme_url_two');
+        if (selected) applySelectedParser(selected);
     }
 
     function registerMenu() {
@@ -343,13 +297,12 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.4',
+                version: '10.5',
                 author: 'maxi3219',
-                description: 'UI tweaks + жесткий перезапуск + авто-открытие выбора парсеров при ошибке подключения',
+                description: 'UI tweaks + жесткий перезапуск + авто-открытие выбора парсеров при ошибке подключения (цвет статуса сохранён)',
                 init: initMenuPlugin
             });
         } else {
-            // fallback if app.plugins unavailable
             initMenuPlugin();
         }
     }
