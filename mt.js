@@ -15,17 +15,6 @@
         { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
     ];
 
-    // Флаг: кнопка разрешена только после входа в «Торренты»
-    let onlyAfterEnterTorrents = false;
-
-    // Строгая проверка DOM на торрентовый экран
-    function inTorrentsDOM() {
-        const filter = document.querySelector('.torrent-filter');
-        if (!filter) return false;
-        const hasItems = !!document.querySelector('.torrent-item, .torrents__body, .torrents-list');
-        return hasItems;
-    }
-
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -89,11 +78,12 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .filter--parser.selector { cursor: pointer !important; }
 
+            /* Торрент-карточки: фон через псевдоэлемент со скруглением, значок просмотрено поверх */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
                 background: transparent !important;
-                overflow: visible !important;
+                overflow: visible !important; /* чтобы значок не обрезался */
             }
             .torrent-item::before {
                 content: '' !important;
@@ -118,6 +108,7 @@
                 border-radius: 0.9em !important;
             }
 
+            /* Градиент при наведении на кнопки фильтра */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -126,15 +117,16 @@
                 color: #fff !important;
             }
 
+            /* Кнопки на карточке: скругление в покое + мгновенное небольшое изменение на hover без анимации радиуса */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: 1em !important;
-                transition: background 0.18s ease !important;
+                border-radius: 1em !important;                   /* убираем квадратность в покое */
+                transition: background 0.18s ease !important;     /* не анимируем радиус */
             }
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
-                border-radius: 0.5em !important;
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important; /* более синий справа */
+                border-radius: 0.5em !important;                  /* меньшее скругление при наведении — без анимации */
                 color: #fff !important;
             }
             .full-start-new__buttons .full-start__button.selector.hover svg,
@@ -161,10 +153,22 @@
             const href = window.location.href;
             let triedReload = false;
 
-            try { triedReload = true; window.location.reload(); } catch (e) {}
+            try {
+                triedReload = true;
+                window.location.reload();
+                // Если окружение игнорирует reload, ниже идут жесткие фоллбеки
+            } catch (e) {
+                // игнор
+            }
+
+            // Фоллбек: жёсткая подмена URL (часто срабатывает в WebView на ТВ)
             setTimeout(() => {
-                try { window.location.replace(href); }
-                catch (e) { try { window.location.href = href; } catch (_) {} }
+                try {
+                    window.location.replace(href);
+                } catch (e) {
+                    // Последний фоллбек: прямое присвоение href
+                    try { window.location.href = href; } catch (_) {}
+                }
             }, triedReload ? 250 : 0);
         });
 
@@ -193,8 +197,6 @@
     }
 
     function mountParserButton(container) {
-        if (!onlyAfterEnterTorrents) return;
-        if (!inTorrentsDOM()) return;
         if (!container || container.querySelector('#parser-selectbox')) return;
 
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
@@ -222,141 +224,53 @@
                 title: 'Каталог парсеров',
                 items,
                 onSelect: (a) => {
-                    // 1) Сохраняем и применяем выбранный парсер
                     Lampa.Storage.set('lme_url_two', a.base);
                     changeParser();
-
-                    // 2) Обновляем подпись на кнопке (если не успела исчезнуть)
                     const el = document.getElementById('parser-current');
                     const picked = parsersInfo.find(p => p.base === a.base);
                     if (el && picked) el.textContent = picked.name;
 
-                    // 3) Гарантируем контекст
-                    onlyAfterEnterTorrents = true;
-
-                    // 4) Короткий ремоунт-луп (до 5 сек): вернуть кнопку, если DOM перерисовался
-                    const started = Date.now();
-                    (function remountLoop(){
-                        if (!onlyAfterEnterTorrents) return;
-                        const cont = document.querySelector('.torrent-filter');
-                        const exists = !!document.getElementById('parser-selectbox');
-                        if (cont && !exists && inTorrentsDOM()) {
-                            mountParserButton(cont);
+                    try {
+                        const active = Lampa.Activity.active();
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
                         }
-                        if (Date.now() - started < 5000) {
-                            setTimeout(remountLoop, 200);
-                        }
-                    })();
-
-                    // 5) Инициируем рефреш торрентов корректно:
-                    //    а) если есть наша кнопка перезагрузки — триггерим её (на ТВ/ПК это самый стабильный способ)
-                    //    б) иначе жёсткий reload страницы как фоллбек
-                    setTimeout(() => {
-                        const reloadBtn = document.getElementById('MRELOAD');
-                        if (reloadBtn) {
-                            reloadBtn.dispatchEvent(new Event('hover:enter', { bubbles: true }));
-                        } else {
-                            try { window.location.reload(); } catch (_) {}
-                        }
-                    }, 250);
-
-                    // ВАЖНО: не дергаем activity.refresh(), он сносит DOM и кнопку в твоей сборке
+                    } catch (err) { /* noop */ }
                 }
             });
         });
     }
 
-    // Хук меню источника: включаем/выключаем контекст
-    function hookSourceMenuEnter() {
-        document.addEventListener('hover:enter', (e) => {
-            const t = e?.target;
-            if (!t) return;
-            const item = t.closest('.selectbox-item');
-            if (!item) return;
-
-            const titleEl = item.querySelector('.selectbox-item__title');
-            const title = (titleEl ? titleEl.textContent : t.textContent || '').trim().toLowerCase();
-
-            if (title === 'торренты') {
-                onlyAfterEnterTorrents = true;
-                waitAndMountInTorrentFilter();
-            } else {
-                onlyAfterEnterTorrents = false;
-                const btn = document.getElementById('parser-selectbox');
-                if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-            }
-        }, true);
-    }
-
-    function waitAndMountInTorrentFilter() {
-        const container = document.querySelector('.torrent-filter');
-        if (container) {
-            setTimeout(() => {
-                if (onlyAfterEnterTorrents && !container.querySelector('#parser-selectbox') && inTorrentsDOM()) {
-                    mountParserButton(container);
-                }
-            }, 180);
-            return;
-        }
-        const start = Date.now();
-        const MAX_WAIT = 8000;
-        const obs = new MutationObserver(() => {
-            const cont = document.querySelector('.torrent-filter');
-            if (cont) {
-                obs.disconnect();
-                setTimeout(() => {
-                    if (onlyAfterEnterTorrents && !cont.querySelector('#parser-selectbox') && inTorrentsDOM()) {
-                        mountParserButton(cont);
-                    }
-                }, 180);
-            } else if (Date.now() - start > MAX_WAIT) {
-                obs.disconnect();
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-    }
-
-    // Наблюдатель: монтирует только при включённом флаге и реальном торрентовом DOM
     function startParserObserver() {
         const obs = new MutationObserver(() => {
             const container = document.querySelector('.torrent-filter');
-            const exists = !!document.getElementById('parser-selectbox');
-
-            if (!onlyAfterEnterTorrents) {
-                if (exists) {
-                    const btn = document.getElementById('parser-selectbox');
-                    if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-                }
-                return;
-            }
-
-            if (onlyAfterEnterTorrents && container && !exists && inTorrentsDOM()) {
+            if (container && !container.querySelector('#parser-selectbox')) {
                 mountParserButton(container);
             }
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
         const first = document.querySelector('.torrent-filter');
-        if (onlyAfterEnterTorrents && first && !first.querySelector('#parser-selectbox') && inTorrentsDOM()) {
-            mountParserButton(first);
-        }
+        if (first) mountParserButton(first);
     }
 
     function initMenuPlugin() {
-        const boot = () => {
-            applyStyles();
-            addReloadButton();
-            hookSourceMenuEnter();
-            startParserObserver();
-            changeParser();
-        };
-
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', e => {
-                if (e.type === 'ready') boot();
+                if (e.type === 'ready') {
+                    applyStyles();
+                    addReloadButton();
+                    startParserObserver();
+                    changeParser();
+                }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', boot);
+            document.addEventListener('DOMContentLoaded', () => {
+                applyStyles();
+                addReloadButton();
+                startParserObserver();
+                changeParser();
+            });
         }
     }
 
@@ -365,9 +279,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.7',
+                version: '10.3',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + строгий монтаж кнопки только после входа в Торренты; авто-переподключение после выбора парсера',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
