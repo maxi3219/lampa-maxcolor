@@ -7,12 +7,12 @@
     const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
     const parsersInfo = [
-        { base: 'jacred_xyz', name: 'Jacred.xyz', settings: { url: 'jacred.xyz', key: '', parser_torrent_type: 'jackett' } },
-        { base: 'jr_maxvol_pro', name: 'Jr.maxvol.pro', settings: { url: 'jr.maxvol.pro', key: '', parser_torrent_type: 'jackett' } },
-        { base: 'jacred_my_to', name: 'Jacred.my.to', settings: { url: 'jacred.my.to', key: '', parser_torrent_type: 'jackett' } },
-        { base: 'lampa_app', name: 'Lampa.app', settings: { url: 'lampa.app', key: '', parser_torrent_type: 'jackett' } },
-        { base: 'jacred_pro', name: 'Jacred.pro', settings: { url: 'jacred.pro', key: '', parser_torrent_type: 'jackett' } },
-        { base: 'jacred_viewbox_dev', name: 'Viewbox', settings: { url: 'jacred.viewbox.dev', key: 'viewbox', parser_torrent_type: 'jackett' } }
+        { base: 'jacred_xyz',        name: 'Jacred.xyz',      settings: { url: 'jacred.xyz',         key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jr_maxvol_pro',     name: 'Jr.maxvol.pro',   settings: { url: 'jr.maxvol.pro',      key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_my_to',      name: 'Jacred.my.to',    settings: { url: 'jacred.my.to',       key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'lampa_app',         name: 'Lampa.app',       settings: { url: 'lampa.app',          key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_pro',        name: 'Jacred.pro',      settings: { url: 'jacred.pro',         key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
     ];
 
     function applyStyles() {
@@ -76,11 +76,9 @@
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
-            .m-reload-screen { cursor: pointer !important; }
-            .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Сохранение исходного внешнего вида рамок — только скругления там, где нужно */
+            /* Торрент-карточки: только базовое скругление, рамки по умолчанию не трогаем */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.3em !important;
@@ -101,7 +99,7 @@
                 pointer-events: none !important;
             }
 
-            /* Градиент при наведении на кнопки в блоке фильтров */
+            /* Градиент при наведении на кнопки фильтра */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -110,24 +108,17 @@
                 color: #fff !important;
             }
 
-            /*
-             1) Для кнопок .full-start__button: в состоянии покоя задаём скругление (1em) —
-                это убирает "квадратность" в покое.
-             2) Убираем анимацию изменения border-radius: оставляем только плавное появление фона,
-                чтобы скругление применялось мгновенно при наведении.
-            */
+            /* Кнопки на карточке: скругление в покое + мгновенное небольшое изменение на hover без анимации радиуса */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: 1em !important; /* скругление в покое согласно просьбе */
-                transition: background 0.18s ease !important; /* НЕ включаем border-radius в transition */
-                -webkit-transition: background 0.18s ease !important;
+                border-radius: 1em !important;                   /* убираем квадратность в покое */
+                transition: background 0.18s ease !important;     /* не анимируем радиус */
             }
 
-            /* Hover: градиент с более синим правым концом, и border-radius меняется мгновенно (без анимации) */
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
-                border-radius: 0.6em !important; /* мгновенное уменьшение радиуса (без анимации) */
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important; /* более синий справа */
+                border-radius: 0.5em !important;                  /* меньшее скругление при наведении — без анимации */
                 color: #fff !important;
             }
 
@@ -150,7 +141,26 @@
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
         btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"/></svg>`;
-        btn.addEventListener('click', () => location.reload());
+
+        btn.addEventListener('hover:enter', () => {
+            const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
+            const isTV = /SmartTV|TV|Tizen|Web0S|NetCast|HbbTV|Android TV|AFTT|AFTM|AFTB/i.test(ua);
+
+            if (isTV && window.Lampa && Lampa.Activity && typeof Lampa.Activity.active === 'function') {
+                const active = Lampa.Activity.active();
+                if (active && active.activity && typeof active.activity.refresh === 'function') {
+                    try { active.activity.refresh(); } catch (e) { try { location.reload(); } catch (_) {} }
+                } else {
+                    try { location.reload(); } catch (_) {}
+                }
+            } else {
+                try { location.reload(); } catch (_) {
+                    const active = Lampa.Activity.active && Lampa.Activity.active();
+                    if (active && active.activity && typeof active.activity.refresh === 'function') active.activity.refresh();
+                }
+            }
+        });
+
         headActions.appendChild(btn);
     }
 
@@ -214,7 +224,7 @@
                         if (active && active.activity && typeof active.activity.refresh === 'function') {
                             active.activity.refresh();
                         }
-                    } catch (err) { console.error(err); }
+                    } catch (err) { /* noop */ }
                 }
             });
         });
@@ -258,9 +268,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.0',
+                version: '10.2',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера + UI tweaks',
+                description: 'Меню + reload (ПК: перезагрузка, ТВ: refresh активности) + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
