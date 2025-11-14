@@ -78,20 +78,26 @@
 
     /* === Кнопка Reload === */
     function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
+        if(document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
-        if (!headActions) { setTimeout(addReloadButton, 1000); return; }
+        if(!headActions){ setTimeout(addReloadButton,1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
         btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
-        btn.addEventListener('click', () => location.reload());
+        btn.addEventListener('click',()=>location.reload());
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер (автовставка при появлении torrent-filter) === */
-    const PARSERS = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+    /* === Парсеры и UI кнопки === */
+    const PARSERS = {
+        'Jacred.xyz': 'https://jacred.xyz/api/torrents',
+        'Jr.maxvol.pro': 'https://jr.maxvol.pro/api/torrents',
+        'Jacred.my.to': 'https://jacred.my.to/api/torrents',
+        'Lampa.app': 'https://lampa.app/api/torrents',
+        'Jacred.pro': 'https://jacred.pro/api/torrents'
+    };
 
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
@@ -105,7 +111,7 @@
         btn.addEventListener('hover:enter', () => {
             Lampa.Select.show({
                 title: 'Выбор парсера',
-                items: PARSERS.map(p => ({
+                items: Object.keys(PARSERS).map(p => ({
                     title: p,
                     selected: Lampa.Storage.get('parser_select') === p
                 })),
@@ -124,13 +130,6 @@
         });
     }
 
-    function ensureParserButtonOnce() {
-        const container = document.querySelector('.torrent-filter');
-        if (container) mountParserButton(container);
-        else setTimeout(ensureParserButtonOnce, 300);
-    }
-
-    /* Наблюдатель: следит за появлением/перерисовкой .torrent-filter и повторно монтирует кнопку */
     function startParserObserver() {
         const obs = new MutationObserver(() => {
             const container = document.querySelector('.torrent-filter');
@@ -139,74 +138,96 @@
             }
         });
         obs.observe(document.body, { childList: true, subtree: true });
-        ensureParserButtonOnce();
+
+        // первичная попытка
+        const first = document.querySelector('.torrent-filter');
+        if (first) mountParserButton(first);
+    }
+
+    /* === Подмена источника торрентов === */
+    const origBuild = (Lampa && Lampa.Torrent && Lampa.Torrent.build) ? Lampa.Torrent.build : null;
+
+    function hookTorrentBuild() {
+        if (!origBuild || !Lampa || !Lampa.Torrent) return;
+        Lampa.Torrent.build = function(object){
+            try{
+                const parser = Lampa.Storage.get('parser_select') || 'Jacred.xyz';
+                if (PARSERS[parser]) {
+                    // Подменяем URL источника торрентов на выбранный парсер
+                    object.url = PARSERS[parser];
+                }
+            } catch(e){ console.error('Parser switch error:', e); }
+            return origBuild.call(this, object);
+        };
     }
 
     function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', event => {
-                if (event.type === 'ready') {
+        if(window.Lampa && typeof Lampa.Listener==='object'){
+            Lampa.Listener.follow('app', event=>{
+                if(event.type==='ready'){
                     applyCustomMenuStyles();
                     addReloadButton();
                     startParserObserver();
+                    hookTorrentBuild();
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded',()=>{
                 applyCustomMenuStyles();
                 addReloadButton();
                 startParserObserver();
+                hookTorrentBuild();
             });
         }
     }
 
     function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+        if(window.app && app.plugins && typeof app.plugins.add==='function'){
             app.plugins.add({
-                id: plugin_id_menu,
-                name: plugin_name_menu,
-                version: '7.6',
-                author: 'maxi3219',
-                description: 'Меню + зеленые раздающие + reload + кнопка парсер',
-                init: initMenuPlugin
+                id:plugin_id_menu,
+                name:plugin_name_menu,
+                version:'8.1',
+                author:'maxi3219',
+                description:'Меню + зеленые раздающие + reload + выбор парсера',
+                init:initMenuPlugin
             });
         } else { initMenuPlugin(); }
     }
 
     registerMenu();
 
-    /* === Плагин MaxColor === */
-    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
+    /* === Плагин MaxColor — перекраска сидов === */
+    const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
 
-    function recolorSeedNumbers() {
-        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
-        seedBlocks.forEach(block => {
-            const span = block.querySelector('span');
-            if (!span) return;
-            const num = parseInt(span.textContent);
-            if (isNaN(num)) return;
-            let color = COLORS.low;
-            if (num > 10) color = COLORS.high;
-            else if (num >= 5) color = COLORS.mid;
-            span.style.color = color;
-            span.style.fontWeight = 'bold';
+    function recolorSeedNumbers(){
+        const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block=>{
+            const span=block.querySelector('span');
+            if(!span) return;
+            const num=parseInt(span.textContent);
+            if(isNaN(num)) return;
+            let color=COLORS.low;
+            if(num>10) color=COLORS.high;
+            else if(num>=5) color=COLORS.mid;
+            span.style.color=color;
+            span.style.fontWeight='bold';
         });
     }
 
-    function startObserver() {
-        const obs = new MutationObserver(() => recolorSeedNumbers());
-        obs.observe(document.body, { childList: true, subtree: true });
+    function startObserver(){
+        const obs=new MutationObserver(()=>recolorSeedNumbers());
+        obs.observe(document.body,{childList:true,subtree:true});
         recolorSeedNumbers();
     }
 
-    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+    if(window.app && app.plugins && typeof app.plugins.add==='function'){
         app.plugins.add({
-            id: 'maxcolor',
-            name: 'MaxColor',
-            version: '2.0',
-            author: 'maxi3219',
-            description: 'Цвет раздающих',
-            init: startObserver
+            id:'maxcolor',
+            name:'MaxColor',
+            version:'2.0',
+            author:'maxi3219',
+            description:'Цвет раздающих',
+            init:startObserver
         });
     } else {
         startObserver();
