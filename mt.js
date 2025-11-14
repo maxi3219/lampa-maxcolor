@@ -24,6 +24,7 @@
             .head__body svg, .head__body svg use { fill:#fff !important; color:#fff !important; }
             .filter--parser.selector { cursor:pointer !important; }
 
+            /* Торрент-подложка со скруглением через псевдоэлемент, значок "просмотрено" поверх */
             .torrent-item {
                 position:relative !important;
                 border-radius:0.9em !important;
@@ -42,6 +43,7 @@
             .torrent-item > * { position:relative !important; z-index:1 !important; }
             .torrent-item__viewed { position:absolute !important; top:8px !important; right:8px !important; z-index:2 !important; }
 
+            /* Кнопки карточки: скругление в покое; на hover — меньший радиус, без анимации скругления */
             .full-start-new__buttons .full-start__button.selector { border-radius:1em !important; transition:background 0.18s ease !important; }
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
@@ -154,13 +156,106 @@
     /* ===================== ERROR DETECTION ===================== */
     function startErrorObserver(){
         const TARGET_TEXT='Здесь пусто Ошибка подключения. Парсер не отвечает на запрос';
+
         const triggerMenu=()=>{ showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.'); };
+
         const checkNodeText=(node)=>{
             try{ const t=(node.innerText||node.textContent||'').trim(); return t.includes(TARGET_TEXT); }
             catch{ return false; }
         };
+
+        // MutationObserver: ловим появление текста ошибки
         const obs=new MutationObserver(muts=>{
             for(const m of muts){
                 m.addedNodes.forEach(n=>{
                     if(n.nodeType===1){
-                        if(checkNodeText(n
+                        if(checkNodeText(n)) triggerMenu();
+                        if(n.querySelectorAll){
+                            n.querySelectorAll('*').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
+                        }
+                    } else if(n.nodeType===3){
+                        const parent = m.target && m.target.nodeType===1 ? m.target : document.body;
+                        if(checkNodeText(parent)) triggerMenu();
+                    }
+                });
+                if(m.target && m.target.nodeType===1){
+                    if(checkNodeText(m.target)) triggerMenu();
+                }
+            }
+        });
+        obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+
+        // Глобальные ошибки/отказы промисов — проверяем DOM чуть позже
+        window.addEventListener('error', ()=>{ setTimeout(()=>{
+            document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
+        },200); });
+        window.addEventListener('unhandledrejection', ()=>{ setTimeout(()=>{
+            document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
+        },200); });
+
+        // Если экран ошибки уже открыт при старте
+        setTimeout(()=>{ document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); }); },500);
+    }
+
+    /* ===================== SEEDS ===================== */
+    function recolorSeedNumbers() {
+        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block => {
+            const span = block.querySelector('span');
+            if (!span) return;
+            const num = parseInt(span.textContent);
+            if (isNaN(num)) return;
+            let color = SEED_COLORS.low;
+            if (num > 10) color = SEED_COLORS.high;
+            else if (num >= 5) color = SEED_COLORS.mid;
+            span.style.color = color;
+            span.style.fontWeight = 'bold';
+        });
+    }
+    function startSeedsObserver() {
+        const obs = new MutationObserver(() => recolorSeedNumbers());
+        obs.observe(document.body, { childList: true, subtree: true });
+        recolorSeedNumbers();
+    }
+
+    /* ===================== INIT ===================== */
+    function initMenuPlugin() {
+        applyStyles();
+        addReloadButton();
+        startParserObserver();
+        startErrorObserver();
+        startSeedsObserver();
+
+        // Применить выбранный парсер при старте
+        const selected = Lampa.Storage.get('lme_url_two');
+        if (selected) applySelectedParser(selected);
+
+        // Если выбран Viewbox и это ТВ — сразу проверим доступность и, если недоступен, откроем меню
+        const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
+        const isTV = /SmartTV|TV|Tizen|Web0S|NetCast|HbbTV|Android TV|AFTT|AFTM|AFTB/i.test(ua);
+        const curBase = Lampa.Storage.get('lme_url_two');
+        if (isTV && curBase === 'jacred_viewbox_dev') {
+            checkAvailability('jacred.viewbox.dev').then(ok => {
+                if (!ok) showParserMenu('Выбранный парсер недоступен на ТВ. Выберите другой источник.');
+            });
+        }
+    }
+
+    function registerMenu() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                version: '10.8',
+                author: 'maxi3219',
+                description: 'Жёсткий перезапуск + авто-меню парсеров при ошибке (точный текст) + индикатор доступности (зелёный/красный) + UI',
+                init: initMenuPlugin
+            });
+        } else {
+            initMenuPlugin();
+        }
+    }
+
+    registerMenu();
+
+})();
