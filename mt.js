@@ -15,6 +15,7 @@
         { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
     ];
 
+    /* --- UI / CSS tweaks --- */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -83,7 +84,7 @@
                 position: relative !important;
                 border-radius: 0.9em !important;
                 background: transparent !important;
-                overflow: visible !important; /* чтобы значок не обрезался */
+                overflow: visible !important;
             }
             .torrent-item::before {
                 content: '' !important;
@@ -108,7 +109,6 @@
                 border-radius: 0.9em !important;
             }
 
-            /* Градиент при наведении на кнопки фильтра */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -119,14 +119,14 @@
 
             /* Кнопки на карточке: скругление в покое + мгновенное небольшое изменение на hover без анимации радиуса */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: 1em !important;                   /* убираем квадратность в покое */
-                transition: background 0.18s ease !important;     /* не анимируем радиус */
+                border-radius: 1em !important;
+                transition: background 0.18s ease !important;
             }
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important; /* более синий справа */
-                border-radius: 0.5em !important;                  /* меньшее скругление при наведении — без анимации */
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
+                border-radius: 0.5em !important;
                 color: #fff !important;
             }
             .full-start-new__buttons .full-start__button.selector.hover svg,
@@ -139,6 +139,7 @@
         document.head.appendChild(style);
     }
 
+    /* --- Reload button that forces hard reload with fallbacks --- */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -156,17 +157,10 @@
             try {
                 triedReload = true;
                 window.location.reload();
-                // Если окружение игнорирует reload, ниже идут жесткие фоллбеки
-            } catch (e) {
-                // игнор
-            }
+            } catch (e) {}
 
-            // Фоллбек: жёсткая подмена URL (часто срабатывает в WebView на ТВ)
             setTimeout(() => {
-                try {
-                    window.location.replace(href);
-                } catch (e) {
-                    // Последний фоллбек: прямое присвоение href
+                try { window.location.replace(href); } catch (e) {
                     try { window.location.href = href; } catch (_) {}
                 }
             }, triedReload ? 250 : 0);
@@ -175,6 +169,47 @@
         headActions.appendChild(btn);
     }
 
+    /* --- Parser selection UI helper --- */
+    function showParserMenu(reason) {
+        const statusesPromise = Promise.all(parsersInfo.map(async p => {
+            const ok = await checkAvailability(p.settings.url);
+            return { ...p, ok };
+        }));
+
+        statusesPromise.then(statuses => {
+            const items = statuses.map(s => ({
+                title: `${s.name}${s.ok ? ' (OK)' : ' (Нет)'}`,
+                base: s.base,
+                ok: s.ok,
+                selected: Lampa.Storage.get('lme_url_two') === s.base
+            }));
+
+            Lampa.Select.show({
+                title: `Каталог парсеров`,
+                subtitle: reason ? reason : '',
+                items,
+                onSelect: (a) => {
+                    Lampa.Storage.set('lme_url_two', a.base);
+                    changeParser();
+                    const el = document.getElementById('parser-current');
+                    const picked = parsersInfo.find(p => p.base === a.base);
+                    if (el && picked) el.textContent = picked.name;
+
+                    try {
+                        const active = Lampa.Activity.active();
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
+                        } else {
+                            // fallback: force reload
+                            setTimeout(() => { try { window.location.reload(); } catch (_) { window.location.href = window.location.href; } }, 200);
+                        }
+                    } catch (err) { /* noop */ }
+                }
+            });
+        });
+    }
+
+    /* --- Change parser values in storage --- */
     function changeParser() {
         const selected = Lampa.Storage.get('lme_url_two');
         const found = parsersInfo.find(p => p.base === selected);
@@ -187,6 +222,7 @@
         }
     }
 
+    /* --- checkAvailability helper --- */
     async function checkAvailability(url) {
         try {
             await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
@@ -196,6 +232,7 @@
         }
     }
 
+    /* --- Mount parser selector button in the filter bar (existing behavior) --- */
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
 
@@ -209,38 +246,54 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', async () => {
-            const statuses = await Promise.all(parsersInfo.map(async p => {
-                const ok = await checkAvailability(p.settings.url);
-                return { ...p, ok };
-            }));
-
-            const items = statuses.map(s => ({
-                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
-                base: s.base,
-                selected: Lampa.Storage.get('lme_url_two') === s.base
-            }));
-
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
-
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        }
-                    } catch (err) { /* noop */ }
-                }
-            });
+            showParserMenu();
         });
     }
 
+    /* --- Observer that detects parser connection error UI and opens parser menu --- */
+    function startErrorObserver() {
+        const SEARCH_TEXTS = [
+            'не удалось подключиться к парсеру',
+            'не удалось подключиться',
+            'ошибка парсера',
+            'parser connection failed',
+            'failed to connect to parser'
+        ];
+
+        const foundErrorText = (txt) => {
+            if (!txt) return false;
+            const lower = txt.toLowerCase();
+            return SEARCH_TEXTS.some(s => lower.indexOf(s) !== -1);
+        };
+
+        const handleNode = (node) => {
+            try {
+                const text = node.innerText || node.textContent || '';
+                if (foundErrorText(text)) {
+                    // Немедленно показать меню выбора парсеров с подсказкой
+                    showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
+                }
+            } catch (e) {}
+        };
+
+        const obs = new MutationObserver(muts => {
+            for (const m of muts) {
+                if (m.addedNodes && m.addedNodes.length) {
+                    m.addedNodes.forEach(n => {
+                        if (n.nodeType === 1) handleNode(n);
+                        if (n.querySelectorAll) {
+                            n.querySelectorAll('*').forEach(el => handleNode(el));
+                        }
+                    });
+                }
+                if (m.target && m.target.nodeType === 1) handleNode(m.target);
+            }
+        });
+
+        obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+
+    /* --- Parser observer to mount button when filter appears --- */
     function startParserObserver() {
         const obs = new MutationObserver(() => {
             const container = document.querySelector('.torrent-filter');
@@ -254,43 +307,7 @@
         if (first) mountParserButton(first);
     }
 
-    function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', e => {
-                if (e.type === 'ready') {
-                    applyStyles();
-                    addReloadButton();
-                    startParserObserver();
-                    changeParser();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyStyles();
-                addReloadButton();
-                startParserObserver();
-                changeParser();
-            });
-        }
-    }
-
-    function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id,
-                name: plugin_name,
-                version: '10.3',
-                author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks',
-                init: initMenuPlugin
-            });
-        } else {
-            initMenuPlugin();
-        }
-    }
-
-    registerMenu();
-
+    /* --- Seed colorization --- */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -305,24 +322,38 @@
             span.style.fontWeight = 'bold';
         });
     }
-
     function startSeedsObserver() {
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
     }
 
-    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-        app.plugins.add({
-            id: 'maxcolor',
-            name: 'MaxColor',
-            version: '2.5',
-            author: 'maxi3219',
-            description: 'Цвет раздающих',
-            init: startSeedsObserver
-        });
-    } else {
+    /* --- Init plugin --- */
+    function initMenuPlugin() {
+        applyStyles();
+        addReloadButton();
+        startParserObserver();
+        startErrorObserver();
         startSeedsObserver();
+        changeParser();
     }
+
+    function registerMenu() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                version: '10.4',
+                author: 'maxi3219',
+                description: 'UI tweaks + жесткий перезапуск + авто-открытие выбора парсеров при ошибке подключения',
+                init: initMenuPlugin
+            });
+        } else {
+            // fallback if app.plugins unavailable
+            initMenuPlugin();
+        }
+    }
+
+    registerMenu();
 
 })();
