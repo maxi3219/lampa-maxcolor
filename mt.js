@@ -1,125 +1,182 @@
 (() => {
+    /* === Плагин RoundedMenu + Reload + Parser === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
-    function logMenu(...args){ try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e){} }
+    function logMenu(...args) { try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e) {} }
 
-    function applyStyles(){
-        if(document.getElementById('roundedmenu-style-menuonly')) return;
-        const style=document.createElement('style');
-        style.id='roundedmenu-style-menuonly';
-        style.innerHTML=`
-            .filter--parser.selector { cursor:pointer; }
-            .selectbox-item.selector.selected { background: linear-gradient(to right,#4dd9a0 1%,#4d8fa8 100%) !important; border-radius:1em; }
-            .selectbox__content.layer--height { border-radius:1em; background: rgba(54,54,54,0.98); box-shadow: 0 8px 24px rgba(0,0,0,0.8); z-index:9999; }
+    /* === Стили меню и иконок === */
+    function applyCustomMenuStyles() {
+        const style = document.createElement('style');
+        style.id = 'roundedmenu-style-menuonly';
+        style.innerHTML = `
+            @media screen and (min-width: 480px) {
+                .settings__content,
+                .selectbox__content.layer--height {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,0.98) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                .settings-folder.selector,
+                .settings-param.selector,
+                .settings-param__value.selector,
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+                .settings-folder.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-folder.selector.traverse,
+                .settings-param.selector.focus,
+                .settings-param.selector.hover,
+                .settings-param.selector.traverse,
+                .settings-param__value.selector.focus,
+                .settings-param__value.selector.hover,
+                .settings-param__value.selector.traverse,
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    border-radius: 1em !important;
+                }
+            }
+
+            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
+            .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
+            .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
+            .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
+            .m-reload-screen { cursor: pointer !important; }
+            .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
+            .filter--parser.selector { cursor: pointer !important; }
         `;
         document.head.appendChild(style);
+        logMenu('Menu styles applied');
     }
 
-    const PARSERS=['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+    /* === Кнопка Reload === */
+    function addReloadButton() {
+        if(document.getElementById('MRELOAD')) return;
+        const headActions = document.querySelector('.head__actions');
+        if(!headActions){ setTimeout(addReloadButton,1000); return; }
 
-    function createParserButton(container){
+        const btn = document.createElement('div');
+        btn.id = 'MRELOAD';
+        btn.className = 'head__action selector m-reload-screen';
+        btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
+        btn.addEventListener('click',()=>location.reload());
+        headActions.appendChild(btn);
+    }
+
+    /* === Кнопка Парсер рядом с Фильтром === */
+    function addParserButton() {
+        const container = document.querySelector('.torrent-filter');
+        if(!container){ setTimeout(addParserButton,500); return; }
         if(container.querySelector('#parser-selectbox')) return;
 
-        const btn=document.createElement('div');
-        btn.id='parser-selectbox';
-        btn.className='simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML=`<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
+        const btn = document.createElement('div');
+        btn.id = 'parser-selectbox';
+        btn.className = 'simple-button simple-button--filter filter--parser selector';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
         container.appendChild(btn);
 
-        btn.addEventListener('click', (e)=>{
-            e.stopPropagation();
-            // удаляем старое меню
-            const oldMenu=document.getElementById('parser-menu');
-            if(oldMenu) oldMenu.remove();
+        const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-            const menu=document.createElement('div');
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            if(document.getElementById('parser-menu')) return;
+
+            const menu = document.createElement('div');
             menu.id='parser-menu';
             menu.className='selectbox__content layer--height';
-            const rect=btn.getBoundingClientRect();
-            menu.style.position='absolute';
-            menu.style.top=(rect.bottom+2)+'px';
-            menu.style.left=rect.left+'px';
-            menu.style.width=rect.width+'px';
             menu.style.maxHeight='300px';
             menu.style.overflowY='auto';
+            menu.style.background='rgba(54,54,54,0.98)';
+            menu.style.borderRadius='1em';
+            menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
+            const rect = btn.getBoundingClientRect();
+            menu.style.position='absolute';
+            menu.style.top = rect.bottom + 'px';
+            menu.style.left = rect.left + 'px';
+            menu.style.width = rect.width + 'px';
             document.body.appendChild(menu);
 
-            PARSERS.forEach(p=>{
-                const item=document.createElement('div');
+            parsers.forEach(p=>{
+                const item = document.createElement('div');
                 item.className='selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
-                item.innerHTML=`<div class="selectbox-item__title">${p}</div>`;
-                item.addEventListener('click', ev=>{
-                    ev.stopPropagation();
+                item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
+                item.addEventListener('click', ()=>{
                     Lampa.Storage.set('parser_select',p);
-                    document.getElementById('parser-current').textContent=p;
-
-                    // Обновляем список торрентов: для фильтров корректно вызвать replace
+                    document.getElementById('parser-current').textContent = p;
                     try{
-                        const active=Lampa.Activity.active();
-                        if(active && active.activity && active.activity.component){
-                            Lampa.Activity.replace({
-                                url: active.activity.url,
-                                title: active.activity.title,
-                                component: active.activity.component
-                            });
+                        const active = Lampa.Activity.active();
+                        if(active && active.activity && typeof active.activity.refresh==='function'){
+                            active.activity.refresh();
                         }
-                    }catch(e){ console.error(e); }
-
+                    }catch(err){ console.error(err); }
                     menu.remove();
                 });
                 menu.appendChild(item);
             });
 
-            // закрытие при клике вне
-            setTimeout(()=>{
-                document.addEventListener('click', function closeMenu(ev){
-                    if(!menu.contains(ev.target)&&!btn.contains(ev.target)){
-                        menu.remove();
-                        document.removeEventListener('click',closeMenu);
-                    }
-                });
-            },10);
+            document.addEventListener('click', ev=>{
+                if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
+            }, {once:true});
         });
     }
 
-    function initPlugin(){
-        applyStyles();
-
-        // Reload кнопка
-        if(!document.getElementById('MRELOAD')){
-            const headActions=document.querySelector('.head__actions');
-            if(headActions){
-                const btn=document.createElement('div');
-                btn.id='MRELOAD';
-                btn.className='head__action selector m-reload-screen';
-                btn.innerHTML='<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>';
-                btn.addEventListener('click',()=>location.reload());
-                headActions.appendChild(btn);
-            }
-        }
-
-        // MutationObserver на фильтры торрентов
-        const obs=new MutationObserver(()=>{
-            document.querySelectorAll('.torrent-filter').forEach(container=>{
-                createParserButton(container);
+    function initMenuPlugin() {
+        if(window.Lampa && typeof Lampa.Listener==='object'){
+            Lampa.Listener.follow('app', event=>{
+                if(event.type==='ready'){
+                    applyCustomMenuStyles();
+                    addReloadButton();
+                    addParserButton();
+                }
             });
-        });
-        obs.observe(document.body,{childList:true,subtree:true});
+        } else {
+            document.addEventListener('DOMContentLoaded',()=>{
+                applyCustomMenuStyles();
+                addReloadButton();
+                addParserButton();
+            });
+        }
     }
 
-    function registerPlugin(){
+    function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.6',author:'maxi3219',description:'Меню + reload + парсер',init:initPlugin});
-        } else initPlugin();
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.5',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
+        } else { initMenuPlugin(); }
     }
 
-    registerPlugin();
+    registerMenu();
 
-    // MaxColor
+    /* === Плагин MaxColor === */
     const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
     function recolorSeedNumbers(){
-        document.querySelectorAll('.torrent-item__seeds').forEach(block=>{
+        const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
+        seedBlocks.forEach(block=>{
             const span=block.querySelector('span');
             if(!span) return;
             const num=parseInt(span.textContent);
@@ -138,6 +195,5 @@
     }
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
         app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
-    } else startObserver();
-
+    } else { startObserver(); }
 })();
