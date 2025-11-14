@@ -4,10 +4,8 @@
     const plugin_id = 'roundedmenu';
     const plugin_name = 'RoundedMenu';
 
-    /* === Палитра для сидов === */
     const SEED_COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
 
-    /* === Каталог парсеров (объединённый + Viewbox) === */
     const parsersInfo = [
         { base:'jacred_xyz',         name:'Jacred.xyz',        settings:{ url:'jacred.xyz',           key:'',        parser_torrent_type:'jackett' } },
         { base:'jr_maxvol_pro',      name:'Jr.maxvol.pro',     settings:{ url:'jr.maxvol.pro',        key:'',        parser_torrent_type:'jackett' } },
@@ -17,7 +15,6 @@
         { base:'jacred_viewbox_dev', name:'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
     ];
 
-    /* === Стили меню + скругления === */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -74,7 +71,8 @@
                     border-radius: 1em !important;
                 }
             }
-            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161д 100%) !important; color: #fff !important; }
+
+            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
@@ -82,24 +80,27 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Скругление карточек торрентов и истории */
             .torrent-item {
                 background-color: rgba(0,0,0,0.3) !important;
-                -webkit-border-radius: 0.9em !important;
-                -moz-border-radius: 0.9em !important;
                 border-radius: 0.9em !important;
+                overflow: hidden !important;
             }
             .watched-history {
                 position: relative !important;
-                -webkit-border-radius: 0.9em !important;
-                -moz-border-radius: 0.9em !important;
                 border-radius: 0.9em !important;
+            }
+
+            .torrent-filter .selector.hover,
+            .torrent-filter .selector.focus,
+            .torrent-filter .selector.traverse {
+                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                border-radius: 1em !important;
+                color: #fff !important;
             }
         `;
         document.head.appendChild(style);
     }
 
-    /* === Reload-кнопка === */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -108,15 +109,11 @@
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
-        btn.innerHTML = `
-            <svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48">
-                <path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/>
-            </svg>`;
+        btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"/></svg>`;
         btn.addEventListener('click', () => location.reload());
         headActions.appendChild(btn);
     }
 
-    /* === Применить выбранный парсер в хранилище Лампы === */
     function changeParser() {
         const selected = Lampa.Storage.get('lme_url_two');
         const found = parsersInfo.find(p => p.base === selected);
@@ -129,7 +126,6 @@
         }
     }
 
-    /* === Проверка доступности (зелёный/красный) === */
     async function checkAvailability(url) {
         try {
             await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
@@ -139,7 +135,6 @@
         }
     }
 
-    /* === Кнопка «Парсер» с автодобавлением и цветовым статусом === */
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
 
@@ -198,7 +193,6 @@
         if (first) mountParserButton(first);
     }
 
-    /* === Инициализация плагина меню + парсер === */
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', e => {
@@ -224,20 +218,21 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.1',
+                version: '9.3',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера (с доступностью) + скругление',
+                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + градиент',
                 init: initMenuPlugin
             });
-        } else { initMenuPlugin(); }
+        } else {
+            initMenuPlugin();
+        }
     }
 
     registerMenu();
 
-    /* === MaxColor: перекраска сидов === */
-    function recolorSeedNumbers(){
+    function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
-        seedBlocks.forEach(block=>{
+        seedBlocks.forEach(block => {
             const span = block.querySelector('span');
             if (!span) return;
             const num = parseInt(span.textContent);
@@ -250,7 +245,7 @@
         });
     }
 
-    function startSeedsObserver(){
+    function startSeedsObserver() {
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
