@@ -80,10 +80,10 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* ВОЗВРАЩАЕМ базовое скругление карточек к прежнему значению (не меняем рамки/тени) */
+            /* Вернули базовое (исходное) состояние для карточек — только скругление если уже было */
             .torrent-item {
                 position: relative !important;
-                border-radius: 0.3em !important; /* вернули как было */
+                border-radius: 0.3em !important;
                 background-color: rgba(0,0,0,0.3) !important;
             }
 
@@ -110,18 +110,18 @@
                 color: #fff !important;
             }
 
-            /* Для кнопок full-start: в покое НЕ меняем скругление (восстанавливаем поведение по умолчанию) */
+            /* full-start buttons: в покое оставляем как было (не задаём скругление) */
             .full-start-new__buttons .full-start__button.selector {
                 border-radius: initial !important;
-                transition: background 0.22s ease, border-radius 0.22s ease !important;
+                transition: background 0.18s ease, border-radius 0.18s ease !important;
             }
 
-            /* При наведении — лёгкое, небольшое скругление (меньше, чем было раньше) и более синий градиент */
+            /* При наведении — очень лёгкое скругление (меньше, чем было ранее) и более синий правый край градиента */
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 10%, #2f6ea8 100%) !important;
-                border-radius: 0.9em !important; /* уменьшено по сравнению с предыдущей версией */
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
+                border-radius: 0.6em !important; /* уменьшенное скругление только на hover */
                 color: #fff !important;
             }
 
@@ -252,9 +252,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.8',
+                version: '9.9',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера + скругления + UI tweaks',
+                description: 'Меню + reload + выбор парсера + мелкие UI tweaks',
                 init: initMenuPlugin
             });
         } else {
