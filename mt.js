@@ -104,39 +104,42 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер в torrent-filter === */
+    /* === Кнопка Парсер в torrent-filter (закрепляем через MutationObserver) === */
     function addParserButton(){
-        const container = document.querySelector('.torrent-filter');
-        if(!container){ setTimeout(addParserButton,500); return; }
-        if(container.querySelector('#parser-selectbox')) return;
+        const observer = new MutationObserver(() => {
+            const container = document.querySelector('.torrent-filter');
+            if(!container) return;
+            if(container.querySelector('#parser-selectbox')) return;
 
-        const btn = document.createElement('div');
-        btn.id = 'parser-selectbox';
-        btn.className='simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML=`<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
-        container.appendChild(btn);
+            const btn = document.createElement('div');
+            btn.id = 'parser-selectbox';
+            btn.className='simple-button simple-button--filter filter--parser selector';
+            btn.innerHTML=`<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
+            container.appendChild(btn);
 
-        const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+            const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        btn.addEventListener('click', () => {
-            // Используем стандартное окно выбора Lampa
-            Lampa.Select.show({
-                title:'Выберите парсер',
-                items: parsers.map(p=>({title:p,value:p})),
-                onSelect:item=>{
-                    Lampa.Storage.set('parser_select',item.value);
-                    document.getElementById('parser-current').textContent=item.value;
-
-                    // обновляем список торрентов без удаления кнопки
-                    try{
-                        const active=Lampa.Activity.active();
-                        if(active && active.activity && typeof active.activity.refresh==='function'){
-                            active.activity.refresh();
-                        }
-                    }catch(e){console.error(e);}
-                }
+            btn.addEventListener('click', () => {
+                // Стандартное окно выбора Lampa
+                Lampa.Select.show({
+                    title:'Выберите парсер',
+                    items: parsers.map(p=>({title:p,value:p})),
+                    onSelect:item=>{
+                        Lampa.Storage.set('parser_select',item.value);
+                        document.getElementById('parser-current').textContent=item.value;
+                        // обновляем список торрентов без удаления кнопки
+                        try{
+                            const active=Lampa.Activity.active();
+                            if(active && active.activity && typeof active.activity.refresh==='function'){
+                                active.activity.refresh();
+                            }
+                        }catch(e){console.error(e);}
+                    }
+                });
             });
         });
+
+        observer.observe(document.body,{childList:true,subtree:true});
     }
 
     function initMenuPlugin(){
@@ -159,7 +162,7 @@
 
     function registerMenu(){
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.8',author:'maxi3219',description:'Меню + Reload + кнопка парсер',init:initMenuPlugin});
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.9',author:'maxi3219',description:'Меню + Reload + кнопка парсер',init:initMenuPlugin});
         } else initMenuPlugin();
     }
 
