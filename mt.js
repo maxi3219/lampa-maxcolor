@@ -8,7 +8,7 @@
 
     const parsersInfo = [
         { base: 'jacred_xyz',        name: 'Jacred.xyz',      settings: { url: 'jacred.xyz',         key: '',       parser_torrent_type: 'jackett' } },
-        { base: 'jr_maxvol_pro',     name: 'Jr.maxvol.pro',   settings: { url: 'jr.maxvol.pro',      key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jr_maxvol_pro',     name: 'Jr.maxvol.pro',   settings: { url: 'jr_maxvol.pro',      key: '',       parser_torrent_type: 'jackett' } },
         { base: 'jacred_my_to',      name: 'Jacred.my.to',    settings: { url: 'jacred.my.to',       key: '',       parser_torrent_type: 'jackett' } },
         { base: 'lampa_app',         name: 'Lampa.app',       settings: { url: 'lampa.app',          key: '',       parser_torrent_type: 'jackett' } },
         { base: 'jacred_pro',        name: 'Jacred.pro',      settings: { url: 'jacred.pro',         key: '',       parser_torrent_type: 'jackett' } },
@@ -18,7 +18,124 @@
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
-        style.innerHTML = ` ... СТИЛИ ОСТАВЛЕНЫ БЕЗ ИЗМЕНЕНИЙ ... `;
+        style.innerHTML = `
+            @media screen and (min-width: 480px) {
+                .settings__content,
+                .selectbox__content.layer--height {
+                    position: fixed !important;
+                    top: 1em !important;
+                    right: 1em !important;
+                    left: auto !important;
+                    width: 35% !important;
+                    max-height: calc(100vh - 2em) !important;
+                    overflow-y: auto !important;
+                    background: rgba(54,54,54,0.98) !important;
+                    border-radius: 1.2em !important;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
+                    padding: 0.5em !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.3s ease, opacity 0.3s ease !important;
+                    z-index: 999 !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                }
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    transform: translateX(0) !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                .settings-folder.selector,
+                .settings-param.selector,
+                .settings-param__value.selector,
+                .selectbox-item.selector {
+                    border-radius: 1em !important;
+                    margin-bottom: 0.3em !important;
+                    transition: background 0.25s ease !important;
+                }
+                .settings-folder.selector.focus,
+                .settings-folder.selector.hover,
+                .settings-folder.selector.traverse,
+                .settings-param.selector.focus,
+                .settings-param.selector.hover,
+                .settings-param.selector.traverse,
+                .settings-param__value.selector.focus,
+                .settings-param__value.selector.hover,
+                .settings-param__value.selector.traverse,
+                .selectbox-item.selector.focus,
+                .selectbox-item.selector.hover,
+                .selectbox-item.selector.traverse {
+                    background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                    border-radius: 1em !important;
+                }
+            }
+
+            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
+            .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
+            .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
+            .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
+            .filter--parser.selector { cursor: pointer !important; }
+
+            /* Торрент-карточки: фон через псевдоэлемент со скруглением, значок просмотрено поверх */
+            .torrent-item {
+                position: relative !important;
+                border-radius: 0.9em !important;
+                background: transparent !important;
+                overflow: visible !important; /* чтобы значок не обрезался */
+            }
+            .torrent-item::before {
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border-radius: inherit !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+            }
+            .torrent-item > * { position: relative !important; z-index: 1 !important; }
+            .torrent-item__viewed {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                z-index: 2 !important;
+                pointer-events: none !important;
+            }
+
+            .watched-history {
+                position: relative !important;
+                border-radius: 0.9em !important;
+            }
+
+            /* Градиент при наведении на кнопки фильтра */
+            .torrent-filter .selector.hover,
+            .torrent-filter .selector.focus,
+            .torrent-filter .selector.traverse {
+                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                border-radius: 1em !important;
+                color: #fff !important;
+            }
+
+            /* Кнопки на карточке: скругление в покое + мгновенное небольшое изменение на hover без анимации радиуса */
+            .full-start-new__buttons .full-start__button.selector {
+                border-radius: 1em !important;                   /* убираем квадратность в покое */
+                transition: background 0.18s ease !important;     /* не анимируем радиус */
+            }
+            .full-start-new__buttons .full-start__button.selector.hover,
+            .full-start-new__buttons .full-start__button.selector.focus,
+            .full-start-new__buttons .full-start__button.selector.traverse {
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important; /* более синий справа */
+                border-radius: 0.5em !important;                  /* меньшее скругление при наведении — без анимации */
+                color: #fff !important;
+            }
+            .full-start-new__buttons .full-start__button.selector.hover svg,
+            .full-start-new__buttons .full-start__button.selector.focus svg,
+            .full-start-new__buttons .full-start__button.selector.traverse svg {
+                color: #fff !important;
+                fill: #fff !important;
+            }
+        `;
         document.head.appendChild(style);
     }
 
@@ -39,12 +156,17 @@
             try {
                 triedReload = true;
                 window.location.reload();
-            } catch (e) {}
+                // Если окружение игнорирует reload, ниже идут жесткие фоллбеки
+            } catch (e) {
+                // игнор
+            }
 
+            // Фоллбек: жёсткая подмена URL (часто срабатывает в WebView на ТВ)
             setTimeout(() => {
                 try {
                     window.location.replace(href);
                 } catch (e) {
+                    // Последний фоллбек: прямое присвоение href
                     try { window.location.href = href; } catch (_) {}
                 }
             }, triedReload ? 250 : 0);
@@ -87,6 +209,7 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', async () => {
+            // при нажатии просто показываем уже оформленное меню (обновлённое состояние проверяется внутри)
             showParserList();
         });
     }
@@ -104,25 +227,25 @@
         if (first) mountParserButton(first);
     }
 
-    /* ------------------------------------------------------------------
-       >>> AUTO PARSER SWITCH BLOCK
-       Если появляется ошибка "Парсер не отвечает" — открываем выбор парсеров
-       ------------------------------------------------------------------ */
+    /* ---------------- Авто-открытие выбора парсера при ошибке ---------------- */
 
     function autoOpenOnParserError() {
         const observer = new MutationObserver(() => {
+            // Возможные селекторы блока "пусто / ошибка"
             const emptyBlock =
-                document.querySelector('.empty, .card-empty, .empty__body, .empty__title');
+                document.querySelector('.empty, .card-empty, .empty__body, .empty__title, .empty__text');
 
             if (!emptyBlock) return;
 
-            const text = emptyBlock.innerText.toLowerCase();
+            const text = emptyBlock.innerText ? emptyBlock.innerText.toLowerCase() : '';
 
+            // Условие — настраиваем под разные формулировки ошибки
             if (
                 text.includes('парсер не отвечает') ||
-                (text.includes('здесь пусто') && text.includes('парсер'))
+                (text.includes('здесь пусто') && text.includes('парсер')) ||
+                text.includes('ошибка подключения') && text.includes('парсер')
             ) {
-                console.log('RoundedMenu: Ошибка парсера → открываю выбор парсеров');
+                // Открываем меню выбора парсеров
                 showParserList();
             }
         });
@@ -134,6 +257,7 @@
     }
 
     function showParserList() {
+        // Проверяем доступность паралельно и затем показываем Select
         Promise.all(parsersInfo.map(async p => {
             const ok = await checkAvailability(p.settings.url);
             return { ...p, ok };
@@ -157,14 +281,42 @@
 
                     try {
                         const active = Lampa.Activity.active();
-                        if (active?.activity?.refresh) active.activity.refresh();
-                    } catch (_) {}
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
+                        }
+                    } catch (err) { /* noop */ }
+                }
+            });
+        })
+        .catch(() => {
+            // если произошла ошибка при проверке доступности — всё равно показать список без цветов
+            const items = parsersInfo.map(p => ({
+                title: p.name,
+                base: p.base,
+                selected: Lampa.Storage.get('lme_url_two') === p.base
+            }));
+            Lampa.Select.show({
+                title: 'Каталог парсеров',
+                items,
+                onSelect: (a) => {
+                    Lampa.Storage.set('lme_url_two', a.base);
+                    changeParser();
+                    const el = document.getElementById('parser-current');
+                    const picked = parsersInfo.find(p => p.base === a.base);
+                    if (el && picked) el.textContent = picked.name;
+
+                    try {
+                        const active = Lampa.Activity.active();
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
+                        }
+                    } catch (err) { /* noop */ }
                 }
             });
         });
     }
 
-    /* ------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------ */
 
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
@@ -174,8 +326,6 @@
                     addReloadButton();
                     startParserObserver();
                     changeParser();
-
-                    // Включаем авто-открытие выбора при ошибке:
                     autoOpenOnParserError();
                 }
             });
@@ -197,7 +347,7 @@
                 name: plugin_name,
                 version: '10.3',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск + скругление + авто-выбор парсера',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
@@ -206,8 +356,6 @@
     }
 
     registerMenu();
-
-    /* ------------------ Цвет раздающих ------------------ */
 
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
