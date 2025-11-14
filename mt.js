@@ -90,11 +90,11 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер в torrent-filter === */
-    function addParserButton() {
-        const container = document.querySelector('.torrent-filter');
-        if (!container) { setTimeout(addParserButton, 500); return; }
-        if (container.querySelector('#parser-selectbox')) return;
+    /* === Кнопка Парсер (автовставка при появлении torrent-filter) === */
+    const PARSERS = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
+
+    function mountParserButton(container) {
+        if (!container || container.querySelector('#parser-selectbox')) return;
 
         const btn = document.createElement('div');
         btn.id = 'parser-selectbox';
@@ -102,12 +102,10 @@
         btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select') || 'Jacred.xyz'}</div>`;
         container.appendChild(btn);
 
-        const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
-
         btn.addEventListener('hover:enter', () => {
             Lampa.Select.show({
                 title: 'Выбор парсера',
-                items: parsers.map(p => ({
+                items: PARSERS.map(p => ({
                     title: p,
                     selected: Lampa.Storage.get('parser_select') === p
                 })),
@@ -126,20 +124,38 @@
         });
     }
 
+    function ensureParserButtonOnce() {
+        const container = document.querySelector('.torrent-filter');
+        if (container) mountParserButton(container);
+        else setTimeout(ensureParserButtonOnce, 300);
+    }
+
+    /* Наблюдатель: следит за появлением/перерисовкой .torrent-filter и повторно монтирует кнопку */
+    function startParserObserver() {
+        const obs = new MutationObserver(() => {
+            const container = document.querySelector('.torrent-filter');
+            if (container && !container.querySelector('#parser-selectbox')) {
+                mountParserButton(container);
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+        ensureParserButtonOnce();
+    }
+
     function initMenuPlugin() {
         if (window.Lampa && typeof Lampa.Listener === 'object') {
             Lampa.Listener.follow('app', event => {
                 if (event.type === 'ready') {
                     applyCustomMenuStyles();
                     addReloadButton();
-                    addParserButton();
+                    startParserObserver();
                 }
             });
         } else {
             document.addEventListener('DOMContentLoaded', () => {
                 applyCustomMenuStyles();
                 addReloadButton();
-                addParserButton();
+                startParserObserver();
             });
         }
     }
@@ -149,7 +165,7 @@
             app.plugins.add({
                 id: plugin_id_menu,
                 name: plugin_name_menu,
-                version: '7.5',
+                version: '7.6',
                 author: 'maxi3219',
                 description: 'Меню + зеленые раздающие + reload + кнопка парсер',
                 init: initMenuPlugin
