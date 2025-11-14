@@ -80,7 +80,7 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Вернули базовое (исходное) состояние для карточек — только скругление если уже было */
+            /* Сохранение исходного внешнего вида рамок — только скругления там, где нужно */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.3em !important;
@@ -110,18 +110,24 @@
                 color: #fff !important;
             }
 
-            /* full-start buttons: в покое оставляем как было (не задаём скругление) */
+            /*
+             1) Для кнопок .full-start__button: в состоянии покоя задаём скругление (1em) —
+                это убирает "квадратность" в покое.
+             2) Убираем анимацию изменения border-radius: оставляем только плавное появление фона,
+                чтобы скругление применялось мгновенно при наведении.
+            */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: initial !important;
-                transition: background 0.18s ease, border-radius 0.18s ease !important;
+                border-radius: 1em !important; /* скругление в покое согласно просьбе */
+                transition: background 0.18s ease !important; /* НЕ включаем border-radius в transition */
+                -webkit-transition: background 0.18s ease !important;
             }
 
-            /* При наведении — очень лёгкое скругление (меньше, чем было ранее) и более синий правый край градиента */
+            /* Hover: градиент с более синим правым концом, и border-radius меняется мгновенно (без анимации) */
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
                 background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
-                border-radius: 0.6em !important; /* уменьшенное скругление только на hover */
+                border-radius: 0.6em !important; /* мгновенное уменьшение радиуса (без анимации) */
                 color: #fff !important;
             }
 
@@ -252,9 +258,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.9',
+                version: '10.0',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера + мелкие UI tweaks',
+                description: 'Меню + reload + выбор парсера + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
@@ -289,7 +295,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.4',
+            version: '2.5',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
