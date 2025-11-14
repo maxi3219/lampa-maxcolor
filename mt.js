@@ -222,19 +222,19 @@
                 title: 'Каталог парсеров',
                 items,
                 onSelect: (a) => {
-                    // 1) Сохраняем и применяем
+                    // 1) Сохраняем и применяем выбранный парсер
                     Lampa.Storage.set('lme_url_two', a.base);
                     changeParser();
 
-                    // 2) Обновляем подпись на кнопке, если она ещё есть
+                    // 2) Обновляем подпись на кнопке (если не успела исчезнуть)
                     const el = document.getElementById('parser-current');
                     const picked = parsersInfo.find(p => p.base === a.base);
                     if (el && picked) el.textContent = picked.name;
 
-                    // 3) Гарантируем контекст и ремоунт после возможной перерисовки
+                    // 3) Гарантируем контекст
                     onlyAfterEnterTorrents = true;
 
-                    // Ремоунт-луп: до 5 секунд пробуем вернуть кнопку, если экран перерисовался
+                    // 4) Короткий ремоунт-луп (до 5 сек): вернуть кнопку, если DOM перерисовался
                     const started = Date.now();
                     (function remountLoop(){
                         if (!onlyAfterEnterTorrents) return;
@@ -248,7 +248,19 @@
                         }
                     })();
 
-                    // 4) Не дергаем activity.refresh() — он сносит DOM и кнопку
+                    // 5) Инициируем рефреш торрентов корректно:
+                    //    а) если есть наша кнопка перезагрузки — триггерим её (на ТВ/ПК это самый стабильный способ)
+                    //    б) иначе жёсткий reload страницы как фоллбек
+                    setTimeout(() => {
+                        const reloadBtn = document.getElementById('MRELOAD');
+                        if (reloadBtn) {
+                            reloadBtn.dispatchEvent(new Event('hover:enter', { bubbles: true }));
+                        } else {
+                            try { window.location.reload(); } catch (_) {}
+                        }
+                    }, 250);
+
+                    // ВАЖНО: не дергаем activity.refresh(), он сносит DOM и кнопку в твоей сборке
                 }
             });
         });
@@ -353,9 +365,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.6',
+                version: '10.7',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + строгий монтаж кнопки только после входа в Торренты; стабильность кнопки после выбора парсера',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + строгий монтаж кнопки только после входа в Торренты; авто-переподключение после выбора парсера',
                 init: initMenuPlugin
             });
         } else {
