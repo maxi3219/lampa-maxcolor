@@ -15,6 +15,15 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
+    function inTorrentsActivity() {
+        try {
+            const active = Lampa.Activity.active();
+            return !!(active && active.activity && active.activity.type === 'torrents');
+        } catch (e) {
+            return false;
+        }
+    }
+
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -188,38 +197,7 @@
         }
     }
 
-    function mountParserButton(container) {
-        if (!container || container.querySelector('#parser-selectbox')) return;
-
-        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
-        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
-
-        const btn = document.createElement('div');
-        btn.id = 'parser-selectbox';
-        btn.className = 'simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
-        container.appendChild(btn);
-
-        btn.addEventListener('hover:enter', async () => {
-            openParserSelect();
-        });
-    }
-
-    function startParserObserver() {
-        const obs = new MutationObserver(() => {
-            const container = document.querySelector('.torrent-filter');
-            if (container && !container.querySelector('#parser-selectbox')) {
-                mountParserButton(container);
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-
-        const first = document.querySelector('.torrent-filter');
-        if (first) mountParserButton(first);
-    }
-
     function openParserSelect() {
-        // Build availability statuses and show select
         Promise.all(parsersInfo.map(async p => {
             const ok = await checkAvailability(p.settings.url);
             return { ...p, ok };
@@ -251,8 +229,41 @@
         });
     }
 
+    function mountParserButton(container) {
+        if (!container || container.querySelector('#parser-selectbox')) return;
+        if (!inTorrentsActivity()) return;
+
+        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
+        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
+
+        const btn = document.createElement('div');
+        btn.id = 'parser-selectbox';
+        btn.className = 'simple-button simple-button--filter filter--parser selector';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
+        container.appendChild(btn);
+
+        btn.addEventListener('hover:enter', () => {
+            if (inTorrentsActivity()) openParserSelect();
+        });
+    }
+
+    function startParserObserver() {
+        const obs = new MutationObserver(() => {
+            if (!inTorrentsActivity()) return;
+            const container = document.querySelector('.torrent-filter');
+            if (container && !container.querySelector('#parser-selectbox')) {
+                mountParserButton(container);
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+
+        if (inTorrentsActivity()) {
+            const first = document.querySelector('.torrent-filter');
+            if (first) mountParserButton(first);
+        }
+    }
+
     function handleParserError() {
-        // Prevent repeated popups in a short time window
         let lastTrigger = 0;
         const TRIGGER_COOLDOWN = 1500; // ms
 
@@ -274,32 +285,30 @@
         }
 
         function wireRefreshButtonWithin(errorBlock) {
-            // Try to bind the "Обновить" button to open selection if default refresh doesn't help
             const btns = errorBlock.querySelectorAll('.button, .selector');
             btns.forEach(b => {
                 const label = (b.textContent || '').trim().toLowerCase();
                 if (label.includes('обновить')) {
                     b.addEventListener('hover:enter', (ev) => {
-                        // Stop default behavior to ensure our menu opens
                         try { ev.stopPropagation(); } catch (e) {}
-                        openParserSelect();
+                        if (inTorrentsActivity()) openParserSelect();
                     }, { once: true });
                 }
             });
         }
 
         const obs = new MutationObserver((mutations) => {
+            if (!inTorrentsActivity()) return;
+
             for (const m of mutations) {
                 const added = Array.from(m.addedNodes || []);
                 for (const node of added) {
-                    // Direct error block
                     if (node.nodeType === 1 && node.classList && node.classList.contains('empty') && isErrorBlock(node)) {
                         if (shouldTriggerOnce()) {
                             wireRefreshButtonWithin(node);
                             openParserSelect();
                         }
                     }
-                    // Nested search
                     if (node.nodeType === 1) {
                         const emptyInTree = node.querySelector && node.querySelector('.empty');
                         if (emptyInTree && isErrorBlock(emptyInTree)) {
@@ -315,9 +324,8 @@
 
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // Immediate check in case the error is already visible
         const initialEmpty = document.querySelector('.empty');
-        if (initialEmpty && isErrorBlock(initialEmpty) && shouldTriggerOnce()) {
+        if (initialEmpty && isErrorBlock(initialEmpty) && inTorrentsActivity() && shouldTriggerOnce()) {
             wireRefreshButtonWithin(initialEmpty);
             openParserSelect();
         }
@@ -346,9 +354,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.4',
+                version: '10.5',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения + скругление подложек торрентов + UI tweaks',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
@@ -383,7 +391,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.6',
+            version: '2.7',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
