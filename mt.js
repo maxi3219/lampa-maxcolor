@@ -80,10 +80,10 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Только скругления (не трогаем белые рамки/тени/outline) */
+            /* ВОЗВРАЩАЕМ базовое скругление карточек к прежнему значению (не меняем рамки/тени) */
             .torrent-item {
                 position: relative !important;
-                border-radius: 0.9em !important;
+                border-radius: 0.3em !important; /* вернули как было */
                 background-color: rgba(0,0,0,0.3) !important;
             }
 
@@ -110,18 +110,18 @@
                 color: #fff !important;
             }
 
-            /* full-start buttons: чуть менее агрессивное скругление и более синий градиент справа */
+            /* Для кнопок full-start: в покое НЕ меняем скругление (восстанавливаем поведение по умолчанию) */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: 0.8em !important;
+                border-radius: initial !important;
                 transition: background 0.22s ease, border-radius 0.22s ease !important;
             }
 
-            /* при наведении используем градиент с более синим правым концом, как у кнопки "Смотреть" на скриншоте */
+            /* При наведении — лёгкое, небольшое скругление (меньше, чем было раньше) и более синий градиент */
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 5%, #2a6fb0 100%) !important;
-                border-radius: 1.05em !important;
+                background: linear-gradient(to right, #4dd9a0 10%, #2f6ea8 100%) !important;
+                border-radius: 0.9em !important; /* уменьшено по сравнению с предыдущей версией */
                 color: #fff !important;
             }
 
@@ -252,7 +252,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.7',
+                version: '9.8',
                 author: 'maxi3219',
                 description: 'Меню + reload + выбор парсера + скругления + UI tweaks',
                 init: initMenuPlugin
