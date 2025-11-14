@@ -4,7 +4,7 @@
     const plugin_id = 'roundedmenu';
     const plugin_name = 'RoundedMenu';
 
-    const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
+    const SEED_COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
 
     const parsersInfo = [
         { base:'jacred_xyz',         name:'Jacred.xyz',        settings:{ url:'jacred.xyz',           key:'',        parser_torrent_type:'jackett' } },
@@ -15,12 +15,14 @@
         { base:'jacred_viewbox_dev', name:'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
     ];
 
+    /* ===================== STYLES ===================== */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
-                .settings__content, .selectbox__content.layer--height {
+                .settings__content,
+                .selectbox__content.layer--height {
                     position: fixed !important;
                     top: 1em !important;
                     right: 1em !important;
@@ -75,7 +77,6 @@
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
-            .filter--parser.selector { cursor: pointer !important; }
 
             /* Торрент-карточки: фон через псевдоэлемент со скруглением, значок поверх */
             .torrent-item {
@@ -98,13 +99,16 @@
 
             .watched-history { position: relative !important; border-radius: 0.9em !important; }
 
-            .torrent-filter .selector.hover, .torrent-filter .selector.focus, .torrent-filter .selector.traverse {
+            /* Фильтр-кнопки: ховер */
+            .torrent-filter .selector.hover,
+            .torrent-filter .selector.focus,
+            .torrent-filter .selector.traverse {
                 background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
                 border-radius: 1em !important;
                 color: #fff !important;
             }
 
-            /* Кнопки на карточке: скругление в покое + мгновенное уменьшение скругления на hover */
+            /* Кнопки карточки: скругление в покое + мгновенное уменьшение скругления на hover, без анимации радиуса */
             .full-start-new__buttons .full-start__button.selector {
                 border-radius: 1em !important;
                 transition: background 0.18s ease !important;
@@ -119,7 +123,8 @@
             .full-start-new__buttons .full-start__button.selector.hover svg,
             .full-start-new__buttons .full-start__button.selector.focus svg,
             .full-start-new__buttons .full-start__button.selector.traverse svg {
-                color: #fff !important; fill: #fff !important;
+                color: #fff !important;
+                fill: #fff !important;
             }
 
             .simple-button--filter.filter--parser { cursor: pointer !important; }
@@ -127,6 +132,7 @@
         document.head.appendChild(style);
     }
 
+    /* ===================== HARD RELOAD ===================== */
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -150,6 +156,7 @@
         headActions.appendChild(btn);
     }
 
+    /* ===================== PARSER MENU ===================== */
     async function checkAvailability(url) {
         try {
             await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
@@ -166,7 +173,6 @@
         }));
 
         const items = statuses.map(s => ({
-            // ТОЛЬКО цвет имени: зелёный если доступен, красный если нет. Никаких (OK) в названии.
             title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
             base: s.base,
             selected: Lampa.Storage.get('lme_url_two') === s.base
@@ -231,50 +237,81 @@
         if (first) mountParserButton(first);
     }
 
+    /* ===================== ERROR DETECTION -> OPEN MENU ===================== */
     function startErrorObserver() {
-        // Точный текст ошибки, который ты дал:
+        // Точный текст ошибки:
         const TARGET_TEXT = 'Здесь пусто Ошибка подключения. Парсер не отвечает на запрос';
 
-        const checkNode = (node) => {
+        const seenOnce = new WeakSet();
+
+        // Проверка текста на узле
+        const checkNodeText = (node) => {
             try {
-                const text = (node.innerText || node.textContent || '').trim();
-                if (!text) return;
-                if (text.indexOf(TARGET_TEXT) !== -1) {
-                    if (!node.__parser_menu_shown) {
-                        node.__parser_menu_shown = true;
-                        showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
-                    }
-                }
-            } catch (e) {}
+                const t = (node.innerText || node.textContent || '').trim();
+                if (!t) return false;
+                return t.indexOf(TARGET_TEXT) !== -1;
+            } catch { return false; }
         };
 
+        // Хелпер: показать меню один раз на событие
+        const triggerMenuOnce = (anchorNode) => {
+            if (anchorNode && seenOnce.has(anchorNode)) return;
+            if (anchorNode) seenOnce.add(anchorNode);
+            showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
+        };
+
+        // 1) MutationObserver: ловим появление текста ошибки где угодно
         const obs = new MutationObserver(muts => {
             for (const m of muts) {
                 if (m.addedNodes && m.addedNodes.length) {
                     m.addedNodes.forEach(n => {
-                        if (n.nodeType === 1) checkNode(n);
-                        if (n.querySelectorAll) n.querySelectorAll('*').forEach(el => checkNode(el));
+                        if (n.nodeType === 1) {
+                            if (checkNodeText(n)) triggerMenuOnce(n);
+                            if (n.querySelectorAll) {
+                                n.querySelectorAll('*').forEach(el => {
+                                    if (checkNodeText(el)) triggerMenuOnce(el);
+                                });
+                            }
+                        } else if (n.nodeType === 3) {
+                            // текстовый узел
+                            const parent = m.target || document.body;
+                            if (checkNodeText(parent)) triggerMenuOnce(parent);
+                        }
                     });
                 }
-                if (m.target && m.target.nodeType === 1) checkNode(m.target);
+                if (m.target && m.target.nodeType === 1) {
+                    if (checkNodeText(m.target)) triggerMenuOnce(m.target);
+                }
             }
         });
-
         obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+        // 2) Перехват глобальных ошибок/отказов промисов — часто сопровождают экран «Здесь пусто...»
+        window.addEventListener('error', () => {
+            // слегка отложим, чтобы DOM успел показать сообщение
+            setTimeout(() => {
+                const all = Array.from(document.querySelectorAll('body *'));
+                const hit = all.find(el => checkNodeText(el));
+                if (hit) triggerMenuOnce(hit);
+            }, 200);
+        });
+        window.addEventListener('unhandledrejection', () => {
+            setTimeout(() => {
+                const all = Array.from(document.querySelectorAll('body *'));
+                const hit = all.find(el => checkNodeText(el));
+                if (hit) triggerMenuOnce(hit);
+            }, 200);
+        });
+
+        // 3) Немедленная проверка при старте (если экран ошибки уже открыт)
+        setTimeout(() => {
+            const all = Array.from(document.querySelectorAll('body *'));
+            const hit = all.find(el => checkNodeText(el));
+            if (hit) triggerMenuOnce(hit);
+        }, 300);
     }
 
-    function changeParser() {
-        const selected = Lampa.Storage.get('lme_url_two');
-        const found = parsersInfo.find(p => p.base === selected);
-        if (found) {
-            const s = found.settings;
-            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
-            Lampa.Storage.set(type + '_url', s.url);
-            Lampa.Storage.set(type + '_key', s.key);
-            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
-        }
-    }
-
+    /* ===================== SEEDS ===================== */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -295,14 +332,27 @@
         recolorSeedNumbers();
     }
 
+    /* ===================== INIT ===================== */
     function initMenuPlugin() {
         applyStyles();
         addReloadButton();
         startParserObserver();
         startErrorObserver();
         startSeedsObserver();
+
+        // Применить выбранный парсер при старте
         const selected = Lampa.Storage.get('lme_url_two');
         if (selected) applySelectedParser(selected);
+
+        // Если выбран Viewbox и это ТВ — сразу проверим доступность и, если он недоступен, откроем меню
+        const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
+        const isTV = /SmartTV|TV|Tizen|Web0S|NetCast|HbbTV|Android TV|AFTT|AFTM|AFTB/i.test(ua);
+        const curBase = Lampa.Storage.get('lme_url_two');
+        if (isTV && curBase === 'jacred_viewbox_dev') {
+            checkAvailability('jacred.viewbox.dev').then(ok => {
+                if (!ok) showParserMenu('Выбранный парсер недоступен на ТВ. Выберите другой источник.');
+            });
+        }
     }
 
     function registerMenu() {
@@ -310,9 +360,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.6',
+                version: '10.7',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск + авто-меню парсеров при ошибке + зелёный/красный статус имен без (OK)',
+                description: 'Жёсткий перезапуск + авто-меню парсеров при ошибке (точное сравнение текста) + UI',
                 init: initMenuPlugin
             });
         } else {
