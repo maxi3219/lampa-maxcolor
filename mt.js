@@ -15,7 +15,7 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // ===== Activity tracking and strict torrents/online detection =====
+    // ===== Activity tracking (optional; helps when fields exist) =====
     const currentActivity = { component: '', source: '', type: '' };
 
     function trackActivity() {
@@ -30,27 +30,37 @@
         } catch (_) {}
     }
 
-    function inTorrentsContext() {
-        const comp = currentActivity.component;
-        const src  = currentActivity.source;
-        const typ  = currentActivity.type;
+    // DOM check: explicit torrent section markers (icon or title "Торренты")
+    function isTorrentSectionDom() {
+        try {
+            const icon = document.querySelector('use[xlink\\:href="#sprite-torrent"]');
+            const titleHasTorrent = Array.from(document.querySelectorAll('.selectbox-item__title'))
+                .some(el => (el.textContent || '').trim().toLowerCase().includes('торренты'));
+            const hasTorrentFilterDom = !!document.querySelector('.torrent-filter');
+            return !!icon || titleHasTorrent || hasTorrentFilterDom;
+        } catch (_) {
+            return false;
+        }
+    }
 
-        // Явный онлайн — исключаем сразу
+    // Strict context gate: only torrents (never online)
+    function inTorrentsContext() {
+        const comp = (currentActivity.component || '').toLowerCase();
+        const src  = (currentActivity.source || '').toLowerCase();
+        const typ  = (currentActivity.type || '').toLowerCase();
+
+        // Hard exclude: any sign of online
         if (comp.includes('online') || src.includes('online')) return false;
 
-        // Явные маркеры торрентов
-        const isTorrentActivity =
-            comp.includes('torrent') ||
-            src.includes('jackett') ||
-            src.includes('prowlarr') ||
-            typ === 'torrents' ||
-            Lampa.Storage.get('parser_torrent_type') === 'jackett' ||
-            Lampa.Storage.get('parser_torrent_type') === 'prowlarr';
+        // Strong include: activity hints for torrents
+        if (comp.includes('torrent') || src.includes('jackett') || src.includes('prowlarr') || typ === 'torrents') return true;
 
-        // Запасной вариант: наличие DOM блока фильтров торрентов, если это не онлайн
-        const hasTorrentFilterDom = !!document.querySelector('.torrent-filter');
+        // Storage hint: currently configured torrent parser type
+        const ptype = Lampa.Storage.get('parser_torrent_type');
+        if (ptype === 'jackett' || ptype === 'prowlarr') return true;
 
-        return isTorrentActivity || (hasTorrentFilterDom);
+        // Final fallback: DOM markers for torrents
+        return isTorrentSectionDom();
     }
 
     // ===== Styles =====
@@ -224,7 +234,6 @@
     }
 
     function openParserSelect() {
-        // Защита: не открывать меню в онлайне
         if (!inTorrentsContext()) return;
 
         Promise.all(parsersInfo.map(async p => {
@@ -362,7 +371,7 @@
         }
     }
 
-    // ===== Seeds color =====
+    // ===== Styles + seeds color =====
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -387,7 +396,7 @@
     // ===== Boot & register =====
     function initMenuPlugin() {
         const boot = () => {
-            trackActivity();           // отслеживаем активность для точной фильтрации
+            trackActivity();
             applyStyles();
             addReloadButton();
             startParserObserver();
@@ -409,7 +418,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.9',
+                version: '11.0',
                 author: 'maxi3219',
                 description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
@@ -425,7 +434,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.8',
+            version: '2.9',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
