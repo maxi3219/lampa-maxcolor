@@ -15,18 +15,44 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // Жёсткая проверка: активный компонент содержит 'torrent'
-    function inTorrentsContext() {
+    // ===== Activity tracking (reliable torrents vs online detection) =====
+    const currentActivity = { component: '', source: '', type: '' };
+
+    function trackActivity() {
         try {
-            const active = Lampa.Activity.active();
-            if (!active || !active.activity) return false;
-            const comp = String(active.activity.component || '').toLowerCase();
-            return comp.includes('torrent');
-        } catch (e) {
-            return false;
-        }
+            Lampa.Listener.follow('activity', e => {
+                if (e && (e.type === 'start' || e.type === 'enter')) {
+                    currentActivity.component = String(e.activity?.component || '').toLowerCase();
+                    currentActivity.source    = String(e.activity?.source    || '').toLowerCase();
+                    currentActivity.type      = String(e.activity?.type      || '').toLowerCase();
+                }
+            });
+        } catch (_) {}
     }
 
+    function inTorrentsContext() {
+        // Hard rules first (exclude online), then include torrents, finally DOM fallback
+        const comp = currentActivity.component;
+        const src  = currentActivity.source;
+        const typ  = currentActivity.type;
+
+        const isOnline = comp.includes('online') || src.includes('online');
+        if (isOnline) return false;
+
+        const isTorrentActivity =
+            comp.includes('torrent') ||
+            src.includes('jackett')   ||
+            typ === 'torrents'        ||
+            Lampa.Storage.get('parser_torrent_type') === 'jackett' ||
+            Lampa.Storage.get('parser_torrent_type') === 'prowlarr';
+
+        // DOM fallback only if not clearly online
+        const hasTorrentFilterDom = !!document.querySelector('.torrent-filter');
+
+        return isTorrentActivity || (hasTorrentFilterDom && !isOnline);
+    }
+
+    // ===== Styles =====
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -148,6 +174,7 @@
         document.head.appendChild(style);
     }
 
+    // ===== Reload button =====
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -173,6 +200,7 @@
         headActions.appendChild(btn);
     }
 
+    // ===== Parser switching =====
     function changeParser() {
         const selected = Lampa.Storage.get('lme_url_two');
         const found = parsersInfo.find(p => p.base === selected);
@@ -226,6 +254,7 @@
         });
     }
 
+    // ===== Parser button (only in torrents) =====
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
         if (!inTorrentsContext()) return;
@@ -260,6 +289,7 @@
         }
     }
 
+    // ===== Auto open select on parser error (only in torrents) =====
     function handleParserError() {
         let lastTrigger = 0;
         const TRIGGER_COOLDOWN = 1500; // ms
@@ -328,41 +358,7 @@
         }
     }
 
-    function initMenuPlugin() {
-        const boot = () => {
-            applyStyles();
-            addReloadButton();
-            startParserObserver();
-            changeParser();
-            handleParserError();
-        };
-
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', e => {
-                if (e.type === 'ready') boot();
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', boot);
-        }
-    }
-
-    function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id,
-                name: plugin_name,
-                version: '10.7',
-                author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
-                init: initMenuPlugin
-            });
-        } else {
-            initMenuPlugin();
-        }
-    }
-
-    registerMenu();
-
+    // ===== Seeds color =====
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -384,11 +380,48 @@
         recolorSeedNumbers();
     }
 
+    // ===== Boot & register =====
+    function initMenuPlugin() {
+        const boot = () => {
+            trackActivity();           // start tracking activity
+            applyStyles();
+            addReloadButton();
+            startParserObserver();
+            changeParser();
+            handleParserError();
+        };
+
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', e => {
+                if (e.type === 'ready') boot();
+            });
+        } else {
+            document.addEventListener('DOMContentLoaded', boot);
+        }
+    }
+
+    function registerMenu() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                version: '10.8',
+                author: 'maxi3219',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
+                init: initMenuPlugin
+            });
+        } else {
+            initMenuPlugin();
+        }
+    }
+
+    registerMenu();
+
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.7',
+            version: '2.8',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
