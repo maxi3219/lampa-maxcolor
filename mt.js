@@ -177,7 +177,4 @@
     function startObserver(){
         const obs=new MutationObserver(()=>recolorSeedNumbers());
         obs.observe(document.body,{childList:true,subtree:true});
-        recolorSeedNumbers();
-    }
-    if(window.app && app.plugins && typeof app.plugins.add==='function'){
-        app.plugins.add({id:'maxcolor',name:'MaxColor',version:'
+        recolor
