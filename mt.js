@@ -80,12 +80,35 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Только скругления карточек и истории — без изменения рамок/обводок */
+            /* Скругление карточек торрентов и сохранение видимости значка просмотрено */
             .torrent-item {
-                background-color: rgba(0,0,0,0.3) !important;
+                position: relative !important;
                 border-radius: 0.9em !important;
-                overflow: hidden !important;
+                /* фон переносим на псевдоэлемент, чтобы не резать дочерние элементы */
+                background: transparent !important;
             }
+            .torrent-item::before {
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border-radius: inherit !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+            }
+            /* содержимое поверх подложки */
+            .torrent-item > * {
+                position: relative !important;
+                z-index: 1 !important;
+            }
+            /* значок просмотрено выше всех и не обрезается */
+            .torrent-item__viewed {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                z-index: 2 !important;
+            }
+
             .watched-history {
                 position: relative !important;
                 border-radius: 0.9em !important;
@@ -220,9 +243,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.4',
+                version: '9.5',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + градиент',
+                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + сохранение значка просмотрено',
                 init: initMenuPlugin
             });
         } else {
@@ -257,7 +280,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.2',
+            version: '2.3',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
