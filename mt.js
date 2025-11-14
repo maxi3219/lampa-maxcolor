@@ -1,11 +1,11 @@
 (() => {
-    /* === Плагин RoundedMenu + Reload + Parser === */
+    /* === Плагин RoundedMenu + Reload + Парсер === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
     function logMenu(...args) { try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e) {} }
 
-    /* === Стили меню и иконок === */
+    /* === Стили меню === */
     function applyCustomMenuStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style-menuonly';
@@ -62,7 +62,6 @@
                     border-radius: 1em !important;
                 }
             }
-
             body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
@@ -89,9 +88,10 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер рядом с Фильтром === */
+    /* === Кнопка Парсер рядом с фильтром === */
     function addParserButton() {
-        const container = document.querySelector('.torrent-filter');
+        const filterSelector = '#app > div.wrap.layer--height.layer--width > div.wrap__content.layer--height.layer--width > div > div > div.activity.layer--width.activity--active > div.activity__body > div > div.explorer__files > div.explorer__files-head > div > div > div > div > div.simple-button.simple-button--filter.filter--filter.selector';
+        const container = document.querySelector(filterSelector)?.parentNode;
         if(!container){ setTimeout(addParserButton,500); return; }
         if(container.querySelector('#parser-selectbox')) return;
 
@@ -103,9 +103,9 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        btn.addEventListener('click', e => {
+        btn.addEventListener('click', (e)=>{
             e.stopPropagation();
-            if(document.getElementById('parser-menu')) return;
+            if(document.querySelector('#parser-menu')) return;
 
             const menu = document.createElement('div');
             menu.id='parser-menu';
@@ -115,8 +115,8 @@
             menu.style.background='rgba(54,54,54,0.98)';
             menu.style.borderRadius='1em';
             menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
-            const rect = btn.getBoundingClientRect();
             menu.style.position='absolute';
+            const rect = btn.getBoundingClientRect();
             menu.style.top = rect.bottom + 'px';
             menu.style.left = rect.left + 'px';
             menu.style.width = rect.width + 'px';
@@ -124,17 +124,17 @@
 
             parsers.forEach(p=>{
                 const item = document.createElement('div');
-                item.className='selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
+                item.className = 'selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
                 item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
                 item.addEventListener('click', ()=>{
-                    Lampa.Storage.set('parser_select',p);
+                    Lampa.Storage.set('parser_select', p);
                     document.getElementById('parser-current').textContent = p;
                     try{
                         const active = Lampa.Activity.active();
                         if(active && active.activity && typeof active.activity.refresh==='function'){
-                            active.activity.refresh();
+                            active.activity.refresh(); // обновляем только список
                         }
-                    }catch(err){ console.error(err); }
+                    }catch(err){console.error(err);}
                     menu.remove();
                 });
                 menu.appendChild(item);
@@ -166,7 +166,14 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.5',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
+            app.plugins.add({
+                id:plugin_id_menu,
+                name:plugin_name_menu,
+                version:'7.5',
+                author:'maxi3219',
+                description:'Меню + зеленые раздающие + reload + кнопка парсер рядом с фильтром',
+                init:initMenuPlugin
+            });
         } else { initMenuPlugin(); }
     }
 
@@ -175,8 +182,7 @@
     /* === Плагин MaxColor === */
     const COLORS={low:'#ff3333',mid:'#ffcc00',high:'#00ff00'};
     function recolorSeedNumbers(){
-        const seedBlocks=document.querySelectorAll('.torrent-item__seeds');
-        seedBlocks.forEach(block=>{
+        document.querySelectorAll('.torrent-item__seeds').forEach(block=>{
             const span=block.querySelector('span');
             if(!span) return;
             const num=parseInt(span.textContent);
@@ -196,4 +202,5 @@
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
         app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
     } else { startObserver(); }
+
 })();
