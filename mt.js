@@ -1,5 +1,7 @@
 (() => {
-    /* === Плагин RoundedMenu + Reload + Парсер === */
+    'use strict';
+
+    /* === Плагин RoundedMenu + Reload + Parser === */
     const plugin_id_menu = 'roundedmenu';
     const plugin_name_menu = 'RoundedMenu';
 
@@ -62,6 +64,7 @@
                     border-radius: 1em !important;
                 }
             }
+
             body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
@@ -84,7 +87,18 @@
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
         btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
-        btn.addEventListener('click',()=>location.reload());
+        btn.addEventListener('click',()=>{
+            try{
+                const active = Lampa.Activity.active();
+                if(active && active.activity && active.activity.url){
+                    Lampa.Activity.replace({
+                        url: active.activity.url,
+                        title: active.activity.title,
+                        component: active.activity.component
+                    });
+                } else location.reload();
+            } catch(e){ location.reload(); }
+        });
         headActions.appendChild(btn);
     }
 
@@ -100,48 +114,30 @@
         btn.innerHTML = `<span>Парсер</span><div id="parser-current">${Lampa.Storage.get('parser_select')||'Jacred.xyz'}</div>`;
         container.appendChild(btn);
 
+        // Список парсеров
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        // Используем стандартный listener через trigger_click
         btn.addEventListener('click', e=>{
-            const menu = document.createElement('div');
-            menu.id='parser-menu';
-            menu.className='selectbox__content layer--height';
-            menu.style.maxHeight='300px';
-            menu.style.overflowY='auto';
-            menu.style.background='rgba(54,54,54,0.98)';
-            menu.style.borderRadius='1em';
-            menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
-            menu.style.position='absolute';
-            const rect = btn.getBoundingClientRect();
-            menu.style.top = rect.bottom + 'px';
-            menu.style.left = rect.left + 'px';
-            menu.style.width = rect.width + 'px';
-            document.body.appendChild(menu);
+            e.stopPropagation();
 
-            parsers.forEach(p=>{
-                const item = document.createElement('div');
-                item.className = 'selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
-                item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
-                item.addEventListener('click', ()=>{
-                    Lampa.Storage.set('parser_select', p);
-                    document.getElementById('parser-current').textContent = p;
+            // Создаём стандартный selectbox
+            if(document.querySelector('#parser-menu')) return;
 
-                    // вызываем стандартный клик для обновления списка
-                    const filterBtn = document.querySelector('.filter--filter');
-                    if(filterBtn){
-                        filterBtn.dispatchEvent(new MouseEvent('click', {bubbles:true}));
-                    }
-
-                    menu.remove();
-                });
-                menu.appendChild(item);
+            const selectbox = Lampa.Selectbox.create({
+                title: 'Выбрать парсер',
+                items: parsers.map(p=>({title:p, selected:Lampa.Storage.get('parser_select')===p})),
+                onSelect: item=>{
+                    Lampa.Storage.set('parser_select', item.title);
+                    document.getElementById('parser-current').textContent = item.title;
+                    try{
+                        const active = Lampa.Activity.active();
+                        if(active && active.activity && typeof active.activity.refresh==='function'){
+                            active.activity.refresh(); // обновление списка торрентов
+                        }
+                    }catch(err){ console.error(err); }
+                }
             });
-
-            // Закрываем при клике вне меню
-            document.addEventListener('click', ev=>{
-                if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
-            }, {once:true});
+            selectbox.open();
         });
     }
 
@@ -165,15 +161,8 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({
-                id:plugin_id_menu,
-                name:plugin_name_menu,
-                version:'8.0',
-                author:'maxi3219',
-                description:'Меню + зеленые раздающие + reload + кнопка парсер',
-                init:initMenuPlugin
-            });
-        } else { initMenuPlugin(); }
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'8.0',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
+        } else initMenuPlugin();
     }
 
     registerMenu();
@@ -202,4 +191,5 @@
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
         app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
     } else { startObserver(); }
+
 })();
