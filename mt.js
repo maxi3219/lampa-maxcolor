@@ -15,47 +15,45 @@
         { base:'jacred_viewbox_dev', name:'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
     ];
 
-    /* ===================== STYLES ===================== */
+    /* ===================== STYLES (минимально нужные, меню не трогаем) ===================== */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
         style.innerHTML = `
-            body { background: linear-gradient(135deg,#010a13 0%,#133442 50%,#01161d 100%) !important; color:#fff !important; }
-            .head__body svg, .head__body svg use { fill:#fff !important; color:#fff !important; }
-            .filter--parser.selector { cursor:pointer !important; }
+            .filter--parser.selector { cursor: pointer !important; }
 
-            /* Торрент-подложка со скруглением через псевдоэлемент, значок "просмотрено" поверх */
+            /* Торрент-подложка: скругление сохраняем, значок "просмотрено" поверх */
             .torrent-item {
-                position:relative !important;
-                border-radius:0.9em !important;
-                background:transparent !important;
-                overflow:visible !important;
+                position: relative !important;
+                border-radius: 0.9em !important;
+                background: transparent !important;
+                overflow: visible !important;
             }
             .torrent-item::before {
-                content:'' !important;
-                position:absolute !important;
-                inset:0 !important;
-                background-color:rgba(0,0,0,0.3) !important;
-                border-radius:inherit !important;
-                z-index:0 !important;
-                pointer-events:none !important;
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
+                background-color: rgba(0,0,0,0.3) !important;
+                border-radius: inherit !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
             }
-            .torrent-item > * { position:relative !important; z-index:1 !important; }
-            .torrent-item__viewed { position:absolute !important; top:8px !important; right:8px !important; z-index:2 !important; }
+            .torrent-item > * { position: relative !important; z-index: 1 !important; }
+            .torrent-item__viewed { position: absolute !important; top: 8px !important; right: 8px !important; z-index: 2 !important; pointer-events: none !important; }
 
             /* Кнопки карточки: скругление в покое; на hover — меньший радиус, без анимации скругления */
-            .full-start-new__buttons .full-start__button.selector { border-radius:1em !important; transition:background 0.18s ease !important; }
+            .full-start-new__buttons .full-start__button.selector { border-radius: 1em !important; transition: background 0.18s ease !important; }
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background:linear-gradient(to right,#4dd9a0 12%,#2f6ea8 100%) !important;
-                border-radius:0.5em !important;
-                color:#fff !important;
+                background: linear-gradient(to right, #4dd9a0 12%, #2f6ea8 100%) !important;
+                border-radius: 0.5em !important;
+                color: #fff !important;
             }
             .full-start-new__buttons .full-start__button.selector.hover svg,
             .full-start-new__buttons .full-start__button.selector.focus svg,
             .full-start-new__buttons .full-start__button.selector.traverse svg {
-                color:#fff !important; fill:#fff !important;
+                color: #fff !important; fill: #fff !important;
             }
         `;
         document.head.appendChild(style);
@@ -65,7 +63,7 @@
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
-        if (!headActions) { setTimeout(addReloadButton,1000); return; }
+        if (!headActions) { setTimeout(addReloadButton, 1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
@@ -78,14 +76,14 @@
                 try { window.location.replace(href); } catch(e){
                     try { window.location.href = href; } catch(_){}
                 }
-            },250);
+            }, 250);
         });
         headActions.appendChild(btn);
     }
 
     /* ===================== PARSER MENU ===================== */
     async function checkAvailability(url) {
-        try { await fetch(`https://${url}`,{method:'HEAD',mode:'no-cors'}); return true; }
+        try { await fetch(`https://${url}`, { method:'HEAD', mode:'no-cors' }); return true; }
         catch { return false; }
     }
 
@@ -94,107 +92,102 @@
             const ok = await checkAvailability(p.settings.url);
             return { ...p, ok };
         }));
+
         const items = statuses.map(s => ({
-            title:`<span style="color:${s.ok ? '#00ff00':'#ff3333'}">${s.name}</span>`,
-            base:s.base,
-            selected:Lampa.Storage.get('lme_url_two')===s.base
+            title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
+            base: s.base,
+            selected: Lampa.Storage.get('lme_url_two') === s.base
         }));
+
         Lampa.Select.show({
-            title:'Каталог парсеров',
-            subtitle:reason||'',
+            title: 'Каталог парсеров',
+            subtitle: reason || '',
             items,
-            onSelect:(a)=>{
-                Lampa.Storage.set('lme_url_two',a.base);
+            onSelect: (a) => {
+                Lampa.Storage.set('lme_url_two', a.base);
                 applySelectedParser(a.base);
-                const el=document.getElementById('parser-current');
-                const picked=parsersInfo.find(p=>p.base===a.base);
-                if(el&&picked) el.textContent=picked.name;
+                const el = document.getElementById('parser-current');
+                const picked = parsersInfo.find(p => p.base === a.base);
+                if (el && picked) el.textContent = picked.name;
+
                 try {
-                    const active=Lampa.Activity.active();
-                    if(active&&active.activity&&typeof active.activity.refresh==='function'){
+                    const active = Lampa.Activity.active();
+                    if (active && active.activity && typeof active.activity.refresh === 'function') {
                         active.activity.refresh();
                     } else {
-                        setTimeout(()=>{ try{window.location.reload();}catch(_){window.location.href=window.location.href;} },200);
+                        setTimeout(() => { try { window.location.reload(); } catch(_) { window.location.href = window.location.href; } }, 200);
                     }
-                } catch(err){}
+                } catch (err) {}
             }
         });
     }
 
-    function applySelectedParser(base){
-        const found=parsersInfo.find(p=>p.base===base);
-        if(!found) return;
-        const s=found.settings;
-        const type=s.parser_torrent_type==='prowlarr'?'prowlarr':'jackett';
-        Lampa.Storage.set(type+'_url',s.url);
-        Lampa.Storage.set(type+'_key',s.key);
-        Lampa.Storage.set('parser_torrent_type',s.parser_torrent_type);
+    function applySelectedParser(base) {
+        const found = parsersInfo.find(p => p.base === base);
+        if (!found) return;
+        const s = found.settings;
+        const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
+        Lampa.Storage.set(type + '_url', s.url);
+        Lampa.Storage.set(type + '_key', s.key);
+        Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
     }
 
-    function mountParserButton(container){
-        if(!container||container.querySelector('#parser-selectbox')) return;
-        const currentBase=Lampa.Storage.get('lme_url_two')||'jacred_xyz';
-        const currentInfo=parsersInfo.find(p=>p.base===currentBase)||parsersInfo[0];
-        const btn=document.createElement('div');
-        btn.id='parser-selectbox';
-        btn.className='simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML=`<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
+    function mountParserButton(container) {
+        if (!container || container.querySelector('#parser-selectbox')) return;
+        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
+        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
+
+        const btn = document.createElement('div');
+        btn.id = 'parser-selectbox';
+        btn.className = 'simple-button simple-button--filter filter--parser selector';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
         container.appendChild(btn);
-        btn.addEventListener('hover:enter',async()=>{ await showParserMenu(); });
+
+        btn.addEventListener('hover:enter', async () => { await showParserMenu(); });
     }
 
-    function startParserObserver(){
-        const obs=new MutationObserver(()=>{
-            const container=document.querySelector('.torrent-filter');
-            if(container&&!container.querySelector('#parser-selectbox')) mountParserButton(container);
+    function startParserObserver() {
+        const obs = new MutationObserver(() => {
+            const container = document.querySelector('.torrent-filter');
+            if (container && !container.querySelector('#parser-selectbox')) {
+                mountParserButton(container);
+            }
         });
-        obs.observe(document.body,{childList:true,subtree:true});
-        const first=document.querySelector('.torrent-filter');
-        if(first) mountParserButton(first);
+        obs.observe(document.body, { childList: true, subtree: true });
+
+        const first = document.querySelector('.torrent-filter');
+        if (first) mountParserButton(first);
     }
 
-    /* ===================== ERROR DETECTION ===================== */
-    function startErrorObserver(){
-        const TARGET_TEXT='Здесь пусто Ошибка подключения. Парсер не отвечает на запрос';
+    /* ===================== ERROR WATCHER (надёжный) ===================== */
+    function startErrorWatcher() {
+        const TARGET_TEXT = 'Здесь пусто Ошибка подключения. Парсер не отвечает на запрос';
 
-        const triggerMenu=()=>{ showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.'); };
-
-        const checkNodeText=(node)=>{
-            try{ const t=(node.innerText||node.textContent||'').trim(); return t.includes(TARGET_TEXT); }
-            catch{ return false; }
-        };
-
-        // MutationObserver: ловим появление текста ошибки
-        const obs=new MutationObserver(muts=>{
-            for(const m of muts){
-                m.addedNodes.forEach(n=>{
-                    if(n.nodeType===1){
-                        if(checkNodeText(n)) triggerMenu();
-                        if(n.querySelectorAll){
-                            n.querySelectorAll('*').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
-                        }
-                    } else if(n.nodeType===3){
-                        const parent = m.target && m.target.nodeType===1 ? m.target : document.body;
-                        if(checkNodeText(parent)) triggerMenu();
-                    }
-                });
-                if(m.target && m.target.nodeType===1){
-                    if(checkNodeText(m.target)) triggerMenu();
+        let openedOnce = false;
+        function scan() {
+            if (openedOnce) return;
+            const all = document.querySelectorAll('body *');
+            for (let i = 0; i < all.length; i++) {
+                const el = all[i];
+                const t = (el.innerText || el.textContent || '').trim();
+                if (!t) continue;
+                if (t.includes(TARGET_TEXT)) {
+                    openedOnce = true;
+                    showParserMenu('Не удалось подключиться к текущему парсеру. Выберите другой источник.');
+                    break;
                 }
             }
-        });
-        obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+        }
 
-        // Глобальные ошибки/отказы промисов — проверяем DOM чуть позже
-        window.addEventListener('error', ()=>{ setTimeout(()=>{
-            document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
-        },200); });
-        window.addEventListener('unhandledrejection', ()=>{ setTimeout(()=>{
-            document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); });
-        },200); });
+        // Регулярная проверка (устойчива к различным DOM-компонентам на ТВ)
+        const intervalId = setInterval(scan, 700);
 
-        // Если экран ошибки уже открыт при старте
-        setTimeout(()=>{ document.querySelectorAll('body *').forEach(el=>{ if(checkNodeText(el)) triggerMenu(); }); },500);
+        // Остановка, когда меню показано, или при уходе с активности
+        const stop = () => { try { clearInterval(intervalId); } catch(_){} };
+        document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+
+        // Дополнительно: проверим сразу через короткую задержку
+        setTimeout(scan, 500);
     }
 
     /* ===================== SEEDS ===================== */
@@ -223,20 +216,20 @@
         applyStyles();
         addReloadButton();
         startParserObserver();
-        startErrorObserver();
+        startErrorWatcher();
         startSeedsObserver();
 
-        // Применить выбранный парсер при старте
+        // Применить выбранный парсер на старте
         const selected = Lampa.Storage.get('lme_url_two');
         if (selected) applySelectedParser(selected);
 
-        // Если выбран Viewbox и это ТВ — сразу проверим доступность и, если недоступен, откроем меню
+        // Если выбран Viewbox на ТВ и он недоступен — сразу предложить выбор
         const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
         const isTV = /SmartTV|TV|Tizen|Web0S|NetCast|HbbTV|Android TV|AFTT|AFTM|AFTB/i.test(ua);
         const curBase = Lampa.Storage.get('lme_url_two');
         if (isTV && curBase === 'jacred_viewbox_dev') {
             checkAvailability('jacred.viewbox.dev').then(ok => {
-                if (!ok) showParserMenu('Выбранный парсер недоступен на ТВ. Выберите другой источник.');
+                if (!ok) showParserMenu('Текущий парсер недоступен. Выберите новый источник.');
             });
         }
     }
@@ -246,9 +239,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.8',
+                version: '10.9',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск + авто-меню парсеров при ошибке (точный текст) + индикатор доступности (зелёный/красный) + UI',
+                description: 'Надёжный авто-выбор парсеров при ошибке подключения + UI скругления',
                 init: initMenuPlugin
             });
         } else {
