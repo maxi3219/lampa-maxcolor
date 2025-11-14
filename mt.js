@@ -84,11 +84,21 @@
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
         btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
-        btn.addEventListener('click',()=>location.reload());
+        btn.addEventListener('click',()=>{
+            const active = Lampa.Activity.active();
+            if(active && active.activity && active.activity.url){
+                Lampa.Noty.show('Экран перезагружается...');
+                Lampa.Activity.replace({
+                    url: active.activity.url,
+                    title: active.activity.title,
+                    component: active.activity.component
+                });
+            } else location.reload();
+        });
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер через стандартный фильтр === */
+    /* === Кнопка Парсер в torrent-filter === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if(!container){ setTimeout(addParserButton,500); return; }
@@ -102,38 +112,20 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        // Обработчик клика — имитируем стандартный Lampa click через elem.trigger_click
-        btn.addEventListener('click', e => {
-            const filterBtn = document.querySelector('.filter--filter');
-            if(!filterBtn) return;
-            const listeners = getEventListeners(filterBtn);
-            if(listeners && listeners.click && listeners.click[0] && typeof listeners.click[0].listener==='function') {
-                // Вызов стандартного Lampa меню с подменю
-                listeners.click[0].listener(e);
-
-                setTimeout(()=>{
-                    // После открытия меню выбираем парсер
-                    const menuBody = document.querySelector('.selectbox__body .scroll__content .scroll__body');
-                    if(menuBody) {
-                        menuBody.innerHTML = '';
-                        parsers.forEach(p=>{
-                            const item = document.createElement('div');
-                            item.className = 'selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
-                            item.innerHTML = `<div class="selectbox-item__title">${p}</div>`;
-                            item.addEventListener('click',()=>{
-                                Lampa.Storage.set('parser_select',p);
-                                document.getElementById('parser-current').textContent = p;
-                                const active=Lampa.Activity.active();
-                                if(active && active.activity && typeof active.activity.refresh==='function'){
-                                    active.activity.refresh();
-                                }
-                                // Не закрываем кнопку
-                            });
-                            menuBody.appendChild(item);
-                        });
+        btn.addEventListener('click', () => {
+            Lampa.selectbox.open({
+                title: 'Выберите парсер',
+                items: parsers.map(p => ({title: p, selected: Lampa.Storage.get('parser_select')===p})),
+                onSelect: (item) => {
+                    Lampa.Storage.set('parser_select', item.title);
+                    document.getElementById('parser-current').textContent = item.title;
+                    // Обновляем список торрентов
+                    const active = Lampa.Activity.active();
+                    if(active && active.activity && typeof active.activity.refresh === 'function'){
+                        active.activity.refresh();
                     }
-                }, 50);
-            }
+                }
+            });
         });
     }
 
@@ -147,7 +139,7 @@
                 }
             });
         } else {
-            document.addEventListener('DOMContentLoaded',()=>{
+            document.addEventListener('DOMContentLoaded', ()=>{
                 applyCustomMenuStyles();
                 addReloadButton();
                 addParserButton();
