@@ -1,16 +1,23 @@
 (() => {
     'use strict';
 
-    /* === Плагин RoundedMenu + Reload + Парсер === */
-    const plugin_id_menu = 'roundedmenu';
-    const plugin_name_menu = 'RoundedMenu';
+    const plugin_id = 'roundedmenu';
+    const plugin_name = 'RoundedMenu';
 
-    function logMenu(...args) { try { console.log(`[${plugin_name_menu}]`, ...args); } catch(e) {} }
+    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
 
-    /* === Стили меню === */
-    function applyCustomMenuStyles() {
+    const parsersInfo = [
+        { base:'jacred_xyz',       name:'Jacred.xyz',       settings:{ url:'jacred.xyz',            key:'',        parser_torrent_type:'jackett' } },
+        { base:'jr_maxvol_pro',    name:'Jr.maxvol.pro',    settings:{ url:'jr.maxvol.pro',         key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_my_to',     name:'Jacred.my.to',     settings:{ url:'jacred.my.to',          key:'',        parser_torrent_type:'jackett' } },
+        { base:'lampa_app',        name:'Lampa.app',        settings:{ url:'lampa.app',             key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_pro',       name:'Jacred.pro',       settings:{ url:'jacred.pro',            key:'',        parser_torrent_type:'jackett' } },
+        { base:'jacred_viewbox_dev', name:'Viewbox',        settings:{ url:'jacred.viewbox.dev',    key:'viewbox', parser_torrent_type:'jackett' } }
+    ];
+
+    function applyStyles() {
         const style = document.createElement('style');
-        style.id = 'roundedmenu-style-menuonly';
+        style.id = 'roundedmenu-style';
         style.innerHTML = `
             @media screen and (min-width: 480px) {
                 .settings__content,
@@ -73,54 +80,44 @@
             .filter--parser.selector { cursor: pointer !important; }
         `;
         document.head.appendChild(style);
-        logMenu('Menu styles applied');
     }
 
-    /* === Кнопка Reload === */
     function addReloadButton() {
-        if (document.getElementById('MRELOAD')) return;
+        if(document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
-        if (!headActions){ setTimeout(addReloadButton,1000); return; }
+        if(!headActions){ setTimeout(addReloadButton,1000); return; }
 
         const btn = document.createElement('div');
         btn.id = 'MRELOAD';
         btn.className = 'head__action selector m-reload-screen';
-        btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="0.48"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z" fill="currentColor"/></svg>`;
+        btn.innerHTML = `<svg fill="#fff" viewBox="0 0 24 24"><path d="M4,12a1,1,0,0,1-2,0A9.983,9.983,0,0,1,18.242,4.206V2.758a1,1,0,1,1,2,0v4a1,1,0,0,1-1,1h-4a1,1,0,0,1,0-2h1.743A7.986,7.986,0,0,0,4,12Zm17-1a1,1,0,0,0-1,1A7.986,7.986,0,0,1,7.015,18.242H8.757a1,1,0,1,0,0-2h-4a1,1,0,0,0-1,1v4a1,1,0,0,0,2,0V19.794A9.984,9.984,0,0,0,22,12,1,1,0,0,0,21,11Z"/></svg>`;
         btn.addEventListener('click',()=>location.reload());
         headActions.appendChild(btn);
     }
 
-    /* === Каталог парсеров (как в pubtorr) === */
-    const parsersInfo = [
-    { base: 'jacred_xyz',       name: 'Jacred.xyz',       settings: { url: 'jacred.xyz',            key: '',        parser_torrent_type: 'jackett' } },
-    { base: 'jr_maxvol_pro',    name: 'Jr.maxvol.pro',    settings: { url: 'jr.maxvol.pro',         key: '',        parser_torrent_type: 'jackett' } },
-    { base: 'jacred_my_to',     name: 'Jacred.my.to',     settings: { url: 'jacred.my.to',          key: '',        parser_torrent_type: 'jackett' } },
-    { base: 'lampa_app',        name: 'Lampa.app',        settings: { url: 'lampa.app',             key: '',        parser_torrent_type: 'jackett' } },
-    { base: 'jacred_pro',       name: 'Jacred.pro',       settings: { url: 'jacred.pro',            key: '',        parser_torrent_type: 'jackett' } },
-    { base: 'jacred_viewbox_dev', name: 'Viewbox',        settings: { url: 'jacred.viewbox.dev',    key: 'viewbox', parser_torrent_type: 'jackett' } }
-];
-
-
     function changeParser() {
-        const jackettUrlTwo = Lampa.Storage.get('lme_url_two'); // base
-        const selectedParser = parsersInfo.find(p => p.base === jackettUrlTwo);
-        if (selectedParser) {
-            const s = selectedParser.settings;
+        const selected = Lampa.Storage.get('lme_url_two');
+        const found = parsersInfo.find(p => p.base === selected);
+        if (found) {
+            const s = found.settings;
             const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
             Lampa.Storage.set(type + '_url', s.url);
             Lampa.Storage.set(type + '_key', s.key);
             Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
-        } else {
-            console.warn('Parser not found in parsersInfo for', jackettUrlTwo);
         }
     }
 
-    /* === Кнопка Парсер (автовставка при появлении torrent-filter) === */
+    function checkAvailability(url) {
+        return fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' })
+            .then(() => true)
+            .catch(() => false);
+    }
+
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
 
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
-        const currentName = (parsersInfo.find(p => p.base === currentBase) || parsersInfo.find(p => p.base==='jacred_xyz')).name;
+        const currentName = (parsersInfo.find(p => p.base === currentBase) || parsersInfo[0]).name;
 
         const btn = document.createElement('div');
         btn.id = 'parser-selectbox';
@@ -128,114 +125,26 @@
         btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentName}</div>`;
         container.appendChild(btn);
 
-        btn.addEventListener('hover:enter', () => {
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items: parsersInfo.map(p => ({
+        btn.addEventListener('hover:enter', async () => {
+            const items = await Promise.all(parsersInfo.map(async p => {
+                const available = await checkAvailability(p.settings.url);
+                return {
                     title: p.name,
                     base: p.base,
-                    selected: Lampa.Storage.get('lme_url_two') === p.base
+                    selected: Lampa.Storage.get('lme_url_two') === p.base,
+                    color: available ? '#00ff00' : '#ff3333'
+                };
+            }));
+
+            Lampa.Select.show({
+                title: 'Каталог парсеров',
+                items: items.map(i => ({
+                    title: `<span style="color:${i.color}">${i.title}</span>`,
+                    base: i.base,
+                    selected: i.selected
                 })),
                 onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base); // сохраняем base
-                    changeParser(); // применяем настройки (url/key/type)
-                    const el = document.getElementById('parser-current');
-                    if (el) el.textContent = a.title;
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        }
-                    } catch (err) { console.error(err); }
-                }
-            });
-        });
-    }
-
-    function startParserObserver() {
-        const obs = new MutationObserver(() => {
-            const container = document.querySelector('.torrent-filter');
-            if (container && !container.querySelector('#parser-selectbox')) {
-                mountParserButton(container);
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-
-        const first = document.querySelector('.torrent-filter');
-        if (first) mountParserButton(first);
-    }
-
-    function initMenuPlugin() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', e => {
-                if (e.type === 'ready') {
-                    applyCustomMenuStyles();
-                    addReloadButton();
-                    startParserObserver();
-                    // первичная установка парсера по сохранённому base
+                    Lampa.Storage.set('lme_url_two', a.base);
                     changeParser();
-                }
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                applyCustomMenuStyles();
-                addReloadButton();
-                startParserObserver();
-                changeParser();
-            });
-        }
-    }
-
-    function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id_menu,
-                name: plugin_name_menu,
-                version: '8.2',
-                author: 'maxi3219',
-                description: 'Меню + зеленые раздающие + reload + выбор парсера',
-                init: initMenuPlugin
-            });
-        } else { initMenuPlugin(); }
-    }
-
-    registerMenu();
-
-    /* === Плагин MaxColor — перекраска сидов === */
-    const COLORS = { low:'#ff3333', mid:'#ffcc00', high:'#00ff00' };
-
-    function recolorSeedNumbers(){
-        const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
-        seedBlocks.forEach(block=>{
-            const span = block.querySelector('span');
-            if(!span) return;
-            const num = parseInt(span.textContent);
-            if(isNaN(num)) return;
-            let color = COLORS.low;
-            if(num > 10) color = COLORS.high;
-            else if(num >= 5) color = COLORS.mid;
-            span.style.color = color;
-            span.style.fontWeight = 'bold';
-        });
-    }
-
-    function startObserver(){
-        const obs = new MutationObserver(()=>recolorSeedNumbers());
-        obs.observe(document.body,{childList:true,subtree:true});
-        recolorSeedNumbers();
-    }
-
-    if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-        app.plugins.add({
-            id: 'maxcolor',
-            name: 'MaxColor',
-            version: '2.0',
-            author: 'maxi3219',
-            description: 'Цвет раздающих',
-            init: startObserver
-        });
-    } else {
-        startObserver();
-    }
-
-})();
+                    const el = document.getElementById('parser-current');
+                    if (el) el.textContent = parsersInfo.find(p => p.base
