@@ -1,8 +1,14 @@
 (() => {
     'use strict';
 
-    const plugin_id = 'roundedmenu';
+    // =========================
+    // Unified plugin: RoundedMenu + MaxColor
+    // With robust parser button mounting strictly after entering Torrents
+    // =========================
+
+    const plugin_id   = 'roundedmenu';
     const plugin_name = 'RoundedMenu';
+    const plugin_ver  = '12.0';
 
     const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
@@ -15,19 +21,12 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // ===== STRICT: mount only on activity start when component is torrents =====
-    function isTorrentsActivity(e) {
-        const comp = String(e?.activity?.component || '').toLowerCase();
-        const src  = String(e?.activity?.source    || '').toLowerCase();
-        const typ  = String(e?.activity?.type      || '').toLowerCase();
+    // ======================================================
+    // New robust logic: strictly mount after entering Torrents
+    // No reliance on Activity/Listener APIs
+    // ======================================================
 
-        if (comp.includes('online') || src.includes('online')) return false;
-        if (comp.includes('torrent')) return true;
-        if (typ === 'torrents') return true;
-        if (src.includes('jackett') || src.includes('prowlarr')) return true;
-
-        return false;
-    }
+    let onlyAfterEnterTorrents = false;
 
     function removeParserButton() {
         const btn = document.getElementById('parser-selectbox');
@@ -56,13 +55,7 @@
     }
 
     function openParserSelect() {
-        // double guard: never open in non-torrent screens
-        try {
-            const active = Lampa.Activity.active();
-            if (!String(active?.activity?.component || '').toLowerCase().includes('torrent')) return;
-        } catch (_) {
-            return;
-        }
+        if (!onlyAfterEnterTorrents) return;
 
         Promise.all(parsersInfo.map(async p => {
             const ok = await checkAvailability(p.settings.url);
@@ -83,19 +76,13 @@
                     const el = document.getElementById('parser-current');
                     const picked = parsersInfo.find(p => p.base === a.base);
                     if (el && picked) el.textContent = picked.name;
-
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        }
-                    } catch (err) { /* noop */ }
                 }
             });
         });
     }
 
     function mountParserButtonInto(container) {
+        if (!onlyAfterEnterTorrents) return;
         if (!container || container.querySelector('#parser-selectbox')) return;
 
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
@@ -110,72 +97,82 @@
         btn.addEventListener('hover:enter', () => openParserSelect());
     }
 
-    // Mount strictly after torrents activity starts (no MutationObserver)
-    function wireActivityMount() {
-        Lampa.Listener.follow('activity', e => {
-            if (e.type === 'start') {
-                if (isTorrentsActivity(e)) {
-                    // small delay to allow screen DOM render
-                    setTimeout(() => {
-                        const container = document.querySelector('.torrent-filter');
-                        if (container) mountParserButtonInto(container);
-                    }, 180);
-                } else {
-                    // leaving torrents or entering online -> remove button
-                    removeParserButton();
-                }
+    // Hook source select menu: catch entering Torrents by title, remove button otherwise
+    function hookSourceMenuEnter() {
+        document.addEventListener('hover:enter', (e) => {
+            const t = e?.target;
+            if (!t) return;
+            const item = t.closest('.selectbox-item');
+            if (!item) return;
+
+            const titleEl = item.querySelector('.selectbox-item__title');
+            const title = (titleEl ? titleEl.textContent : t.textContent || '').trim().toLowerCase();
+
+            if (title === 'торренты') {
+                onlyAfterEnterTorrents = true;
+                removeParserButton();
+                waitAndMountInTorrentFilter();
+            } else {
+                onlyAfterEnterTorrents = false;
+                removeParserButton();
             }
-        });
+        }, true);
     }
 
-    // ===== Error handling only while in torrents (activity checked on demand) =====
-    function handleParserError() {
+    // Wait for .torrent-filter to appear after entering Torrents and then mount the button
+    function waitAndMountInTorrentFilter() {
+        if (!onlyAfterEnterTorrents) return;
+
+        const container = document.querySelector('.torrent-filter');
+        if (container) {
+            setTimeout(() => mountParserButtonInto(container), 180);
+            return;
+        }
+
+        const start = Date.now();
+        const MAX_WAIT = 8000;
+        const obs = new MutationObserver(() => {
+            if (!onlyAfterEnterTorrents) { obs.disconnect(); return; }
+            const cont = document.querySelector('.torrent-filter');
+            if (cont) {
+                obs.disconnect();
+                setTimeout(() => mountParserButtonInto(cont), 180);
+            } else if (Date.now() - start > MAX_WAIT) {
+                obs.disconnect();
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Error handler: auto-open parser select only when in torrents flow
+    function handleParserErrorAutoSelect() {
         let lastTrigger = 0;
-        const TRIGGER_COOLDOWN = 1500;
-
-        function shouldTriggerOnce() {
-            const now = Date.now();
-            if (now - lastTrigger < TRIGGER_COOLDOWN) return false;
-            lastTrigger = now;
-            return true;
-        }
-
-        function isErrorBlock(node) {
-            if (!node) return false;
-            const txt = (node.textContent || '').toLowerCase();
-            return (
-                txt.includes('ошибка подключения') ||
-                txt.includes('здесь пусто') ||
-                txt.includes('парсер не отвечает')
-            );
-        }
+        const CD = 1500;
 
         const obs = new MutationObserver((mutations) => {
-            // check activity on demand; do not rely on global flags
-            let inTorrents = false;
-            try {
-                const comp = String(Lampa.Activity.active()?.activity?.component || '').toLowerCase();
-                inTorrents = comp.includes('torrent');
-            } catch (_) { inTorrents = false; }
-            if (!inTorrents) return;
+            if (!onlyAfterEnterTorrents) return;
+            const now = Date.now();
+            if (now - lastTrigger < CD) return;
 
             for (const m of mutations) {
-                const added = Array.from(m.addedNodes || []);
-                for (const node of added) {
-                    if (node.nodeType === 1) {
-                        const target = node.classList?.contains('empty') ? node : (node.querySelector?.('.empty') || null);
-                        if (target && isErrorBlock(target) && shouldTriggerOnce()) {
-                            openParserSelect();
-                        }
+                for (const node of Array.from(m.addedNodes || [])) {
+                    if (node.nodeType !== 1) continue;
+                    const empty = node.classList?.contains('empty') ? node : node.querySelector?.('.empty');
+                    if (!empty) continue;
+                    const txt = (empty.textContent || '').toLowerCase();
+                    if (txt.includes('ошибка подключения') || txt.includes('здесь пусто') || txt.includes('парсер не отвечает')) {
+                        lastTrigger = now;
+                        openParserSelect();
                     }
                 }
             }
         });
-
         obs.observe(document.body, { childList: true, subtree: true });
     }
 
-    // ===== Styles & reload (unchanged) =====
+    // =========================
+    // Styles (unchanged visual spec)
+    // =========================
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -297,6 +294,9 @@
         document.head.appendChild(style);
     }
 
+    // =========================
+    // Reload button (unchanged)
+    // =========================
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -322,6 +322,9 @@
         headActions.appendChild(btn);
     }
 
+    // =========================
+    // Seeds color (unchanged)
+    // =========================
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -343,14 +346,20 @@
         recolorSeedNumbers();
     }
 
-    // ===== Boot & register =====
+    // =========================
+    // Boot & register
+    // =========================
     function initMenuPlugin() {
         const boot = () => {
             applyStyles();
             addReloadButton();
-            wireActivityMount();   // mount ONLY on torrents activity start
+
+            // New: source menu hook and error auto-select
+            hookSourceMenuEnter();
+            handleParserErrorAutoSelect();
+
+            // Keep storage sync for selected parser
             changeParser();
-            handleParserError();   // reacts only while in torrents
         };
 
         if (window.Lampa && typeof Lampa.Listener === 'object') {
@@ -367,9 +376,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '11.3',
+                version: plugin_ver,
                 author: 'maxi3219',
-                description: 'Кнопка выбора парсеров монтируется строго после входа в Торренты. В онлайне отсутствует.',
+                description: 'Кнопка выбора парсеров монтируется строго после входа в Торренты через меню источников. В онлайне отсутствует.',
                 init: initMenuPlugin
             });
         } else {
@@ -379,6 +388,7 @@
 
     registerMenu();
 
+    // MaxColor registration kept unified
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: 'maxcolor',
