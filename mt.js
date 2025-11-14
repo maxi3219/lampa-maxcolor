@@ -15,13 +15,9 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    function inTorrentsActivity() {
-        try {
-            const active = Lampa.Activity.active();
-            return !!(active && active.activity && active.activity.type === 'torrents');
-        } catch (e) {
-            return false;
-        }
+    // Контекст торрентов: ориентируемся на наличие блока фильтров торрентов
+    function inTorrentsContext() {
+        return !!document.querySelector('.torrent-filter');
     }
 
     function applyStyles() {
@@ -159,17 +155,11 @@
             const href = window.location.href;
             let triedReload = false;
 
-            try {
-                triedReload = true;
-                window.location.reload();
-            } catch (e) {}
+            try { triedReload = true; window.location.reload(); } catch (e) {}
 
             setTimeout(() => {
-                try {
-                    window.location.replace(href);
-                } catch (e) {
-                    try { window.location.href = href; } catch (_) {}
-                }
+                try { window.location.replace(href); }
+                catch (e) { try { window.location.href = href; } catch (_) {} }
             }, triedReload ? 250 : 0);
         });
 
@@ -231,7 +221,7 @@
 
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
-        if (!inTorrentsActivity()) return;
+        if (!inTorrentsContext()) return;
 
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
         const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
@@ -243,13 +233,12 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', () => {
-            if (inTorrentsActivity()) openParserSelect();
+            if (inTorrentsContext()) openParserSelect();
         });
     }
 
     function startParserObserver() {
         const obs = new MutationObserver(() => {
-            if (!inTorrentsActivity()) return;
             const container = document.querySelector('.torrent-filter');
             if (container && !container.querySelector('#parser-selectbox')) {
                 mountParserButton(container);
@@ -257,10 +246,8 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        if (inTorrentsActivity()) {
-            const first = document.querySelector('.torrent-filter');
-            if (first) mountParserButton(first);
-        }
+        const first = document.querySelector('.torrent-filter');
+        if (first) mountParserButton(first);
     }
 
     function handleParserError() {
@@ -291,14 +278,15 @@
                 if (label.includes('обновить')) {
                     b.addEventListener('hover:enter', (ev) => {
                         try { ev.stopPropagation(); } catch (e) {}
-                        if (inTorrentsActivity()) openParserSelect();
+                        if (inTorrentsContext()) openParserSelect();
                     }, { once: true });
                 }
             });
         }
 
         const obs = new MutationObserver((mutations) => {
-            if (!inTorrentsActivity()) return;
+            // Автозапуск меню ТОЛЬКО в контексте торрентов
+            if (!inTorrentsContext()) return;
 
             for (const m of mutations) {
                 const added = Array.from(m.addedNodes || []);
@@ -324,8 +312,9 @@
 
         obs.observe(document.body, { childList: true, subtree: true });
 
+        // Первый проход, если ошибка уже на экране
         const initialEmpty = document.querySelector('.empty');
-        if (initialEmpty && isErrorBlock(initialEmpty) && inTorrentsActivity() && shouldTriggerOnce()) {
+        if (initialEmpty && isErrorBlock(initialEmpty) && inTorrentsContext() && shouldTriggerOnce()) {
             wireRefreshButtonWithin(initialEmpty);
             openParserSelect();
         }
@@ -354,7 +343,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.5',
+                version: '10.6',
                 author: 'maxi3219',
                 description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
