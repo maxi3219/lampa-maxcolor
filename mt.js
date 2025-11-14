@@ -15,72 +15,28 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // Track current activity (if fields are present)
-    const currentActivity = { component: '', source: '', type: '' };
-
-    function trackActivity() {
-        try {
-            Lampa.Listener.follow('activity', e => {
-                if (e && (e.type === 'start' || e.type === 'enter')) {
-                    currentActivity.component = String(e.activity?.component || '').toLowerCase();
-                    currentActivity.source    = String(e.activity?.source    || '').toLowerCase();
-                    currentActivity.type      = String(e.activity?.type      || '').toLowerCase();
-                }
-            });
-        } catch (_) {}
-    }
-
-    // DOM gate: detect explicit ONLINE markers so we can exclude
-    function isOnlineSectionDom() {
-        try {
-            const onlineIcon = document.querySelector('use[xlink\\:href="#sprite-online"], use[href="#sprite-online"]');
-            const titleHasOnline = Array.from(document.querySelectorAll('.selectbox-item__title, .button span, .menu__item'))
-                .some(el => (el.textContent || '').trim().toLowerCase().includes('онлайн'));
-            const onlineFilter = document.querySelector('.online-filter, .filter--online');
-            return !!onlineIcon || titleHasOnline || !!onlineFilter;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    // DOM gate: detect explicit TORRENT markers
-    function isTorrentSectionDom() {
-        try {
-            const torrentIcon = document.querySelector('use[xlink\\:href="#sprite-torrent"], use[href="#sprite-torrent"]');
-            const titleHasTorrent = Array.from(document.querySelectorAll('.selectbox-item__title, .button span, .menu__item'))
-                .some(el => (el.textContent || '').trim().toLowerCase().includes('торренты'));
-            const hasTorrentFilterDom = !!document.querySelector('.torrent-filter');
-            return !!torrentIcon || titleHasTorrent || hasTorrentFilterDom;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    // Strict context gate: show features only in torrents, never in online
+    // ===== Reliable torrents detection: check active activity component =====
     function inTorrentsContext() {
-        const comp = (currentActivity.component || '').toLowerCase();
-        const src  = (currentActivity.source || '').toLowerCase();
-        const typ  = (currentActivity.type || '').toLowerCase();
+        try {
+            const active = Lampa.Activity && typeof Lampa.Activity.active === 'function'
+                ? Lampa.Activity.active()
+                : null;
+            const comp = String(active?.activity?.component || '').toLowerCase();
+            // match "torrent" or "torrents" or "search_torrents"
+            if (comp.includes('torrent')) return true;
 
-        // Hard exclude: ONLINE anywhere in activity or DOM
-        if (comp.includes('online') || src.includes('online') || isOnlineSectionDom()) return false;
+            // storage hint as a fallback (user configured parser type)
+            const ptype = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('parser_torrent_type') : '';
+            if (ptype === 'jackett' || ptype === 'prowlarr') return true;
 
-        // Strong include: activity hints or storage config for torrent parsers
-        const storageType = Lampa.Storage.get('parser_torrent_type');
-        const isTorrentByActivity =
-            comp.includes('torrent') ||
-            src.includes('jackett')  ||
-            src.includes('prowlarr') ||
-            typ === 'torrents'       ||
-            storageType === 'jackett' ||
-            storageType === 'prowlarr';
-
-        if (isTorrentByActivity) return true;
-
-        // Final fallback: explicit torrent markers in current screen
-        return isTorrentSectionDom();
+            // otherwise false: do NOT show in online menu
+            return false;
+        } catch (e) {
+            return false;
+        }
     }
 
+    // ===== Styles =====
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -202,6 +158,7 @@
         document.head.appendChild(style);
     }
 
+    // ===== Reload button =====
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -227,6 +184,7 @@
         headActions.appendChild(btn);
     }
 
+    // ===== Parser switching =====
     function changeParser() {
         const selected = Lampa.Storage.get('lme_url_two');
         const found = parsersInfo.find(p => p.base === selected);
@@ -282,6 +240,7 @@
         });
     }
 
+    // ===== Parser button (only when active activity is torrents) =====
     function mountParserButton(container) {
         if (!container || container.querySelector('#parser-selectbox')) return;
         if (!inTorrentsContext()) return;
@@ -302,7 +261,13 @@
 
     function startParserObserver() {
         const obs = new MutationObserver(() => {
-            if (!inTorrentsContext()) return;
+            // look for the torrent-filter container on active torrents screen
+            if (!inTorrentsContext()) {
+                // remove lingering button if present when leaving torrents
+                const dangling = document.getElementById('parser-selectbox');
+                if (dangling && dangling.parentNode) dangling.parentNode.removeChild(dangling);
+                return;
+            }
             const container = document.querySelector('.torrent-filter');
             if (container && !container.querySelector('#parser-selectbox')) {
                 mountParserButton(container);
@@ -310,15 +275,15 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        if (inTorrentsContext()) {
-            const first = document.querySelector('.torrent-filter');
-            if (first) mountParserButton(first);
-        }
+        // initial attempt
+        const initialContainer = document.querySelector('.torrent-filter');
+        if (initialContainer && inTorrentsContext()) mountParserButton(initialContainer);
     }
 
+    // ===== Auto open select on parser error (only while in torrents) =====
     function handleParserError() {
         let lastTrigger = 0;
-        const TRIGGER_COOLDOWN = 1500;
+        const TRIGGER_COOLDOWN = 1500; // ms
 
         function shouldTriggerOnce() {
             const now = Date.now();
@@ -384,6 +349,7 @@
         }
     }
 
+    // ===== Seeds color =====
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -405,9 +371,9 @@
         recolorSeedNumbers();
     }
 
+    // ===== Boot & register =====
     function initMenuPlugin() {
         const boot = () => {
-            trackActivity();
             applyStyles();
             addReloadButton();
             startParserObserver();
@@ -416,6 +382,20 @@
         };
 
         if (window.Lampa && typeof Lampa.Listener === 'object') {
+            // ensure we try to re-check mount on activity start (when user navigates to Torrents)
+            Lampa.Listener.follow('activity', e => {
+                if (e && e.type === 'start') {
+                    // small delay to allow activity DOM to render
+                    setTimeout(() => {
+                        // remove button if leaving torrents
+                        if (!inTorrentsContext()) {
+                            const dangling = document.getElementById('parser-selectbox');
+                            if (dangling && dangling.parentNode) dangling.parentNode.removeChild(dangling);
+                        }
+                    }, 220);
+                }
+            });
+
             Lampa.Listener.follow('app', e => {
                 if (e.type === 'ready') boot();
             });
@@ -429,9 +409,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '11.1',
+                version: '11.2',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
+                description: 'Парсер селектор только в активном экране Торренты + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
