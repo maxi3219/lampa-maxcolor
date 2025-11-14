@@ -17,7 +17,7 @@
         { base:'jacred_viewbox_dev', name:'Viewbox',           settings:{ url:'jacred.viewbox.dev',   key:'viewbox', parser_torrent_type:'jackett' } }
     ];
 
-    /* === Стили меню === */
+    /* === Стили меню + скругления === */
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -74,13 +74,27 @@
                     border-radius: 1em !important;
                 }
             }
-            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161d 100%) !important; color: #fff !important; }
+            body { background: linear-gradient(135deg, #010a13 0%, #133442 50%, #01161д 100%) !important; color: #fff !important; }
             .head__body svg, .head__body svg use { fill: #fff !important; color: #fff !important; transition: none !important; }
             .head__body .selector.hover svg, .head__body .selector.focus svg, .head__body .selector.traverse svg { fill: #fff !important; color: #fff !important; }
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .m-reload-screen { cursor: pointer !important; }
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
+
+            /* Скругление карточек торрентов и истории */
+            .torrent-item {
+                background-color: rgba(0,0,0,0.3) !important;
+                -webkit-border-radius: 0.9em !important;
+                -moz-border-radius: 0.9em !important;
+                border-radius: 0.9em !important;
+            }
+            .watched-history {
+                position: relative !important;
+                -webkit-border-radius: 0.9em !important;
+                -moz-border-radius: 0.9em !important;
+                border-radius: 0.9em !important;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -117,7 +131,6 @@
 
     /* === Проверка доступности (зелёный/красный) === */
     async function checkAvailability(url) {
-        // HEAD + no-cors даёт эвристическую оценку: если ошибка — считаем недоступным
         try {
             await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
             return true;
@@ -140,13 +153,11 @@
         container.appendChild(btn);
 
         btn.addEventListener('hover:enter', async () => {
-            // Параллельно проверяем доступность всех парсеров
             const statuses = await Promise.all(parsersInfo.map(async p => {
                 const ok = await checkAvailability(p.settings.url);
                 return { ...p, ok };
             }));
 
-            // Формируем список с цветами
             const items = statuses.map(s => ({
                 title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
                 base: s.base,
@@ -163,7 +174,6 @@
                     const picked = parsersInfo.find(p => p.base === a.base);
                     if (el && picked) el.textContent = picked.name;
 
-                    // Обновить текущую активность, чтобы подтянуть данные нового источника
                     try {
                         const active = Lampa.Activity.active();
                         if (active && active.activity && typeof active.activity.refresh === 'function') {
@@ -184,7 +194,6 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // Первичная попытка
         const first = document.querySelector('.torrent-filter');
         if (first) mountParserButton(first);
     }
@@ -197,7 +206,7 @@
                     applyStyles();
                     addReloadButton();
                     startParserObserver();
-                    changeParser(); // применить сохранённый выбор
+                    changeParser();
                 }
             });
         } else {
@@ -215,9 +224,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.0',
+                version: '9.1',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера (с доступностью)',
+                description: 'Меню + reload + выбор парсера (с доступностью) + скругление',
                 init: initMenuPlugin
             });
         } else { initMenuPlugin(); }
@@ -251,7 +260,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.1',
+            version: '2.2',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
