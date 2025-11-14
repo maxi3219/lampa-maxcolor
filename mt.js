@@ -68,6 +68,7 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .m-reload-screen { cursor: pointer !important; }
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
+            .filter--parser.selector { cursor: pointer !important; }
         `;
         document.head.appendChild(style);
         logMenu('Menu styles applied');
@@ -87,7 +88,7 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер === */
+    /* === Кнопка Парсер в torrent-filter === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if(!container){ setTimeout(addParserButton,500); return; }
@@ -101,51 +102,23 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        // Используем стандартный механизм Lampa для selectbox
-        btn.addEventListener('click', e => {
-            e.stopPropagation(); // предотвращаем конфликт с другими кнопками
-
-            if(document.querySelector('#parser-menu')) return; // меню уже открыто
-
-            const menu = document.createElement('div');
-            menu.id='parser-menu';
-            menu.className='selectbox__content layer--height';
-            menu.style.maxHeight='400px';
-            menu.style.position='absolute';
-            const rect = btn.getBoundingClientRect();
-            menu.style.top = (rect.bottom + window.scrollY) + 'px';
-            menu.style.left = (rect.left + window.scrollX) + 'px';
-            menu.style.width = rect.width + 'px';
-            menu.style.background='rgba(54,54,54,0.98)';
-            menu.style.borderRadius='1em';
-            menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
-            menu.style.overflowY='auto';
-            menu.style.zIndex='9999';
-
-            parsers.forEach(p=>{
-                const item = document.createElement('div');
-                item.className='selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
-                item.innerHTML=`<div class="selectbox-item__title">${p}</div>`;
-                item.addEventListener('click',()=>{
-                    Lampa.Storage.set('parser_select',p);
-                    document.getElementById('parser-current').textContent=p;
-
+        btn.addEventListener('click', () => {
+            // Создаем selectbox через стандартный метод Lampa
+            const options = parsers.map(p => ({title:p,value:p}));
+            Lampa.Select.show({
+                title:'Выберите парсер',
+                items:options,
+                onSelect: p=>{
+                    Lampa.Storage.set('parser_select',p.value);
+                    document.getElementById('parser-current').textContent = p.value;
                     try{
-                        const active = Lampa.Activity.active();
+                        const active=Lampa.Activity.active();
                         if(active && active.activity && typeof active.activity.refresh==='function'){
-                            active.activity.refresh(); // обновляем только список торрентов
+                            active.activity.refresh();
                         }
-                    } catch(err){console.error(err);}
-                    menu.remove();
-                });
-                menu.appendChild(item);
+                    }catch(err){console.error(err);}
+                }
             });
-
-            document.body.appendChild(menu);
-
-            document.addEventListener('click', ev=>{
-                if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
-            }, {once:true});
         });
     }
 
@@ -169,14 +142,7 @@
 
     function registerMenu() {
         if(window.app && app.plugins && typeof app.plugins.add==='function'){
-            app.plugins.add({
-                id:plugin_id_menu,
-                name:plugin_name_menu,
-                version:'7.5',
-                author:'maxi3219',
-                description:'Меню + зеленые раздающие + reload + кнопка парсер',
-                init:initMenuPlugin
-            });
+            app.plugins.add({id:plugin_id_menu,name:plugin_name_menu,version:'7.5',author:'maxi3219',description:'Меню + зеленые раздающие + reload + кнопка парсер',init:initMenuPlugin});
         } else { initMenuPlugin(); }
     }
 
@@ -204,13 +170,6 @@
         recolorSeedNumbers();
     }
     if(window.app && app.plugins && typeof app.plugins.add==='function'){
-        app.plugins.add({
-            id:'maxcolor',
-            name:'MaxColor',
-            version:'2.0',
-            author:'maxi3219',
-            description:'Цвет раздающих',
-            init:startObserver
-        });
+        app.plugins.add({id:'maxcolor',name:'MaxColor',version:'2.0',author:'maxi3219',description:'Цвет раздающих',init:startObserver});
     } else { startObserver(); }
 })();
