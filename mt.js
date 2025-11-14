@@ -15,28 +15,167 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // ===== Reliable torrents detection: check active activity component =====
-    function inTorrentsContext() {
+    // ===== STRICT: mount only on activity start when component is torrents =====
+    function isTorrentsActivity(e) {
+        const comp = String(e?.activity?.component || '').toLowerCase();
+        const src  = String(e?.activity?.source    || '').toLowerCase();
+        const typ  = String(e?.activity?.type      || '').toLowerCase();
+
+        if (comp.includes('online') || src.includes('online')) return false;
+        if (comp.includes('torrent')) return true;
+        if (typ === 'torrents') return true;
+        if (src.includes('jackett') || src.includes('prowlarr')) return true;
+
+        return false;
+    }
+
+    function removeParserButton() {
+        const btn = document.getElementById('parser-selectbox');
+        if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+    }
+
+    function changeParser() {
+        const selected = Lampa.Storage.get('lme_url_two');
+        const found = parsersInfo.find(p => p.base === selected);
+        if (found) {
+            const s = found.settings;
+            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
+            Lampa.Storage.set(type + '_url', s.url);
+            Lampa.Storage.set(type + '_key', s.key);
+            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
+        }
+    }
+
+    async function checkAvailability(url) {
         try {
-            const active = Lampa.Activity && typeof Lampa.Activity.active === 'function'
-                ? Lampa.Activity.active()
-                : null;
-            const comp = String(active?.activity?.component || '').toLowerCase();
-            // match "torrent" or "torrents" or "search_torrents"
-            if (comp.includes('torrent')) return true;
-
-            // storage hint as a fallback (user configured parser type)
-            const ptype = Lampa.Storage && Lampa.Storage.get ? Lampa.Storage.get('parser_torrent_type') : '';
-            if (ptype === 'jackett' || ptype === 'prowlarr') return true;
-
-            // otherwise false: do NOT show in online menu
-            return false;
-        } catch (e) {
+            await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
+            return true;
+        } catch {
             return false;
         }
     }
 
-    // ===== Styles =====
+    function openParserSelect() {
+        // double guard: never open in non-torrent screens
+        try {
+            const active = Lampa.Activity.active();
+            if (!String(active?.activity?.component || '').toLowerCase().includes('torrent')) return;
+        } catch (_) {
+            return;
+        }
+
+        Promise.all(parsersInfo.map(async p => {
+            const ok = await checkAvailability(p.settings.url);
+            return { ...p, ok };
+        })).then(statuses => {
+            const items = statuses.map(s => ({
+                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
+                base: s.base,
+                selected: Lampa.Storage.get('lme_url_two') === s.base
+            }));
+
+            Lampa.Select.show({
+                title: 'Каталог парсеров',
+                items,
+                onSelect: (a) => {
+                    Lampa.Storage.set('lme_url_two', a.base);
+                    changeParser();
+                    const el = document.getElementById('parser-current');
+                    const picked = parsersInfo.find(p => p.base === a.base);
+                    if (el && picked) el.textContent = picked.name;
+
+                    try {
+                        const active = Lampa.Activity.active();
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
+                        }
+                    } catch (err) { /* noop */ }
+                }
+            });
+        });
+    }
+
+    function mountParserButtonInto(container) {
+        if (!container || container.querySelector('#parser-selectbox')) return;
+
+        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
+        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
+
+        const btn = document.createElement('div');
+        btn.id = 'parser-selectbox';
+        btn.className = 'simple-button simple-button--filter filter--parser selector';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
+        container.appendChild(btn);
+
+        btn.addEventListener('hover:enter', () => openParserSelect());
+    }
+
+    // Mount strictly after torrents activity starts (no MutationObserver)
+    function wireActivityMount() {
+        Lampa.Listener.follow('activity', e => {
+            if (e.type === 'start') {
+                if (isTorrentsActivity(e)) {
+                    // small delay to allow screen DOM render
+                    setTimeout(() => {
+                        const container = document.querySelector('.torrent-filter');
+                        if (container) mountParserButtonInto(container);
+                    }, 180);
+                } else {
+                    // leaving torrents or entering online -> remove button
+                    removeParserButton();
+                }
+            }
+        });
+    }
+
+    // ===== Error handling only while in torrents (activity checked on demand) =====
+    function handleParserError() {
+        let lastTrigger = 0;
+        const TRIGGER_COOLDOWN = 1500;
+
+        function shouldTriggerOnce() {
+            const now = Date.now();
+            if (now - lastTrigger < TRIGGER_COOLDOWN) return false;
+            lastTrigger = now;
+            return true;
+        }
+
+        function isErrorBlock(node) {
+            if (!node) return false;
+            const txt = (node.textContent || '').toLowerCase();
+            return (
+                txt.includes('ошибка подключения') ||
+                txt.includes('здесь пусто') ||
+                txt.includes('парсер не отвечает')
+            );
+        }
+
+        const obs = new MutationObserver((mutations) => {
+            // check activity on demand; do not rely on global flags
+            let inTorrents = false;
+            try {
+                const comp = String(Lampa.Activity.active()?.activity?.component || '').toLowerCase();
+                inTorrents = comp.includes('torrent');
+            } catch (_) { inTorrents = false; }
+            if (!inTorrents) return;
+
+            for (const m of mutations) {
+                const added = Array.from(m.addedNodes || []);
+                for (const node of added) {
+                    if (node.nodeType === 1) {
+                        const target = node.classList?.contains('empty') ? node : (node.querySelector?.('.empty') || null);
+                        if (target && isErrorBlock(target) && shouldTriggerOnce()) {
+                            openParserSelect();
+                        }
+                    }
+                }
+            }
+        });
+
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ===== Styles & reload (unchanged) =====
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -158,7 +297,6 @@
         document.head.appendChild(style);
     }
 
-    // ===== Reload button =====
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -184,172 +322,6 @@
         headActions.appendChild(btn);
     }
 
-    // ===== Parser switching =====
-    function changeParser() {
-        const selected = Lampa.Storage.get('lme_url_two');
-        const found = parsersInfo.find(p => p.base === selected);
-        if (found) {
-            const s = found.settings;
-            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
-            Lampa.Storage.set(type + '_url', s.url);
-            Lampa.Storage.set(type + '_key', s.key);
-            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
-        }
-    }
-
-    async function checkAvailability(url) {
-        try {
-            await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    function openParserSelect() {
-        if (!inTorrentsContext()) return;
-
-        Promise.all(parsersInfo.map(async p => {
-            const ok = await checkAvailability(p.settings.url);
-            return { ...p, ok };
-        })).then(statuses => {
-            const items = statuses.map(s => ({
-                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
-                base: s.base,
-                selected: Lampa.Storage.get('lme_url_two') === s.base
-            }));
-
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
-
-                    try {
-                        const active = Lampa.Activity.active();
-                        if (active && active.activity && typeof active.activity.refresh === 'function') {
-                            active.activity.refresh();
-                        }
-                    } catch (err) { /* noop */ }
-                }
-            });
-        });
-    }
-
-    // ===== Parser button (only when active activity is torrents) =====
-    function mountParserButton(container) {
-        if (!container || container.querySelector('#parser-selectbox')) return;
-        if (!inTorrentsContext()) return;
-
-        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
-        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
-
-        const btn = document.createElement('div');
-        btn.id = 'parser-selectbox';
-        btn.className = 'simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
-        container.appendChild(btn);
-
-        btn.addEventListener('hover:enter', () => {
-            openParserSelect();
-        });
-    }
-
-    function startParserObserver() {
-        const obs = new MutationObserver(() => {
-            // look for the torrent-filter container on active torrents screen
-            if (!inTorrentsContext()) {
-                // remove lingering button if present when leaving torrents
-                const dangling = document.getElementById('parser-selectbox');
-                if (dangling && dangling.parentNode) dangling.parentNode.removeChild(dangling);
-                return;
-            }
-            const container = document.querySelector('.torrent-filter');
-            if (container && !container.querySelector('#parser-selectbox')) {
-                mountParserButton(container);
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-
-        // initial attempt
-        const initialContainer = document.querySelector('.torrent-filter');
-        if (initialContainer && inTorrentsContext()) mountParserButton(initialContainer);
-    }
-
-    // ===== Auto open select on parser error (only while in torrents) =====
-    function handleParserError() {
-        let lastTrigger = 0;
-        const TRIGGER_COOLDOWN = 1500; // ms
-
-        function shouldTriggerOnce() {
-            const now = Date.now();
-            if (now - lastTrigger < TRIGGER_COOLDOWN) return false;
-            lastTrigger = now;
-            return true;
-        }
-
-        function isErrorBlock(node) {
-            if (!node) return false;
-            const txt = (node.textContent || '').toLowerCase();
-            return (
-                txt.includes('ошибка подключения') ||
-                txt.includes('здесь пусто') ||
-                txt.includes('парсер не отвечает')
-            );
-        }
-
-        function wireRefreshButtonWithin(errorBlock) {
-            const btns = errorBlock.querySelectorAll('.button, .selector');
-            btns.forEach(b => {
-                const label = (b.textContent || '').trim().toLowerCase();
-                if (label.includes('обновить')) {
-                    b.addEventListener('hover:enter', (ev) => {
-                        try { ev.stopPropagation(); } catch (e) {}
-                        openParserSelect();
-                    }, { once: true });
-                }
-            });
-        }
-
-        const obs = new MutationObserver((mutations) => {
-            if (!inTorrentsContext()) return;
-
-            for (const m of mutations) {
-                const added = Array.from(m.addedNodes || []);
-                for (const node of added) {
-                    if (node.nodeType === 1 && node.classList && node.classList.contains('empty') && isErrorBlock(node)) {
-                        if (shouldTriggerOnce()) {
-                            wireRefreshButtonWithin(node);
-                            openParserSelect();
-                        }
-                    }
-                    if (node.nodeType === 1) {
-                        const emptyInTree = node.querySelector && node.querySelector('.empty');
-                        if (emptyInTree && isErrorBlock(emptyInTree)) {
-                            if (shouldTriggerOnce()) {
-                                wireRefreshButtonWithin(emptyInTree);
-                                openParserSelect();
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        obs.observe(document.body, { childList: true, subtree: true });
-
-        const initialEmpty = document.querySelector('.empty');
-        if (initialEmpty && isErrorBlock(initialEmpty) && inTorrentsContext() && shouldTriggerOnce()) {
-            wireRefreshButtonWithin(initialEmpty);
-            openParserSelect();
-        }
-    }
-
-    // ===== Seeds color =====
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -376,26 +348,12 @@
         const boot = () => {
             applyStyles();
             addReloadButton();
-            startParserObserver();
+            wireActivityMount();   // mount ONLY on torrents activity start
             changeParser();
-            handleParserError();
+            handleParserError();   // reacts only while in torrents
         };
 
         if (window.Lampa && typeof Lampa.Listener === 'object') {
-            // ensure we try to re-check mount on activity start (when user navigates to Torrents)
-            Lampa.Listener.follow('activity', e => {
-                if (e && e.type === 'start') {
-                    // small delay to allow activity DOM to render
-                    setTimeout(() => {
-                        // remove button if leaving torrents
-                        if (!inTorrentsContext()) {
-                            const dangling = document.getElementById('parser-selectbox');
-                            if (dangling && dangling.parentNode) dangling.parentNode.removeChild(dangling);
-                        }
-                    }, 220);
-                }
-            });
-
             Lampa.Listener.follow('app', e => {
                 if (e.type === 'ready') boot();
             });
@@ -409,9 +367,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '11.2',
+                version: '11.3',
                 author: 'maxi3219',
-                description: 'Парсер селектор только в активном экране Торренты + UI tweaks',
+                description: 'Кнопка выбора парсеров монтируется строго после входа в Торренты. В онлайне отсутствует.',
                 init: initMenuPlugin
             });
         } else {
