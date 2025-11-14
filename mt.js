@@ -15,9 +15,16 @@
         { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
     ];
 
-    // Контекст торрентов: ориентируемся на наличие блока фильтров торрентов
+    // Жёсткая проверка: активный компонент содержит 'torrent'
     function inTorrentsContext() {
-        return !!document.querySelector('.torrent-filter');
+        try {
+            const active = Lampa.Activity.active();
+            if (!active || !active.activity) return false;
+            const comp = String(active.activity.component || '').toLowerCase();
+            return comp.includes('torrent');
+        } catch (e) {
+            return false;
+        }
     }
 
     function applyStyles() {
@@ -239,6 +246,7 @@
 
     function startParserObserver() {
         const obs = new MutationObserver(() => {
+            if (!inTorrentsContext()) return;
             const container = document.querySelector('.torrent-filter');
             if (container && !container.querySelector('#parser-selectbox')) {
                 mountParserButton(container);
@@ -246,8 +254,10 @@
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        const first = document.querySelector('.torrent-filter');
-        if (first) mountParserButton(first);
+        if (inTorrentsContext()) {
+            const first = document.querySelector('.torrent-filter');
+            if (first) mountParserButton(first);
+        }
     }
 
     function handleParserError() {
@@ -285,7 +295,6 @@
         }
 
         const obs = new MutationObserver((mutations) => {
-            // Автозапуск меню ТОЛЬКО в контексте торрентов
             if (!inTorrentsContext()) return;
 
             for (const m of mutations) {
@@ -312,7 +321,6 @@
 
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // Первый проход, если ошибка уже на экране
         const initialEmpty = document.querySelector('.empty');
         if (initialEmpty && isErrorBlock(initialEmpty) && inTorrentsContext() && shouldTriggerOnce()) {
             wireRefreshButtonWithin(initialEmpty);
@@ -343,7 +351,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.6',
+                version: '10.7',
                 author: 'maxi3219',
                 description: 'Жёсткий перезапуск (ПК/ТВ) + авто-выбор парсера при ошибке подключения (только торренты) + скругление подложек торрентов + UI tweaks',
                 init: initMenuPlugin
