@@ -1,178 +1,23 @@
 (() => {
     'use strict';
 
-    // =========================
-    // Unified plugin: RoundedMenu + MaxColor
-    // With robust parser button mounting strictly after entering Torrents
-    // =========================
-
-    const plugin_id   = 'roundedmenu';
+    const plugin_id = 'roundedmenu';
     const plugin_name = 'RoundedMenu';
-    const plugin_ver  = '12.0';
 
     const SEED_COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
 
     const parsersInfo = [
-        { base: 'jacred_xyz',         name: 'Jacred.xyz',      settings: { url: 'jacred.xyz',          key: '',        parser_torrent_type: 'jackett' } },
-        { base: 'jr_maxvol_pro',      name: 'Jr.maxvol.pro',   settings: { url: 'jr.maxvol.pro',       key: '',        parser_torrent_type: 'jackett' } },
-        { base: 'jacred_my_to',       name: 'Jacred.my.to',    settings: { url: 'jacred.my.to',        key: '',        parser_torrent_type: 'jackett' } },
-        { base: 'lampa_app',          name: 'Lampa.app',       settings: { url: 'lampa.app',           key: '',        parser_torrent_type: 'jackett' } },
-        { base: 'jacred_pro',         name: 'Jacred.pro',      settings: { url: 'jacred.pro',          key: '',        parser_torrent_type: 'jackett' } },
-        { base: 'jacred_viewbox_dev', name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev',  key: 'viewbox', parser_torrent_type: 'jackett' } }
+        { base: 'jacred_xyz',        name: 'Jacred.xyz',      settings: { url: 'jacred.xyz',         key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jr_maxvol_pro',     name: 'Jr.maxvol.pro',   settings: { url: 'jr.maxvol.pro',      key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_my_to',      name: 'Jacred.my.to',    settings: { url: 'jacred.my.to',       key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'lampa_app',         name: 'Lampa.app',       settings: { url: 'lampa.app',          key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_pro',        name: 'Jacred.pro',      settings: { url: 'jacred.pro',         key: '',       parser_torrent_type: 'jackett' } },
+        { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
     ];
 
-    // ======================================================
-    // New robust logic: strictly mount after entering Torrents
-    // No reliance on Activity/Listener APIs
-    // ======================================================
-
+    // === LAST FIX INTEGRATED: strict mount after entering "Торренты" via source menu ===
     let onlyAfterEnterTorrents = false;
 
-    function removeParserButton() {
-        const btn = document.getElementById('parser-selectbox');
-        if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-    }
-
-    function changeParser() {
-        const selected = Lampa.Storage.get('lme_url_two');
-        const found = parsersInfo.find(p => p.base === selected);
-        if (found) {
-            const s = found.settings;
-            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
-            Lampa.Storage.set(type + '_url', s.url);
-            Lampa.Storage.set(type + '_key', s.key);
-            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
-        }
-    }
-
-    async function checkAvailability(url) {
-        try {
-            await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    function openParserSelect() {
-        if (!onlyAfterEnterTorrents) return;
-
-        Promise.all(parsersInfo.map(async p => {
-            const ok = await checkAvailability(p.settings.url);
-            return { ...p, ok };
-        })).then(statuses => {
-            const items = statuses.map(s => ({
-                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
-                base: s.base,
-                selected: Lampa.Storage.get('lme_url_two') === s.base
-            }));
-
-            Lampa.Select.show({
-                title: 'Каталог парсеров',
-                items,
-                onSelect: (a) => {
-                    Lampa.Storage.set('lme_url_two', a.base);
-                    changeParser();
-                    const el = document.getElementById('parser-current');
-                    const picked = parsersInfo.find(p => p.base === a.base);
-                    if (el && picked) el.textContent = picked.name;
-                }
-            });
-        });
-    }
-
-    function mountParserButtonInto(container) {
-        if (!onlyAfterEnterTorrents) return;
-        if (!container || container.querySelector('#parser-selectbox')) return;
-
-        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
-        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
-
-        const btn = document.createElement('div');
-        btn.id = 'parser-selectbox';
-        btn.className = 'simple-button simple-button--filter filter--parser selector';
-        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
-        container.appendChild(btn);
-
-        btn.addEventListener('hover:enter', () => openParserSelect());
-    }
-
-    // Hook source select menu: catch entering Torrents by title, remove button otherwise
-    function hookSourceMenuEnter() {
-        document.addEventListener('hover:enter', (e) => {
-            const t = e?.target;
-            if (!t) return;
-            const item = t.closest('.selectbox-item');
-            if (!item) return;
-
-            const titleEl = item.querySelector('.selectbox-item__title');
-            const title = (titleEl ? titleEl.textContent : t.textContent || '').trim().toLowerCase();
-
-            if (title === 'торренты') {
-                onlyAfterEnterTorrents = true;
-                removeParserButton();
-                waitAndMountInTorrentFilter();
-            } else {
-                onlyAfterEnterTorrents = false;
-                removeParserButton();
-            }
-        }, true);
-    }
-
-    // Wait for .torrent-filter to appear after entering Torrents and then mount the button
-    function waitAndMountInTorrentFilter() {
-        if (!onlyAfterEnterTorrents) return;
-
-        const container = document.querySelector('.torrent-filter');
-        if (container) {
-            setTimeout(() => mountParserButtonInto(container), 180);
-            return;
-        }
-
-        const start = Date.now();
-        const MAX_WAIT = 8000;
-        const obs = new MutationObserver(() => {
-            if (!onlyAfterEnterTorrents) { obs.disconnect(); return; }
-            const cont = document.querySelector('.torrent-filter');
-            if (cont) {
-                obs.disconnect();
-                setTimeout(() => mountParserButtonInto(cont), 180);
-            } else if (Date.now() - start > MAX_WAIT) {
-                obs.disconnect();
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-    }
-
-    // Error handler: auto-open parser select only when in torrents flow
-    function handleParserErrorAutoSelect() {
-        let lastTrigger = 0;
-        const CD = 1500;
-
-        const obs = new MutationObserver((mutations) => {
-            if (!onlyAfterEnterTorrents) return;
-            const now = Date.now();
-            if (now - lastTrigger < CD) return;
-
-            for (const m of mutations) {
-                for (const node of Array.from(m.addedNodes || [])) {
-                    if (node.nodeType !== 1) continue;
-                    const empty = node.classList?.contains('empty') ? node : node.querySelector?.('.empty');
-                    if (!empty) continue;
-                    const txt = (empty.textContent || '').toLowerCase();
-                    if (txt.includes('ошибка подключения') || txt.includes('здесь пусто') || txt.includes('парсер не отвечает')) {
-                        lastTrigger = now;
-                        openParserSelect();
-                    }
-                }
-            }
-        });
-        obs.observe(document.body, { childList: true, subtree: true });
-    }
-
-    // =========================
-    // Styles (unchanged visual spec)
-    // =========================
     function applyStyles() {
         const style = document.createElement('style');
         style.id = 'roundedmenu-style';
@@ -236,6 +81,7 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .filter--parser.selector { cursor: pointer !important; }
 
+            /* Торрент-карточки */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
@@ -265,6 +111,7 @@
                 border-radius: 0.9em !important;
             }
 
+            /* Градиент при наведении на фильтры */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -273,6 +120,7 @@
                 color: #fff !important;
             }
 
+            /* Кнопки на карточке */
             .full-start-new__buttons .full-start__button.selector {
                 border-radius: 1em !important;
                 transition: background 0.18s ease !important;
@@ -294,9 +142,6 @@
         document.head.appendChild(style);
     }
 
-    // =========================
-    // Reload button (unchanged)
-    // =========================
     function addReloadButton() {
         if (document.getElementById('MRELOAD')) return;
         const headActions = document.querySelector('.head__actions');
@@ -311,20 +156,198 @@
             const href = window.location.href;
             let triedReload = false;
 
-            try { triedReload = true; window.location.reload(); } catch (e) {}
+            try {
+                triedReload = true;
+                window.location.reload();
+            } catch (e) {}
 
             setTimeout(() => {
-                try { window.location.replace(href); }
-                catch (e) { try { window.location.href = href; } catch (_) {} }
+                try {
+                    window.location.replace(href);
+                } catch (e) {
+                    try { window.location.href = href; } catch (_) {}
+                }
             }, triedReload ? 250 : 0);
         });
 
         headActions.appendChild(btn);
     }
 
-    // =========================
-    // Seeds color (unchanged)
-    // =========================
+    function changeParser() {
+        const selected = Lampa.Storage.get('lme_url_two');
+        const found = parsersInfo.find(p => p.base === selected);
+        if (found) {
+            const s = found.settings;
+            const type = s.parser_torrent_type === 'prowlarr' ? 'prowlarr' : 'jackett';
+            Lampa.Storage.set(type + '_url', s.url);
+            Lampa.Storage.set(type + '_key', s.key);
+            Lampa.Storage.set('parser_torrent_type', s.parser_torrent_type);
+        }
+    }
+
+    async function checkAvailability(url) {
+        try {
+            await fetch(`https://${url}`, { method: 'HEAD', mode: 'no-cors' });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    function mountParserButton(container) {
+        if (!container || container.querySelector('#parser-selectbox')) return;
+
+        const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
+        const currentInfo = parsersInfo.find(p => p.base === currentBase) || parsersInfo[0];
+
+        const btn = document.createElement('div');
+        btn.id = 'parser-selectbox';
+        btn.className = 'simple-button simple-button--filter filter--parser selector';
+        btn.innerHTML = `<span>Парсер</span><div id="parser-current">${currentInfo.name}</div>`;
+        container.appendChild(btn);
+
+        btn.addEventListener('hover:enter', async () => {
+            const statuses = await Promise.all(parsersInfo.map(async p => {
+                const ok = await checkAvailability(p.settings.url);
+                return { ...p, ok };
+            }));
+
+            const items = statuses.map(s => ({
+                title: `<span style="color:${s.ok ? '#00ff00' : '#ff3333'}">${s.name}</span>`,
+                base: s.base,
+                selected: Lampa.Storage.get('lme_url_two') === s.base
+            }));
+
+            Lampa.Select.show({
+                title: 'Каталог парсеров',
+                items,
+                onSelect: (a) => {
+                    Lampa.Storage.set('lme_url_two', a.base);
+                    changeParser();
+                    const el = document.getElementById('parser-current');
+                    const picked = parsersInfo.find(p => p.base === a.base);
+                    if (el && picked) el.textContent = picked.name;
+
+                    // sticky re-mount after possible screen refresh
+                    setTimeout(() => {
+                        const cont = document.querySelector('.torrent-filter');
+                        if (cont && !cont.querySelector('#parser-selectbox')) {
+                            mountParserButton(cont);
+                        }
+                    }, 200);
+
+                    try {
+                        const active = Lampa.Activity.active();
+                        if (active && active.activity && typeof active.activity.refresh === 'function') {
+                            active.activity.refresh();
+                        }
+                    } catch (err) { /* noop */ }
+                }
+            });
+        });
+    }
+
+    // === LAST FIX: catch entering "Торренты" in source menu and mount strictly after ===
+    function hookSourceMenuEnter() {
+        document.addEventListener('hover:enter', (e) => {
+            const t = e?.target;
+            if (!t) return;
+            const item = t.closest('.selectbox-item');
+            if (!item) return;
+
+            const titleEl = item.querySelector('.selectbox-item__title');
+            const title = (titleEl ? titleEl.textContent : t.textContent || '').trim().toLowerCase();
+
+            if (title === 'торренты') {
+                onlyAfterEnterTorrents = true;
+                // wait for torrents filter and mount
+                waitAndMountInTorrentFilter();
+            } else if (title === 'онлайн') {
+                onlyAfterEnterTorrents = false;
+                // remove button when leaving torrents context
+                const btn = document.getElementById('parser-selectbox');
+                if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+            }
+        }, true);
+    }
+
+    function waitAndMountInTorrentFilter() {
+        const container = document.querySelector('.torrent-filter');
+        if (container) {
+            setTimeout(() => {
+                if (!container.querySelector('#parser-selectbox')) mountParserButton(container);
+            }, 180);
+            return;
+        }
+        const start = Date.now();
+        const MAX_WAIT = 8000;
+        const obs = new MutationObserver(() => {
+            const cont = document.querySelector('.torrent-filter');
+            if (cont) {
+                obs.disconnect();
+                setTimeout(() => {
+                    if (!cont.querySelector('#parser-selectbox')) mountParserButton(cont);
+                }, 180);
+            } else if (Date.now() - start > MAX_WAIT) {
+                obs.disconnect();
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Sticky observer: always remount if the button disappears while torrents filter exists
+    function startParserObserver() {
+        const obs = new MutationObserver(() => {
+            const container = document.querySelector('.torrent-filter');
+            const exists = !!document.getElementById('parser-selectbox');
+
+            if (container && !exists) {
+                mountParserButton(container);
+            }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
+
+        const first = document.querySelector('.torrent-filter');
+        if (first && !first.querySelector('#parser-selectbox')) mountParserButton(first);
+    }
+
+    function initMenuPlugin() {
+        const boot = () => {
+            applyStyles();
+            addReloadButton();
+            // integrate last fix
+            hookSourceMenuEnter();
+            // keep your working auto-observer and sticky remount
+            startParserObserver();
+            changeParser();
+        };
+
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', e => {
+                if (e.type === 'ready') boot();
+            });
+        } else {
+            document.addEventListener('DOMContentLoaded', boot);
+        }
+    }
+
+    function registerMenu() {
+        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
+            app.plugins.add({
+                id: plugin_id,
+                name: plugin_name,
+                version: '10.4', // incremented
+                author: 'maxi3219',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + кнопка парсера монтируется строго после входа в Торренты',
+                init: initMenuPlugin
+            });
+        } else {
+            initMenuPlugin();
+        }
+    }
+
+    registerMenu();
+
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -346,54 +369,11 @@
         recolorSeedNumbers();
     }
 
-    // =========================
-    // Boot & register
-    // =========================
-    function initMenuPlugin() {
-        const boot = () => {
-            applyStyles();
-            addReloadButton();
-
-            // New: source menu hook and error auto-select
-            hookSourceMenuEnter();
-            handleParserErrorAutoSelect();
-
-            // Keep storage sync for selected parser
-            changeParser();
-        };
-
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', e => {
-                if (e.type === 'ready') boot();
-            });
-        } else {
-            document.addEventListener('DOMContentLoaded', boot);
-        }
-    }
-
-    function registerMenu() {
-        if (window.app && app.plugins && typeof app.plugins.add === 'function') {
-            app.plugins.add({
-                id: plugin_id,
-                name: plugin_name,
-                version: plugin_ver,
-                author: 'maxi3219',
-                description: 'Кнопка выбора парсеров монтируется строго после входа в Торренты через меню источников. В онлайне отсутствует.',
-                init: initMenuPlugin
-            });
-        } else {
-            initMenuPlugin();
-        }
-    }
-
-    registerMenu();
-
-    // MaxColor registration kept unified
     if (window.app && app.plugins && typeof app.plugins.add === 'function') {
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.9',
+            version: '2.5',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
