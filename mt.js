@@ -87,7 +87,7 @@
         headActions.appendChild(btn);
     }
 
-    /* === Кнопка Парсер через стандарт Lampa.Controller.listener === */
+    /* === Кнопка Парсер === */
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if(!container){ setTimeout(addParserButton,500); return; }
@@ -101,28 +101,52 @@
 
         const parsers = ['Jacred.xyz','Jr.maxvol.pro','Jacred.my.to','Lampa.app','Jacred.pro'];
 
-        // Используем Lampa.Controller.listener
-        if(window.Lampa && Lampa.Controller && Lampa.Controller.listener) {
-            Lampa.Controller.listener.add('click', btn, ()=>{
-                Lampa.Select.show({
-                    title:'Выбор парсера',
-                    items: parsers.map(p=>({
-                        title:p,
-                        selected:Lampa.Storage.get('parser_select')===p,
-                        onSelect:()=>{
-                            Lampa.Storage.set('parser_select',p);
-                            document.getElementById('parser-current').textContent = p;
-                            try{
-                                const active=Lampa.Activity.active();
-                                if(active && active.activity && typeof active.activity.refresh==='function'){
-                                    active.activity.refresh(); // обновляем список торрентов
-                                }
-                            }catch(err){console.error(err);}
+        // Используем стандартный механизм Lampa для selectbox
+        btn.addEventListener('click', e => {
+            e.stopPropagation(); // предотвращаем конфликт с другими кнопками
+
+            if(document.querySelector('#parser-menu')) return; // меню уже открыто
+
+            const menu = document.createElement('div');
+            menu.id='parser-menu';
+            menu.className='selectbox__content layer--height';
+            menu.style.maxHeight='400px';
+            menu.style.position='absolute';
+            const rect = btn.getBoundingClientRect();
+            menu.style.top = (rect.bottom + window.scrollY) + 'px';
+            menu.style.left = (rect.left + window.scrollX) + 'px';
+            menu.style.width = rect.width + 'px';
+            menu.style.background='rgba(54,54,54,0.98)';
+            menu.style.borderRadius='1em';
+            menu.style.boxShadow='0 8px 24px rgba(0,0,0,0.8)';
+            menu.style.overflowY='auto';
+            menu.style.zIndex='9999';
+
+            parsers.forEach(p=>{
+                const item = document.createElement('div');
+                item.className='selectbox-item selector'+(Lampa.Storage.get('parser_select')===p?' selected':'');
+                item.innerHTML=`<div class="selectbox-item__title">${p}</div>`;
+                item.addEventListener('click',()=>{
+                    Lampa.Storage.set('parser_select',p);
+                    document.getElementById('parser-current').textContent=p;
+
+                    try{
+                        const active = Lampa.Activity.active();
+                        if(active && active.activity && typeof active.activity.refresh==='function'){
+                            active.activity.refresh(); // обновляем только список торрентов
                         }
-                    }))
+                    } catch(err){console.error(err);}
+                    menu.remove();
                 });
+                menu.appendChild(item);
             });
-        }
+
+            document.body.appendChild(menu);
+
+            document.addEventListener('click', ev=>{
+                if(!btn.contains(ev.target) && !menu.contains(ev.target)) menu.remove();
+            }, {once:true});
+        });
     }
 
     function initMenuPlugin() {
