@@ -80,6 +80,7 @@
             .m-reload-screen:hover svg { transform: rotate(180deg); transition: transform 0.4s ease; }
             .filter--parser.selector { cursor: pointer !important; }
 
+            /* Только скругления карточек и истории — без изменения рамок/обводок */
             .torrent-item {
                 background-color: rgba(0,0,0,0.3) !important;
                 border-radius: 0.9em !important;
@@ -90,6 +91,7 @@
                 border-radius: 0.9em !important;
             }
 
+            /* Градиент при наведении на кнопки в блоке фильтров */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -218,7 +220,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.3',
+                version: '9.4',
                 author: 'maxi3219',
                 description: 'Меню + reload + выбор парсера (с доступностью) + скругление + градиент',
                 init: initMenuPlugin
