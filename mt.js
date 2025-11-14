@@ -110,17 +110,18 @@
                 color: #fff !important;
             }
 
-            /* Кнопки на карточке: увеличенное скругление и градиент при наведении */
+            /* full-start buttons: чуть менее агрессивное скругление и более синий градиент справа */
             .full-start-new__buttons .full-start__button.selector {
-                border-radius: 0.9em !important;
-                transition: background 0.25s ease, border-radius 0.25s ease !important;
+                border-radius: 0.8em !important;
+                transition: background 0.22s ease, border-radius 0.22s ease !important;
             }
 
+            /* при наведении используем градиент с более синим правым концом, как у кнопки "Смотреть" на скриншоте */
             .full-start-new__buttons .full-start__button.selector.hover,
             .full-start-new__buttons .full-start__button.selector.focus,
             .full-start-new__buttons .full-start__button.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
-                border-radius: 1.2em !important;
+                background: linear-gradient(to right, #4dd9a0 5%, #2a6fb0 100%) !important;
+                border-radius: 1.05em !important;
                 color: #fff !important;
             }
 
@@ -251,9 +252,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '9.6',
+                version: '9.7',
                 author: 'maxi3219',
-                description: 'Меню + reload + выбор парсера (с доступностью) + скругление + UI tweaks',
+                description: 'Меню + reload + выбор парсера + скругления + UI tweaks',
                 init: initMenuPlugin
             });
         } else {
@@ -288,7 +289,7 @@
         app.plugins.add({
             id: 'maxcolor',
             name: 'MaxColor',
-            version: '2.3',
+            version: '2.4',
             author: 'maxi3219',
             description: 'Цвет раздающих',
             init: startSeedsObserver
