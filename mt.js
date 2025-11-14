@@ -15,8 +15,17 @@
         { base: 'jacred_viewbox_dev',name: 'Viewbox',         settings: { url: 'jacred.viewbox.dev', key: 'viewbox',parser_torrent_type: 'jackett' } }
     ];
 
-    // === LAST FIX INTEGRATED: strict mount after entering "Торренты" via source menu ===
+    // Флаг контекста: кнопка только после входа в «Торренты»
     let onlyAfterEnterTorrents = false;
+
+    // Строгая проверка DOM на торрентовый экран
+    function inTorrentsDOM() {
+        const filter = document.querySelector('.torrent-filter');
+        if (!filter) return false;
+        // Требуем наличие реальных элементов торрентов, чтобы исключить онлайновые совпадения
+        const hasItems = !!document.querySelector('.torrent-item, .torrents__body, .torrents-list');
+        return hasItems;
+    }
 
     function applyStyles() {
         const style = document.createElement('style');
@@ -81,7 +90,6 @@
             .head__body .selector.hover, .head__body .selector.focus, .head__body .selector.traverse { color: inherit !important; }
             .filter--parser.selector { cursor: pointer !important; }
 
-            /* Торрент-карточки */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
@@ -111,7 +119,6 @@
                 border-radius: 0.9em !important;
             }
 
-            /* Градиент при наведении на фильтры */
             .torrent-filter .selector.hover,
             .torrent-filter .selector.focus,
             .torrent-filter .selector.traverse {
@@ -120,7 +127,6 @@
                 color: #fff !important;
             }
 
-            /* Кнопки на карточке */
             .full-start-new__buttons .full-start__button.selector {
                 border-radius: 1em !important;
                 transition: background 0.18s ease !important;
@@ -156,17 +162,10 @@
             const href = window.location.href;
             let triedReload = false;
 
-            try {
-                triedReload = true;
-                window.location.reload();
-            } catch (e) {}
-
+            try { triedReload = true; window.location.reload(); } catch (e) {}
             setTimeout(() => {
-                try {
-                    window.location.replace(href);
-                } catch (e) {
-                    try { window.location.href = href; } catch (_) {}
-                }
+                try { window.location.replace(href); }
+                catch (e) { try { window.location.href = href; } catch (_) {} }
             }, triedReload ? 250 : 0);
         });
 
@@ -195,6 +194,9 @@
     }
 
     function mountParserButton(container) {
+        // Жёсткая защита: монтировать только в торрентах и только при включённом флаге
+        if (!onlyAfterEnterTorrents) return;
+        if (!inTorrentsDOM()) return;
         if (!container || container.querySelector('#parser-selectbox')) return;
 
         const currentBase = Lampa.Storage.get('lme_url_two') || 'jacred_xyz';
@@ -228,10 +230,11 @@
                     const picked = parsersInfo.find(p => p.base === a.base);
                     if (el && picked) el.textContent = picked.name;
 
-                    // sticky re-mount after possible screen refresh
+                    // Sticky re-mount (если экран перерисовался)
                     setTimeout(() => {
+                        if (!onlyAfterEnterTorrents) return;
                         const cont = document.querySelector('.torrent-filter');
-                        if (cont && !cont.querySelector('#parser-selectbox')) {
+                        if (cont && !cont.querySelector('#parser-selectbox') && inTorrentsDOM()) {
                             mountParserButton(cont);
                         }
                     }, 200);
@@ -247,7 +250,7 @@
         });
     }
 
-    // === LAST FIX: catch entering "Торренты" in source menu and mount strictly after ===
+    // Хук на меню «Источник»: включаем/выключаем контекстный флаг
     function hookSourceMenuEnter() {
         document.addEventListener('hover:enter', (e) => {
             const t = e?.target;
@@ -260,11 +263,10 @@
 
             if (title === 'торренты') {
                 onlyAfterEnterTorrents = true;
-                // wait for torrents filter and mount
                 waitAndMountInTorrentFilter();
-            } else if (title === 'онлайн') {
+            } else {
+                // Любой другой пункт — выключаем контекст и удаляем кнопку
                 onlyAfterEnterTorrents = false;
-                // remove button when leaving torrents context
                 const btn = document.getElementById('parser-selectbox');
                 if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
             }
@@ -275,7 +277,9 @@
         const container = document.querySelector('.torrent-filter');
         if (container) {
             setTimeout(() => {
-                if (!container.querySelector('#parser-selectbox')) mountParserButton(container);
+                if (onlyAfterEnterTorrents && !container.querySelector('#parser-selectbox') && inTorrentsDOM()) {
+                    mountParserButton(container);
+                }
             }, 180);
             return;
         }
@@ -286,7 +290,9 @@
             if (cont) {
                 obs.disconnect();
                 setTimeout(() => {
-                    if (!cont.querySelector('#parser-selectbox')) mountParserButton(cont);
+                    if (onlyAfterEnterTorrents && !cont.querySelector('#parser-selectbox') && inTorrentsDOM()) {
+                        mountParserButton(cont);
+                    }
                 }, 180);
             } else if (Date.now() - start > MAX_WAIT) {
                 obs.disconnect();
@@ -295,29 +301,39 @@
         obs.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Sticky observer: always remount if the button disappears while torrents filter exists
+    // Наблюдатель: монтирует только при включённом флаге и настоящем торрентовом DOM
     function startParserObserver() {
         const obs = new MutationObserver(() => {
             const container = document.querySelector('.torrent-filter');
             const exists = !!document.getElementById('parser-selectbox');
 
-            if (container && !exists) {
+            // Если контекст выключен — не монтировать и удалять кнопку, если вдруг появилась
+            if (!onlyAfterEnterTorrents) {
+                if (exists) {
+                    const btn = document.getElementById('parser-selectbox');
+                    if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+                }
+                return;
+            }
+
+            // Контекст включён — монтировать только при реальном торрентовом DOM
+            if (onlyAfterEnterTorrents && container && !exists && inTorrentsDOM()) {
                 mountParserButton(container);
             }
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
         const first = document.querySelector('.torrent-filter');
-        if (first && !first.querySelector('#parser-selectbox')) mountParserButton(first);
+        if (onlyAfterEnterTorrents && first && !first.querySelector('#parser-selectbox') && inTorrentsDOM()) {
+            mountParserButton(first);
+        }
     }
 
     function initMenuPlugin() {
         const boot = () => {
             applyStyles();
             addReloadButton();
-            // integrate last fix
             hookSourceMenuEnter();
-            // keep your working auto-observer and sticky remount
             startParserObserver();
             changeParser();
         };
@@ -336,9 +352,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '10.4', // incremented
+                version: '10.5',
                 author: 'maxi3219',
-                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + кнопка парсера монтируется строго после входа в Торренты',
+                description: 'Жёсткий перезапуск (ПК/ТВ) + восстановленное скругление подложек торрентов + UI tweaks + строгий монтаж кнопки только после входа в Торренты',
                 init: initMenuPlugin
             });
         } else {
