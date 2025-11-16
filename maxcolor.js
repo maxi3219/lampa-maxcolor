@@ -10,7 +10,7 @@
 
     const BLOCK_RADIUS = '0.9em';   // для .torrent-item и .watched-history
     const ACTIVE_RADIUS = '0.6em';  // для активных и наведённых кнопок
-    const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
+    const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%) !important';
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
@@ -101,7 +101,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.3)');
+        log('Observer started (v3.4)');
     }
 
     function register() {
@@ -109,9 +109,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.3',
+                version: '3.4',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон, единое скругление кнопок и фикс настроек',
+                description: 'Цвет сидов, скругления блоков, новый фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
             });
             log('Registered with Lampa');
