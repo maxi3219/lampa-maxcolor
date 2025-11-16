@@ -14,6 +14,7 @@
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
+    // окраска сидов
     function recolorSeedNumbers() {
         document.querySelectorAll('.torrent-item__seeds').forEach(block => {
             const span = block.querySelector('span');
@@ -28,6 +29,7 @@
         });
     }
 
+    // скругление блоков
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -35,6 +37,7 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
+    // фон
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -43,6 +46,7 @@
         }
     }
 
+    // кнопки и подсветка меню
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -80,6 +84,7 @@
         document.head.appendChild(style);
     }
 
+    // фикс меню
     function fixSettingsBlock() {
         const styleId = 'maxcolor-settings-fix';
         if (document.getElementById(styleId)) return;
@@ -93,8 +98,8 @@
                     top: 1em !important;
                     bottom: 1em !important;
                     right: 1em !important;
-                    left: auto !important;
-                    width: 35% !important;
+                    width: 35% !important;          /* фиксированная ширина */
+                    max-width: 40em !important;     /* ограничение, чтобы не торчало */
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,0.98) !important;
@@ -121,7 +126,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.0)');
+        log('Observer started (v4.1)');
     }
 
     function register() {
@@ -129,7 +134,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.0',
+                version: '4.1',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, новый фон, подсветка меню и фикс настроек',
                 init: startObserver
