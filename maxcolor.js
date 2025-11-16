@@ -50,7 +50,7 @@
         }
     }
 
-    // кнопки: активные и наведённые
+    // кнопки: активные и наведённые + подсветка меню
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -102,9 +102,8 @@
                 position: absolute !important;
                 top: 1em !important;
                 bottom: 1em !important;   /* равный отступ снизу */
-                left: 1em !important;
-                right: 1em !important;
-                width: auto !important;
+                right: 1em !important;    /* прижимаем к правому краю */
+                width: 35% !important;    /* фиксированная ширина */
                 max-height: calc(100vh - 2em) !important;
                 overflow-y: auto !important;
                 opacity: 0.98; /* лёгкая прозрачность */
@@ -129,7 +128,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.8)');
+        log('Observer started (v3.9)');
     }
 
     function register() {
@@ -137,7 +136,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.8',
+                version: '3.9',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, новый фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
