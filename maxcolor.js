@@ -9,8 +9,8 @@
     };
 
     const RADIUS = '0.9em';
-    const HOVER_RADIUS = '0.6em';
     const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
+    const HOVER_RADIUS = '0.6em';
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
@@ -18,7 +18,6 @@
 
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
-
         seedBlocks.forEach(block => {
             const span = block.querySelector('span');
             if (!span) return;
@@ -55,15 +54,15 @@
         }
     }
 
-    function addHoverEffect() {
-        // Добавляем CSS-правило для скругления при наведении
-        const styleId = 'maxcolor-hover-style';
+    function adjustButtonHover() {
+        const styleId = 'maxcolor-button-hover';
         if (!document.getElementById(styleId)) {
             const style = document.createElement('style');
             style.id = styleId;
             style.textContent = `
                 .full-start-new__buttons .full-start__button:hover {
                     border-radius: ${HOVER_RADIUS} !important;
+                    transition: border-radius 0.2s ease;
                 }
             `;
             document.head.appendChild(style);
@@ -74,14 +73,14 @@
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        addHoverEffect();
+        adjustButtonHover();
     }
 
     function startObserver() {
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.2)');
+        log('Observer started (v2.4)');
     }
 
     function register() {
@@ -89,9 +88,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.2',
+                version: '2.4',
                 author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и скругление при наведении',
+                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и уменьшает скругление при наведении',
                 init: startObserver
             });
             log('Registered with Lampa');
