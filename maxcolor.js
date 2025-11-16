@@ -9,7 +9,8 @@
     };
 
     const RADIUS = '0.9em';
-    const GRADIENT = 'linear-gradient(89deg, #000000 0%, #222222 50%, #3b3b3b 100%)';
+    const HOVER_RADIUS = '0.6em';
+    const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
@@ -54,17 +55,33 @@
         }
     }
 
+    function addHoverEffect() {
+        // Добавляем CSS-правило для скругления при наведении
+        const styleId = 'maxcolor-hover-style';
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                .full-start-new__buttons .full-start__button:hover {
+                    border-radius: ${HOVER_RADIUS} !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
+        addHoverEffect();
     }
 
     function startObserver() {
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.1)');
+        log('Observer started (v2.2)');
     }
 
     function register() {
@@ -72,9 +89,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.1',
+                version: '2.2',
                 author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:", добавляет скругление углов и меняет фон',
+                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и скругление при наведении',
                 init: startObserver
             });
             log('Registered with Lampa');
