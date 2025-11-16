@@ -13,7 +13,7 @@
     }
 
     /* ============================================================
-       ДОБАВЛЕННЫЕ СТИЛИ: ФОН + СКРУГЛЕНИЯ ЭЛЕМЕНТОВ
+       СТИЛИ: ФОН + СКРУГЛЕНИЯ + ВОССТАНОВЛЕНИЕ ОБВОДКИ
        ============================================================ */
     function applyStyles() {
         const css = `
@@ -32,10 +32,20 @@
                 overflow: hidden !important;
             }
 
-            /* СКРУГЛЕНИЕ БЛОКА ИСТОРИИ ПРОСМОТРА */
+            /* СКРУГЛЕНИЕ ИСТОРИИ ПРОСМОТРА */
             .watched-history {
                 border-radius: 0.9em !important;
                 overflow: hidden !important;
+            }
+
+            /* ВОССТАНАВЛИВАЕМ БЕЛУЮ ПОДСВЕТКУ ВЫДЕЛЕНИЯ */
+            .torrent-item.selector.focus,
+            .torrent-item.selector.hover,
+            .torrent-item.selector.traverse {
+                outline: 3px solid #ffffff !important;
+                outline-offset: -3px !important;
+                box-shadow: 0 0 12px rgba(255,255,255,0.35) !important;
+                border-radius: inherit !important;
             }
         `;
 
@@ -46,7 +56,7 @@
     }
 
     /* ============================================================
-       ОСНОВНАЯ ЛОГИКА ОКРАШИВАНИЯ ЧИСЕЛ "РАЗДАЮТ"
+       ЛОГИКА ОКРАШИВАНИЯ ЧИСЕЛ "РАЗДАЮТ"
        ============================================================ */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
@@ -71,14 +81,14 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        log('Observer started (v1.8)');
+        log('Observer started (v1.9)');
     }
 
     /* ============================================================
-       РЕГИСТРАЦИЯ ПЛАГИНА + СТАРТ СТИЛЕЙ
+       РЕГИСТРАЦИЯ ПЛАГИНА
        ============================================================ */
     function register() {
-        applyStyles();
+        applyStyles(); // подключаем твой стиль
 
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
@@ -86,7 +96,7 @@
                 name: plugin_name,
                 version: '1.9',
                 author: 'maxi3219',
-                description: 'Окрашивает число раздающих + скругление элементов + новый фон',
+                description: 'Окрашивает число раздающих + стиль интерфейса',
                 init: startObserver
             });
             log('Registered with Lampa');
