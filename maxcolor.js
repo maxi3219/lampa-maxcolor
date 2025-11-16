@@ -14,7 +14,7 @@
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
-    // окраска сидов
+    // Окраска сидов
     function recolorSeedNumbers() {
         document.querySelectorAll('.torrent-item__seeds').forEach(block => {
             const span = block.querySelector('span');
@@ -29,7 +29,7 @@
         });
     }
 
-    // скругление блоков
+    // Скругления блоков
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -37,7 +37,7 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // фон
+    // Фон подложки приложения
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -46,7 +46,7 @@
         }
     }
 
-    // кнопки
+    // Стили кнопок
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -68,37 +68,66 @@
         document.head.appendChild(style);
     }
 
-    // фикс меню
-    function fixSettingsBlock() {
-        const styleId = 'maxcolor-settings-fix';
+    // Жёсткая фиксация позиции и внутренних отступов меню (inline с !important)
+    function hardFixSettingsPosition() {
+        const panels = document.querySelectorAll('.settings__content, .selectbox__content.layer--height');
+        panels.forEach(panel => {
+            // Сдвиг вправо
+            panel.style.setProperty('right', '3em', 'important');
+
+            // Равные внешние отступы сверху/снизу через фиксированное позиционирование
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('top', '1em', 'important');
+            panel.style.setProperty('bottom', '1em', 'important');
+
+            // Фикс ширины и ограничение, чтобы не «торчало»
+            panel.style.setProperty('width', '35%', 'important');
+            panel.style.setProperty('max-width', '40em', 'important');
+
+            // Внутренние отступы + усиленный нижний
+            panel.style.setProperty('padding-top', '1em', 'important');
+            panel.style.setProperty('padding-right', '1em', 'important');
+            panel.style.setProperty('padding-left', '1em', 'important');
+            panel.style.setProperty('padding-bottom', '4em', 'important'); // реальный запас снизу
+
+            // Базовые визуальные стили
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('border-radius', '1.2em', 'important');
+            panel.style.setProperty('background', 'rgb(33 33 33 / 98%)', 'important');
+            panel.style.setProperty('box-shadow', '0 8px 24px rgba(0,0,0,0.8)', 'important');
+            panel.style.setProperty('display', 'flex', 'important');
+            panel.style.setProperty('flex-direction', 'column', 'important');
+            panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
+            panel.style.setProperty('box-sizing', 'border-box', 'important');
+
+            // Гарантируем невырезание последнего элемента — добавляем «спейсер» в конец
+            const spacerId = 'maxmenu-bottom-spacer';
+            if (!panel.querySelector(`#${spacerId}`)) {
+                const spacer = document.createElement('div');
+                spacer.id = spacerId;
+                spacer.style.height = '2.5em';
+                spacer.style.minHeight = '2.5em';
+                spacer.style.flexShrink = '0';
+                panel.appendChild(spacer);
+            }
+        });
+    }
+
+    // Дополнительные CSS-страховки на случай жёстких тем
+    function addSettingsSafetyCSS() {
+        const styleId = 'maxcolor-settings-safety';
         if (document.getElementById(styleId)) return;
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
             @media screen and (min-width: 480px) {
-                .settings__content,
-                .selectbox__content.layer--height {
-                    position: fixed !important;
-                    top: 1em !important;
-                    bottom: 1em !important;
-                    right: 3em !important;            /* чуть сильнее вправо */
-                    width: 35% !important;
-                    max-width: 40em !important;
-                    max-height: calc(100vh - 2em) !important;
-                    overflow-y: auto !important;
-                    background: rgb(33 33 33 / 98%) !important; /* новый фон */
-                    border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
-                    padding: 1em 1em 3em 1em !important; /* увеличен нижний внутренний отступ */
-                    display: flex !important;
-                    flex-direction: column !important;
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    box-sizing: border-box !important;
                 }
-
-                /* запасной отступ последнему элементу */
-                .settings__content .settings-folder.selector:last-child,
-                .settings__content .settings-param.selector:last-child,
-                .settings__content .settings-param__value.selector:last-child,
-                .selectbox__content.layer--height .selectbox-item.selector:last-child {
+                /* запасной отступ последнему пункту — если тема режет padding */
+                body.settings--open .settings__content .selector:last-child,
+                body.selectbox--open .selectbox__content.layer--height .selector:last-child {
                     margin-bottom: 2em !important;
                 }
             }
@@ -111,14 +140,15 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        fixSettingsBlock();
+        hardFixSettingsPosition();
+        addSettingsSafetyCSS();
     }
 
     function startObserver() {
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.4)');
+        log('Observer started (v4.5)');
     }
 
     function register() {
@@ -126,9 +156,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.4',
+                version: '4.5',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон и фикс настроек',
+                description: 'Цвет сидов, скругления блоков, новый фон, фиксация позиции меню и защита нижнего отступа',
                 init: startObserver
             });
             log('Registered with Lampa');
