@@ -32,7 +32,7 @@
         });
     }
 
-    // Применение кастомных стилей (фон + скругления)
+    // Стилизация фона и скруглений
     function applyCustomStyles() {
         // Фон для основного контейнера
         const wrap = document.querySelector('.wrap__content');
@@ -53,19 +53,48 @@
         });
     }
 
-    // Наблюдатель за изменениями DOM
+    // Применение фона к меню
+    function unifyMenuBackground() {
+        const menu = document.querySelector('.menu');
+        if (menu) {
+            menu.style.background = 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)';
+        }
+    }
+
+    // Отключение canvas и замена фона
+    function overrideCanvasBackground() {
+        const bg = document.querySelector('.background');
+        if (bg) {
+            bg.style.background = 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)';
+            bg.style.zIndex = '-1';
+        }
+
+        const canvasOne = document.querySelector('.background__one');
+        const canvasTwo = document.querySelector('.background__two');
+
+        [canvasOne, canvasTwo].forEach(canvas => {
+            if (canvas) {
+                canvas.style.display = 'none';
+            }
+        });
+    }
+
+    // Наблюдатель за DOM
     function startObserver() {
         const obs = new MutationObserver(() => {
             recolorSeedNumbers();
             applyCustomStyles();
+            unifyMenuBackground();
+            overrideCanvasBackground();
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
-        // Первичный запуск
         recolorSeedNumbers();
         applyCustomStyles();
+        unifyMenuBackground();
+        overrideCanvasBackground();
 
-        log('Observer started (v1.9)');
+        log('Observer started (v2.0)');
     }
 
     // Регистрация плагина
@@ -74,9 +103,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.9',
+                version: '2.0',
                 author: 'maxi3219',
-                description: 'Окрашивает число "Раздают", меняет фон и скругляет углы',
+                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и стилизует меню',
                 init: startObserver
             });
             log('Registered with Lampa');
