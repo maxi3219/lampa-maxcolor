@@ -8,6 +8,9 @@
         high: '#00ff00'   // >10 — зелёный
     };
 
+    const RADIUS = '0.9em';
+    const GRADIENT = 'linear-gradient(90deg, #000000 0%, #2f3233 50%, #000000 100%)';
+
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
     }
@@ -32,28 +35,36 @@
     }
 
     function roundCorners() {
-        // Добавляем скругление углов к нужным блокам
         const torrentItems = document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render');
         torrentItems.forEach(item => {
-            item.style.borderRadius = '0.9em';
+            item.style.borderRadius = RADIUS;
         });
 
         const watchedHistory = document.querySelectorAll('.watched-history.selector');
         watchedHistory.forEach(item => {
-            item.style.borderRadius = '0.9em';
+            item.style.borderRadius = RADIUS;
         });
+    }
+
+    function changeBackground() {
+        const backgroundBlock = document.querySelector('.background');
+        if (backgroundBlock) {
+            backgroundBlock.style.background = GRADIENT;
+            backgroundBlock.style.setProperty('background', GRADIENT, 'important');
+        }
     }
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
+        changeBackground();
     }
 
     function startObserver() {
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v1.9)');
+        log('Observer started (v2.0)');
     }
 
     function register() {
@@ -61,9 +72,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.9',
+                version: '2.0',
                 author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:" и добавляет скругление углов',
+                description: 'Окрашивает число после "Раздают:", добавляет скругление углов и меняет фон',
                 init: startObserver
             });
             log('Registered with Lampa');
