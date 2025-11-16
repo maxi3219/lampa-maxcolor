@@ -81,9 +81,9 @@
         style.id = styleId;
         style.textContent = `
             .settings__content {
-                margin-top: 1em;
-                margin-bottom: 1em; /* одинаковый отступ сверху и снизу */
-                opacity: 0.95; /* лёгкая прозрачность, цвет остаётся как в теме */
+                padding-top: 1em;
+                padding-bottom: 1em; /* равные внутренние отступы */
+                opacity: 0.98; /* лёгкая прозрачность, цвет остаётся как в теме */
             }
         `;
         document.head.appendChild(style);
@@ -101,7 +101,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.0)');
+        log('Observer started (v3.1)');
     }
 
     function register() {
@@ -109,7 +109,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.0',
+                version: '3.1',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
