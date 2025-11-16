@@ -31,11 +31,13 @@
         });
     }
 
-    // Стилизация фона и скруглений
+    // Фон приложения и скругления
     function applyCustomStyles() {
         const wrap = document.querySelector('.wrap__content');
         if (wrap) {
-            wrap.style.background = 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)';
+            wrap.style.setProperty('background', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
+            wrap.style.setProperty('background-color', 'transparent', 'important');
+            wrap.style.setProperty('background-image', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
         }
 
         const torrentItems = document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render');
@@ -49,30 +51,62 @@
         });
     }
 
-    // Отключение canvas и замена фона
+    // Отключение canvas-фона
     function overrideCanvasBackground() {
         const bg = document.querySelector('.background');
         if (bg) {
-            bg.style.background = 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)';
-            bg.style.zIndex = '-1';
+            bg.style.setProperty('background', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
+            bg.style.setProperty('background-color', 'transparent', 'important');
         }
 
         const canvasOne = document.querySelector('.background__one');
         const canvasTwo = document.querySelector('.background__two');
         [canvasOne, canvasTwo].forEach(canvas => {
-            if (canvas) canvas.style.display = 'none';
+            if (canvas) canvas.style.setProperty('display', 'none', 'important');
         });
     }
 
-    // Меню прозрачное
-    function styleMenuPanel() {
-        const menu = document.querySelector('.menu');
-        if (menu) {
-            menu.style.background = 'transparent';   // фон прозрачный
-            menu.style.borderRadius = '';            // убираем скругления
-            menu.style.margin = '';                  // убираем отступы
-            menu.style.boxShadow = '';               // убираем тень
-            menu.style.overflow = '';                // возвращаем как было
+    // Сделать меню и все его слои прозрачными
+    function makeMenuTransparent() {
+        const targets = [
+            '.menu',
+            '.menu__header',
+            '.menu__case',
+            '.menu__list',
+            '.menu__item',
+            '.menu__split'
+        ];
+
+        targets.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                el.style.setProperty('background', 'transparent', 'important');
+                el.style.setProperty('background-color', 'transparent', 'important');
+                el.style.setProperty('background-image', 'none', 'important');
+                el.style.setProperty('box-shadow', 'none', 'important');
+                el.style.setProperty('border', 'none', 'important');
+                el.style.setProperty('outline', 'none', 'important');
+            });
+        });
+
+        // На случай псевдо-элементов/градиентных масок
+        const styleTagId = 'maxcolor-transparent-menu';
+        if (!document.getElementById(styleTagId)) {
+            const css = `
+                .menu::before, .menu::after,
+                .menu__header::before, .menu__header::after,
+                .menu__case::before, .menu__case::after,
+                .menu__list::before, .menu__list::after,
+                .menu__item::before, .menu__item::after {
+                    background: transparent !important;
+                    background-image: none !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                }
+            `;
+            const tag = document.createElement('style');
+            tag.id = styleTagId;
+            tag.textContent = css;
+            document.head.appendChild(tag);
         }
     }
 
@@ -81,16 +115,16 @@
             recolorSeedNumbers();
             applyCustomStyles();
             overrideCanvasBackground();
-            styleMenuPanel();
+            makeMenuTransparent();
         });
         obs.observe(document.body, { childList: true, subtree: true });
 
         recolorSeedNumbers();
         applyCustomStyles();
         overrideCanvasBackground();
-        styleMenuPanel();
+        makeMenuTransparent();
 
-        log('Observer started (v2.2)');
+        log('Observer started (v2.3)');
     }
 
     function register() {
@@ -98,9 +132,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.2',
+                version: '2.3',
                 author: 'maxi3219',
-                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и делает меню прозрачным',
+                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и делает меню полностью прозрачным',
                 init: startObserver
             });
             log('Registered with Lampa');
