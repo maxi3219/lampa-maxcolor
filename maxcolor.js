@@ -8,8 +8,8 @@
         high: '#00ff00'   // >10 — зелёный
     };
 
-    const RADIUS = '0.9em';
-    const HOVER_RADIUS = '0.4em'; // уменьшенное скругление при наведении
+    const RADIUS = '0.9em';       // базовое скругление для блоков
+    const ACTIVE_RADIUS = '0.6em'; // скругление для активной и наведённой кнопки
     const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
     function log(...a) {
@@ -54,18 +54,23 @@
         }
     }
 
-    function adjustButtonHover() {
-        const styleId = 'maxcolor-button-hover';
+    function adjustButtonStates() {
+        const styleId = 'maxcolor-button-states';
         if (!document.getElementById(styleId)) {
             const style = document.createElement('style');
             style.id = styleId;
             style.textContent = `
+                /* Базовое состояние кнопок */
                 .full-start-new__buttons .full-start__button {
-                    border-radius: ${RADIUS};
                     transition: border-radius 0.2s ease;
                 }
+                /* Активная кнопка сразу получает скругление */
+                .full-start-new__buttons .full-start__button.active {
+                    border-radius: ${ACTIVE_RADIUS} !important;
+                }
+                /* При наведении на любую кнопку */
                 .full-start-new__buttons .full-start__button:hover {
-                    border-radius: ${HOVER_RADIUS} !important;
+                    border-radius: ${ACTIVE_RADIUS} !important;
                 }
             `;
             document.head.appendChild(style);
@@ -76,14 +81,14 @@
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        adjustButtonHover();
+        adjustButtonStates();
     }
 
     function startObserver() {
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.6)');
+        log('Observer started (v2.7)');
     }
 
     function register() {
@@ -91,9 +96,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.6',
+                version: '2.7',
                 author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и уменьшает скругление при наведении',
+                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и задаёт скругление для активных/наведённых кнопок',
                 init: startObserver
             });
             log('Registered with Lampa');
