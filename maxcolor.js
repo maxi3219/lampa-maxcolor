@@ -69,6 +69,23 @@
             .full-start-new__buttons.layer--focus .full-start__button.selector {
                 border-radius: ${ACTIVE_RADIUS} !important;
             }
+
+            /* Свечение для активных пунктов меню */
+            .settings-folder.selector.focus,
+            .settings-folder.selector.hover,
+            .settings-folder.selector.traverse,
+            .settings-param.selector.focus,
+            .settings-param.selector.hover,
+            .settings-param.selector.traverse,
+            .settings-param__value.selector.focus,
+            .settings-param__value.selector.hover,
+            .settings-param__value.selector.traverse,
+            .selectbox-item.selector.focus,
+            .selectbox-item.selector.hover,
+            .selectbox-item.selector.traverse {
+                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
+                border-radius: 1em !important;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -85,10 +102,10 @@
                 position: absolute !important;
                 top: 1em !important;
                 bottom: 1em !important;   /* равный отступ снизу */
+                left: 1em !important;
                 right: 1em !important;
-                left: auto !important;
-                width: 35% !important;
-                max-height: calc(100vh - 2em) !important; /* учитывает оба отступа */
+                width: auto !important;
+                max-height: calc(100vh - 2em) !important;
                 overflow-y: auto !important;
                 opacity: 0.98; /* лёгкая прозрачность */
                 border-radius: 1.2em !important;
@@ -112,7 +129,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.7)');
+        log('Observer started (v3.8)');
     }
 
     function register() {
@@ -120,7 +137,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.7',
+                version: '3.8',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, новый фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
