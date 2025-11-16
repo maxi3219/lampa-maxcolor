@@ -8,12 +8,13 @@
         high: '#00ff00'   // >10 — зелёный
     };
 
-    const BLOCK_RADIUS = '0.9em'; // для .torrent-item и .watched-history
-    const ACTIVE_RADIUS = '0.6em'; // для активной и наведённой кнопки
+    const BLOCK_RADIUS = '0.9em';   // для .torrent-item и .watched-history
+    const ACTIVE_RADIUS = '0.6em';  // для активных и наведённых кнопок
     const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
+    // окраска сидов
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -31,6 +32,7 @@
         });
     }
 
+    // скругление блоков
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
@@ -39,6 +41,7 @@
             .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
     }
 
+    // фон
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -46,30 +49,43 @@
         }
     }
 
+    // кнопки: активные и наведённые
     function enforceButtonsRadius() {
-        // Вставляем высокоспецифичное правило, чтобы перебить базовый border-radius: 1em
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
 
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-/* Базовые кнопки остаются 1em — как в теме, не трогаем */
-/* Активная/наведённая кнопка — 0.6em */
-.full-start-new__buttons .full-start__button:hover,
-.full-start-new__buttons .full-start__button:focus,
-.full-start-new__buttons .full-start__button.focus,
-.full-start-new__buttons .full-start__button.active,
-.full-start-new__buttons .full-start__button.selector:hover,
-.full-start-new__buttons .full-start__button.selector:focus,
-/* кейс, когда контейнер активен/в фокусе и внутри есть кнопка */
-.full-start-new__buttons.focus .full-start__button.selector,
-.full-start-new__buttons.active .full-start__button.selector,
-/* кейс с кареткой/слоями фокуса, которые Lampa любит навешивать */
-.full-start-new__buttons .full-start__button.layer--focus,
-.full-start-new__buttons.layer--focus .full-start__button.selector {
-    border-radius: ${ACTIVE_RADIUS} !important;
-}
+            .full-start-new__buttons .full-start__button {
+                transition: border-radius 0.2s ease;
+            }
+            .full-start-new__buttons .full-start__button:hover,
+            .full-start-new__buttons .full-start__button:focus,
+            .full-start-new__buttons .full-start__button.focus,
+            .full-start-new__buttons .full-start__button.active,
+            .full-start-new__buttons .full-start__button.layer--focus,
+            .full-start-new__buttons.layer--focus .full-start__button.selector {
+                border-radius: ${ACTIVE_RADIUS} !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // фикс блока настроек
+    function fixSettingsBlock() {
+        const styleId = 'maxcolor-settings-fix';
+        if (document.getElementById(styleId)) return;
+
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            .settings__content {
+                margin-top: 1em;
+                margin-bottom: 1em; /* одинаковый отступ сверху и снизу */
+                background-color: rgba(0, 0, 0, 0.7) !important; /* лёгкая прозрачность */
+                border-radius: 0.6em;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -79,13 +95,14 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
+        fixSettingsBlock();
     }
 
     function startObserver() {
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.8)');
+        log('Observer started (v2.9)');
     }
 
     function register() {
@@ -93,9 +110,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.8',
+                version: '2.9',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон, и единое скругление 0.6em для активных/наведённых кнопок',
+                description: 'Цвет сидов, скругления блоков, фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
             });
             log('Registered with Lampa');
