@@ -8,20 +8,17 @@
         high: '#00ff00'   // >10 — зелёный
     };
 
-    const RADIUS = '0.9em';       // базовое скругление для блоков
-    const ACTIVE_RADIUS = '0.6em'; // скругление для активной и наведённой кнопки
+    const BLOCK_RADIUS = '0.9em'; // для .torrent-item и .watched-history
+    const ACTIVE_RADIUS = '0.6em'; // для активной и наведённой кнопки
     const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
-    function log(...a) {
-        try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
-    }
+    function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
             const span = block.querySelector('span');
             if (!span) return;
-
             const num = parseInt(span.textContent);
             if (isNaN(num)) return;
 
@@ -35,60 +32,60 @@
     }
 
     function roundCorners() {
-        const torrentItems = document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render');
-        torrentItems.forEach(item => {
-            item.style.borderRadius = RADIUS;
-        });
+        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
+            .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
 
-        const watchedHistory = document.querySelectorAll('.watched-history.selector');
-        watchedHistory.forEach(item => {
-            item.style.borderRadius = RADIUS;
-        });
+        document.querySelectorAll('.watched-history.selector')
+            .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
     }
 
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
-            backgroundBlock.style.background = GRADIENT;
             backgroundBlock.style.setProperty('background', GRADIENT, 'important');
         }
     }
 
-    function adjustButtonStates() {
+    function enforceButtonsRadius() {
+        // Вставляем высокоспецифичное правило, чтобы перебить базовый border-radius: 1em
         const styleId = 'maxcolor-button-states';
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = `
-                /* Базовое состояние кнопок */
-                .full-start-new__buttons .full-start__button {
-                    transition: border-radius 0.2s ease;
-                }
-                /* Активная кнопка сразу получает скругление */
-                .full-start-new__buttons .full-start__button.active {
-                    border-radius: ${ACTIVE_RADIUS} !important;
-                }
-                /* При наведении на любую кнопку */
-                .full-start-new__buttons .full-start__button:hover {
-                    border-radius: ${ACTIVE_RADIUS} !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
+        if (document.getElementById(styleId)) return;
+
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+/* Базовые кнопки остаются 1em — как в теме, не трогаем */
+/* Активная/наведённая кнопка — 0.6em */
+.full-start-new__buttons .full-start__button:hover,
+.full-start-new__buttons .full-start__button:focus,
+.full-start-new__buttons .full-start__button.focus,
+.full-start-new__buttons .full-start__button.active,
+.full-start-new__buttons .full-start__button.selector:hover,
+.full-start-new__buttons .full-start__button.selector:focus,
+/* кейс, когда контейнер активен/в фокусе и внутри есть кнопка */
+.full-start-new__buttons.focus .full-start__button.selector,
+.full-start-new__buttons.active .full-start__button.selector,
+/* кейс с кареткой/слоями фокуса, которые Lampa любит навешивать */
+.full-start-new__buttons .full-start__button.layer--focus,
+.full-start-new__buttons.layer--focus .full-start__button.selector {
+    border-radius: ${ACTIVE_RADIUS} !important;
+}
+        `;
+        document.head.appendChild(style);
     }
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        adjustButtonStates();
+        enforceButtonsRadius();
     }
 
     function startObserver() {
-        const obs = new MutationObserver(() => applyStyles());
+        const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.7)');
+        log('Observer started (v2.8)');
     }
 
     function register() {
@@ -96,9 +93,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.7',
+                version: '2.8',
                 author: 'maxi3219',
-                description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и задаёт скругление для активных/наведённых кнопок',
+                description: 'Цвет сидов, скругления блоков, фон, и единое скругление 0.6em для активных/наведённых кнопок',
                 init: startObserver
             });
             log('Registered with Lampa');
