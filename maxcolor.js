@@ -12,6 +12,7 @@
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
     }
 
+    // Окрашивание числа "Раздают"
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -30,6 +31,7 @@
         });
     }
 
+    // Стилизация фона и скруглений
     function applyCustomStyles() {
         const wrap = document.querySelector('.wrap__content');
         if (wrap) {
@@ -47,6 +49,7 @@
         });
     }
 
+    // Отключение canvas и замена фона
     function overrideCanvasBackground() {
         const bg = document.querySelector('.background');
         if (bg) {
@@ -61,14 +64,15 @@
         });
     }
 
+    // Меню прозрачное
     function styleMenuPanel() {
         const menu = document.querySelector('.menu');
         if (menu) {
-            menu.style.background = 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)';
-            menu.style.borderRadius = '1em';
-            menu.style.margin = '1em';
-            menu.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
-            menu.style.overflow = 'hidden';
+            menu.style.background = 'transparent';   // фон прозрачный
+            menu.style.borderRadius = '';            // убираем скругления
+            menu.style.margin = '';                  // убираем отступы
+            menu.style.boxShadow = '';               // убираем тень
+            menu.style.overflow = '';                // возвращаем как было
         }
     }
 
@@ -86,7 +90,7 @@
         overrideCanvasBackground();
         styleMenuPanel();
 
-        log('Observer started (v2.1)');
+        log('Observer started (v2.2)');
     }
 
     function register() {
@@ -94,9 +98,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.1',
+                version: '2.2',
                 author: 'maxi3219',
-                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и стилизует меню',
+                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и делает меню прозрачным',
                 init: startObserver
             });
             log('Registered with Lampa');
