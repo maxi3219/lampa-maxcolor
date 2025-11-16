@@ -46,7 +46,7 @@
         }
     }
 
-    // кнопки и подсветка меню
+    // кнопки
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -63,22 +63,6 @@
             .full-start-new__buttons .full-start__button.layer--focus,
             .full-start-new__buttons.layer--focus .full-start__button.selector {
                 border-radius: ${ACTIVE_RADIUS} !important;
-            }
-            /* Подсветка активных пунктов меню */
-            .settings-folder.selector.focus,
-            .settings-folder.selector.hover,
-            .settings-folder.selector.traverse,
-            .settings-param.selector.focus,
-            .settings-param.selector.hover,
-            .settings-param.selector.traverse,
-            .settings-param__value.selector.focus,
-            .settings-param__value.selector.hover,
-            .settings-param__value.selector.traverse,
-            .selectbox-item.selector.focus,
-            .selectbox-item.selector.hover,
-            .selectbox-item.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
-                border-radius: 1em !important;
             }
         `;
         document.head.appendChild(style);
@@ -97,9 +81,9 @@
                     position: fixed !important;
                     top: 1em !important;
                     bottom: 1em !important;
-                    right: 1em !important;
-                    width: 35% !important;          /* фиксированная ширина */
-                    max-width: 40em !important;     /* ограничение, чтобы не торчало */
+                    right: 2em !important;           /* сдвиг вправо */
+                    width: 35% !important;
+                    max-width: 40em !important;
                     max-height: calc(100vh - 2em) !important;
                     overflow-y: auto !important;
                     background: rgba(54,54,54,0.98) !important;
@@ -126,7 +110,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.1)');
+        log('Observer started (v4.2)');
     }
 
     function register() {
@@ -134,9 +118,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.1',
+                version: '4.2',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон, подсветка меню и фикс настроек',
+                description: 'Цвет сидов, скругления блоков, новый фон и фикс настроек',
                 init: startObserver
             });
             log('Registered with Lampa');
