@@ -83,8 +83,7 @@
             .settings__content {
                 margin-top: 1em;
                 margin-bottom: 1em; /* одинаковый отступ сверху и снизу */
-                background-color: rgba(0, 0, 0, 0.7) !important; /* лёгкая прозрачность */
-                border-radius: 0.6em;
+                opacity: 0.95; /* лёгкая прозрачность, цвет остаётся как в теме */
             }
         `;
         document.head.appendChild(style);
@@ -102,7 +101,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.9)');
+        log('Observer started (v3.0)');
     }
 
     function register() {
@@ -110,7 +109,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.9',
+                version: '3.0',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
