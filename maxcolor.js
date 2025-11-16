@@ -13,11 +13,11 @@
     }
 
     /* ============================================================
-       СТИЛИ: ФОН + СКРУГЛЕНИЯ + ВОССТАНОВЛЕНИЕ ОБВОДКИ
+       СТИЛИ (фокус торрентов + кнопки)
        ============================================================ */
     function applyStyles() {
         const css = `
-            /* ГЛОБАЛЬНЫЙ ФОН */
+            /* Фон */
             .wrap,
             .wrap__content,
             body,
@@ -25,27 +25,37 @@
                 background: linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%) !important;
             }
 
-            /* СКРУГЛЕНИЕ ТОРРЕНТ-КАРТОЧЕК */
+            /* Базовое скругление торрентов */
             .torrent-item {
                 position: relative !important;
                 border-radius: 0.9em !important;
                 overflow: hidden !important;
+                transition: outline .15s ease, box-shadow .15s ease;
             }
 
-            /* СКРУГЛЕНИЕ ИСТОРИИ ПРОСМОТРА */
-            .watched-history {
-                border-radius: 0.9em !important;
-                overflow: hidden !important;
-            }
-
-            /* ВОССТАНАВЛИВАЕМ БЕЛУЮ ПОДСВЕТКУ ВЫДЕЛЕНИЯ */
+            /* Фокус торрентов — мягкая, менее белая, тонкая, скругление 0.9 */
             .torrent-item.selector.focus,
             .torrent-item.selector.hover,
             .torrent-item.selector.traverse {
-                outline: 3px solid #ffffff !important;
-                outline-offset: -3px !important;
-                box-shadow: 0 0 12px rgba(255,255,255,0.35) !important;
-                border-radius: inherit !important;
+                outline: 1.6px solid rgba(255,255,255,0.28) !important;
+                outline-offset: -2px !important;
+                border-radius: 0.9em !important; /* ← скругление НЕ уменьшаем */
+                box-shadow: 0 0 6px rgba(255,255,255,0.22) !important;
+            }
+
+            /* История */
+            .watched-history {
+                border-radius: 0.9em !important;
+            }
+
+            /* ================= КНОПКИ .full-start-new__buttons ================ */
+
+            /* Уменьшаем ТОЛЬКО толщину обводки при фокусе / наведении */
+            .full-start-new__buttons .full-start__button.selector.focus,
+            .full-start-new__buttons .full-start__button.selector.hover,
+            .full-start-new__buttons .full-start__button.selector.traverse {
+                outline: 1.4px solid rgba(255,255,255,0.35) !important;
+                outline-offset: -2px !important;
             }
         `;
 
@@ -56,7 +66,7 @@
     }
 
     /* ============================================================
-       ЛОГИКА ОКРАШИВАНИЯ ЧИСЕЛ "РАЗДАЮТ"
+       Цвет сидов
        ============================================================ */
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
@@ -81,22 +91,22 @@
         const obs = new MutationObserver(() => recolorSeedNumbers());
         obs.observe(document.body, { childList: true, subtree: true });
         recolorSeedNumbers();
-        log('Observer started (v1.9)');
+        log('Observer started (v2.1)');
     }
 
     /* ============================================================
-       РЕГИСТРАЦИЯ ПЛАГИНА
+       Регистрация
        ============================================================ */
     function register() {
-        applyStyles(); // подключаем твой стиль
+        applyStyles();
 
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.9',
+                version: '2.1',
                 author: 'maxi3219',
-                description: 'Окрашивает число раздающих + стиль интерфейса',
+                description: 'Мягкая обводка торрентов + лёгкая обводка кнопок + цвета сидов',
                 init: startObserver
             });
             log('Registered with Lampa');
