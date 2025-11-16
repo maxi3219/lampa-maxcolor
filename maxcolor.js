@@ -8,13 +8,12 @@
         high: '#00ff00'   // >10 — зелёный
     };
 
-    const BLOCK_RADIUS = '0.9em';   // для .torrent-item и .watched-history
-    const ACTIVE_RADIUS = '0.6em';  // для активных и наведённых кнопок
-    const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
+    const BLOCK_RADIUS = '0.9em'; // для .torrent-item и .watched-history
+    const ACTIVE_RADIUS = '0.6em'; // для активной и наведённой кнопки
+    const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
-    // окраска сидов
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
@@ -32,7 +31,6 @@
         });
     }
 
-    // скругление блоков
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
@@ -41,77 +39,37 @@
             .forEach(item => { item.style.borderRadius = BLOCK_RADIUS; });
     }
 
-    // фон
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
-            backgroundBlock.style.background = GRADIENT;
             backgroundBlock.style.setProperty('background', GRADIENT, 'important');
         }
     }
 
-    // кнопки: активные и наведённые + подсветка меню
     function enforceButtonsRadius() {
+        // Вставляем высокоспецифичное правило, чтобы перебить базовый border-radius: 1em
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
 
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            .full-start-new__buttons .full-start__button {
-                transition: border-radius 0.2s ease;
-            }
-            .full-start-new__buttons .full-start__button:hover,
-            .full-start-new__buttons .full-start__button:focus,
-            .full-start-new__buttons .full-start__button.focus,
-            .full-start-new__buttons .full-start__button.active,
-            .full-start-new__buttons .full-start__button.layer--focus,
-            .full-start-new__buttons.layer--focus .full-start__button.selector {
-                border-radius: ${ACTIVE_RADIUS} !important;
-            }
-
-            /* Свечение для активных пунктов меню */
-            .settings-folder.selector.focus,
-            .settings-folder.selector.hover,
-            .settings-folder.selector.traverse,
-            .settings-param.selector.focus,
-            .settings-param.selector.hover,
-            .settings-param.selector.traverse,
-            .settings-param__value.selector.focus,
-            .settings-param__value.selector.hover,
-            .settings-param__value.selector.traverse,
-            .selectbox-item.selector.focus,
-            .selectbox-item.selector.hover,
-            .selectbox-item.selector.traverse {
-                background: linear-gradient(to right, #4dd9a0 1%, #4d8fa8 100%) !important;
-                border-radius: 1em !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // фикс блока настроек
-    function fixSettingsBlock() {
-        const styleId = 'maxcolor-settings-fix';
-        if (document.getElementById(styleId)) return;
-
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            .settings__content {
-                position: absolute !important;
-                top: 1em !important;
-                bottom: 1em !important;   /* равный отступ снизу */
-                right: 1em !important;    /* прижимаем к правому краю */
-                width: 35% !important;    /* фиксированная ширина */
-                max-height: calc(100vh - 2em) !important;
-                overflow-y: auto !important;
-                opacity: 0.98; /* лёгкая прозрачность */
-                border-radius: 1.2em !important;
-                background: rgba(54,54,54,0.98) !important;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
-                padding: 1em !important;
-            }
+/* Базовые кнопки остаются 1em — как в теме, не трогаем */
+/* Активная/наведённая кнопка — 0.6em */
+.full-start-new__buttons .full-start__button:hover,
+.full-start-new__buttons .full-start__button:focus,
+.full-start-new__buttons .full-start__button.focus,
+.full-start-new__buttons .full-start__button.active,
+.full-start-new__buttons .full-start__button.selector:hover,
+.full-start-new__buttons .full-start__button.selector:focus,
+/* кейс, когда контейнер активен/в фокусе и внутри есть кнопка */
+.full-start-new__buttons.focus .full-start__button.selector,
+.full-start-new__buttons.active .full-start__button.selector,
+/* кейс с кареткой/слоями фокуса, которые Lampa любит навешивать */
+.full-start-new__buttons .full-start__button.layer--focus,
+.full-start-new__buttons.layer--focus .full-start__button.selector {
+    border-radius: ${ACTIVE_RADIUS} !important;
+}
         `;
         document.head.appendChild(style);
     }
@@ -121,14 +79,13 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        fixSettingsBlock();
     }
 
     function startObserver() {
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.9)');
+        log('Observer started (v2.8)');
     }
 
     function register() {
@@ -136,9 +93,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.9',
+                version: '2.8',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон, единое скругление кнопок и фикс настроек',
+                description: 'Цвет сидов, скругления блоков, фон, и единое скругление 0.6em для активных/наведённых кнопок',
                 init: startObserver
             });
             log('Registered with Lampa');
