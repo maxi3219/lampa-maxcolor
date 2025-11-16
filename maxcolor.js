@@ -3,22 +3,20 @@
     const plugin_name = 'MaxColor';
 
     const COLORS = {
-        low: '#ff3333',   // <5 — красный
-        mid: '#ffcc00',   // 5–10 — жёлтый
-        high: '#00ff00'   // >10 — зелёный
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
     };
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
     }
 
-    // Окрашивание числа "Раздают"
     function recolorSeedNumbers() {
         const seedBlocks = document.querySelectorAll('.torrent-item__seeds');
         seedBlocks.forEach(block => {
             const span = block.querySelector('span');
             if (!span) return;
-
             const num = parseInt(span.textContent);
             if (isNaN(num)) return;
 
@@ -31,67 +29,41 @@
         });
     }
 
-    // Фон приложения и скругления
     function applyCustomStyles() {
         const wrap = document.querySelector('.wrap__content');
         if (wrap) {
             wrap.style.setProperty('background', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
-            wrap.style.setProperty('background-color', 'transparent', 'important');
-            wrap.style.setProperty('background-image', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
         }
 
-        const torrentItems = document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render');
-        torrentItems.forEach(item => {
-            item.style.borderRadius = '0.9em';
-        });
+        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
+            .forEach(item => item.style.borderRadius = '0.9em');
 
-        const historyBlocks = document.querySelectorAll('.watched-history.selector');
-        historyBlocks.forEach(block => {
-            block.style.borderRadius = '0.9em';
-        });
+        document.querySelectorAll('.watched-history.selector')
+            .forEach(block => block.style.borderRadius = '0.9em');
     }
 
-    // Отключение canvas-фона
     function overrideCanvasBackground() {
         const bg = document.querySelector('.background');
         if (bg) {
             bg.style.setProperty('background', 'linear-gradient(135deg, #171717 0%, #2f3233 50%, #000000 100%)', 'important');
-            bg.style.setProperty('background-color', 'transparent', 'important');
         }
-
-        const canvasOne = document.querySelector('.background__one');
-        const canvasTwo = document.querySelector('.background__two');
-        [canvasOne, canvasTwo].forEach(canvas => {
+        ['.background__one', '.background__two'].forEach(sel => {
+            const canvas = document.querySelector(sel);
             if (canvas) canvas.style.setProperty('display', 'none', 'important');
         });
     }
 
-    // Сделать меню и все его слои прозрачными
     function makeMenuTransparent() {
-        const targets = [
-            '.menu',
-            '.menu__header',
-            '.menu__case',
-            '.menu__list',
-            '.menu__item',
-            '.menu__split'
-        ];
-
-        targets.forEach(sel => {
-            document.querySelectorAll(sel).forEach(el => {
-                el.style.setProperty('background', 'transparent', 'important');
-                el.style.setProperty('background-color', 'transparent', 'important');
-                el.style.setProperty('background-image', 'none', 'important');
-                el.style.setProperty('box-shadow', 'none', 'important');
-                el.style.setProperty('border', 'none', 'important');
-                el.style.setProperty('outline', 'none', 'important');
-            });
-        });
-
-        // На случай псевдо-элементов/градиентных масок
         const styleTagId = 'maxcolor-transparent-menu';
         if (!document.getElementById(styleTagId)) {
             const css = `
+                .menu, .menu__header, .menu__case, .menu__list, .menu__item, .menu__split {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                    background-image: none !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                }
                 .menu::before, .menu::after,
                 .menu__header::before, .menu__header::after,
                 .menu__case::before, .menu__case::after,
@@ -124,7 +96,7 @@
         overrideCanvasBackground();
         makeMenuTransparent();
 
-        log('Observer started (v2.3)');
+        log('Observer started (v2.4)');
     }
 
     function register() {
@@ -132,9 +104,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.3',
+                version: '2.4',
                 author: 'maxi3219',
-                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и делает меню полностью прозрачным',
+                description: 'Окрашивает число "Раздают", меняет фон, скругляет углы и делает меню прозрачным',
                 init: startObserver
             });
             log('Registered with Lampa');
