@@ -9,7 +9,7 @@
     };
 
     const RADIUS = '0.9em';
-    const HOVER_RADIUS = '0.6em';
+    const HOVER_RADIUS = '0.4em'; // уменьшенное скругление при наведении
     const GRADIENT = 'linear-gradient(89deg, #000000 0%, #292929 50%, #0e0e0e 100%)';
 
     function log(...a) {
@@ -83,7 +83,7 @@
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.5)');
+        log('Observer started (v2.6)');
     }
 
     function register() {
@@ -91,7 +91,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.5',
+                version: '2.6',
                 author: 'maxi3219',
                 description: 'Окрашивает число после "Раздают:", добавляет скругление углов, меняет фон и уменьшает скругление при наведении',
                 init: startObserver
