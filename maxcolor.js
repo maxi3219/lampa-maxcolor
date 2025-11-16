@@ -82,7 +82,7 @@
         style.textContent = `
             .settings__content {
                 padding-top: 1em;
-                padding-bottom: 1.5em; /* чуть больше снизу, чтобы на ТВ выглядело одинаково */
+                padding-bottom: 3em; /* увеличенный нижний отступ для ТВ */
                 opacity: 0.98; /* лёгкая прозрачность, цвет остаётся как в теме */
             }
         `;
@@ -101,7 +101,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.2)');
+        log('Observer started (v3.3)');
     }
 
     function register() {
@@ -109,7 +109,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.2',
+                version: '3.3',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
