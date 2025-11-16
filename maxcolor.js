@@ -10,7 +10,7 @@
 
     const BLOCK_RADIUS = '0.9em';   // для .torrent-item и .watched-history
     const ACTIVE_RADIUS = '0.6em';  // для активных и наведённых кнопок
-    const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%) !important';
+    const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
@@ -45,6 +45,7 @@
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
+            backgroundBlock.style.background = GRADIENT;
             backgroundBlock.style.setProperty('background', GRADIENT, 'important');
         }
     }
@@ -83,7 +84,8 @@
             .settings__content {
                 padding-top: 1em;
                 padding-bottom: 3em; /* увеличенный нижний отступ для ТВ */
-                opacity: 0.98; /* лёгкая прозрачность, цвет остаётся как в теме */
+                margin-left: 2em;    /* сдвиг вправо */
+                opacity: 0.98;       /* лёгкая прозрачность */
             }
         `;
         document.head.appendChild(style);
@@ -101,7 +103,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v3.4)');
+        log('Observer started (v3.6)');
     }
 
     function register() {
@@ -109,7 +111,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '3.4',
+                version: '3.6',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, новый фон, единое скругление кнопок и фикс настроек',
                 init: startObserver
