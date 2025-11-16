@@ -81,7 +81,7 @@
                     position: fixed !important;
                     top: 1em !important;
                     bottom: 1em !important;
-                    right: 2em !important;           /* сдвиг вправо */
+                    right: 3em !important;            /* чуть сильнее вправо */
                     width: 35% !important;
                     max-width: 40em !important;
                     max-height: calc(100vh - 2em) !important;
@@ -89,9 +89,17 @@
                     background: rgba(54,54,54,0.98) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
-                    padding: 1em !important;
+                    padding: 1em 1em 2.5em 1em !important; /* увеличен нижний внутренний отступ */
                     display: flex !important;
                     flex-direction: column !important;
+                }
+
+                /* запасной отступ последнему элементу внутри, если темы режут padding */
+                .settings__content .settings-folder.selector:last-child,
+                .settings__content .settings-param.selector:last-child,
+                .settings__content .settings-param__value.selector:last-child,
+                .selectbox__content.layer--height .selectbox-item.selector:last-child {
+                    margin-bottom: 1.5em !important;
                 }
             }
         `;
@@ -110,7 +118,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.2)');
+        log('Observer started (v4.3)');
     }
 
     function register() {
@@ -118,7 +126,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.2',
+                version: '4.3',
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, новый фон и фикс настроек',
                 init: startObserver
