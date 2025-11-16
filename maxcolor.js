@@ -9,7 +9,7 @@
     };
 
     const RADIUS = '0.9em';
-    const GRADIENT = 'linear-gradient(90deg, #000000 0%, #2f3233 50%, #000000 100%)';
+    const GRADIENT = 'linear-gradient(89deg, #000000 0%, #222222 50%, #3b3b3b 100%)';
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
@@ -64,7 +64,7 @@
         const obs = new MutationObserver(() => applyStyles());
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v2.0)');
+        log('Observer started (v2.1)');
     }
 
     function register() {
@@ -72,7 +72,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '2.0',
+                version: '2.1',
                 author: 'maxi3219',
                 description: 'Окрашивает число после "Раздают:", добавляет скругление углов и меняет фон',
                 init: startObserver
