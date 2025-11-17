@@ -14,7 +14,9 @@
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
-    // Окраска сидов
+    /* ----------------------------------------------------
+       ОКРАСКА СИДОВ
+    ---------------------------------------------------- */
     function recolorSeedNumbers() {
         document.querySelectorAll('.torrent-item__seeds').forEach(block => {
             const span = block.querySelector('span');
@@ -29,7 +31,9 @@
         });
     }
 
-    // Скругления блоков
+    /* ----------------------------------------------------
+       СКРУГЛЕНИЕ БЛОКОВ
+    ---------------------------------------------------- */
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -37,7 +41,9 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // Фон подложки приложения
+    /* ----------------------------------------------------
+       НОВЫЙ ФОН
+    ---------------------------------------------------- */
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -46,7 +52,9 @@
         }
     }
 
-    // Стили кнопок
+    /* ----------------------------------------------------
+       СКРУГЛЕНИЕ КНОПОК
+    ---------------------------------------------------- */
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -68,182 +76,109 @@
         document.head.appendChild(style);
     }
 
-    // Жёсткий CSS - чтобы перебить любые стили Lampa (если будут пересоздавать)
-    function injectForceCSS() {
-        const id = 'maxcolor-force-css';
-        if (document.getElementById(id)) return;
+    /* ----------------------------------------------------
+       ПРАВИЛЬНОЕ МЕНЮ СПРАВА, РОВНЫЕ ОТСТУПЫ И БЕЗ ОБРЕЗАНИЯ
+    ---------------------------------------------------- */
+    function fixMenu() {
+        if (document.getElementById("max-fix-selectbox")) return;
 
         const style = document.createElement('style');
-        style.id = id;
+        style.id = "max-fix-selectbox";
         style.textContent = `
-            /* Очень специфичный и важный блок стилей для панели настроек/selectbox */
-            html body.settings--open .settings__content,
-            html body.selectbox--open .selectbox__content.layer--height,
-            body.settings--open .settings__content,
-            body.selectbox--open .selectbox__content.layer--height {
-                position: fixed !important;
-                /* одинаковые внешние отступы сверху/снизу (outerGap) и справа (rightGap) */
-                top: 1.5em !important;
-                bottom: 1.5em !important;
-                right: 0.8em !important;
-                left: auto !important;
 
-                width: 36% !important;
-                max-width: 42em !important;
-                box-sizing: border-box !important;
-                padding: 1em !important;
-                padding-bottom: 7.5em !important; /* большой запас для пульта */
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: flex-start !important; /* не прижимать к низу */
-                align-items: stretch !important;
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch !important;
-                scroll-padding-bottom: 8.5em !important;
-                overscroll-behavior: contain !important;
+        /* ОСНОВНОЙ ПАТЧ ДЛЯ МЕНЮ (selectbox + settings) */
+        .selectbox__content.layer--height,
+        .settings__content {
 
-                background: rgb(33 33 33 / 98%) !important;
-                border-radius: 1.2em !important;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.85) !important;
-                transform: none !important;
-                margin: 0 !important;
-                z-index: 99999 !important;
-            }
+            position: fixed !important;
+            box-sizing: border-box !important;
 
-            /* Последний элемент — дополнительный отступ + защита для фокуса */
-            body.settings--open .settings__content .selector:last-child,
-            body.selectbox--open .selectbox__content.layer--height .selector:last-child {
-                margin-bottom: 7.5em !important;
-            }
+            /* одинаковый отступ сверху/снизу/справа */
+            top: 1.5em !important;
+            bottom: 1.5em !important;
+            right: 1.5em !important;
 
-            /* При фокусе (пульт) добавляем scroll-margin чтобы элемент не прятался */
-            body.settings--open .settings__content .selector:focus,
-            body.selectbox--open .selectbox__content.layer--height .selector:focus {
-                scroll-margin-bottom: 8.5em !important;
-            }
+            left: auto !important;
 
-            /* Гарантируем, что вставленный spacer видим и занимает место */
-            #maxmenu-bottom-spacer {
-                display: block !important;
-            }
+            /* перебиваем inset, который Lampa вставляет автоматически */
+            inset: 1.5em 1.5em 1.5em auto !important;
+
+            width: 36% !important;
+            max-width: 42em !important;
+
+            padding: 1em !important;
+            padding-bottom: 4em !important;
+
+            border-radius: 1.2em !important;
+            background: rgba(33,33,33,0.98) !important;
+
+            overflow-y: auto !important;
+
+            /* Убираем растягивание меню (2639px и т.п.) */
+            height: auto !important;
+            max-height: calc(100vh - 3em) !important;
+
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        /* Убираем кривые внутренние высоты */
+        .selectbox__body,
+        .settings__body,
+        .scroll,
+        .scroll__content,
+        .scroll__body {
+            height: auto !important;
+            max-height: none !important;
+        }
+
+        /* Даем запас снизу, чтобы последний пункт НЕ резался на пульте */
+        .scroll__body::after,
+        .settings__content .selector:last-child::after {
+            content: "";
+            display: block;
+            height: 4em !important;
+        }
+
         `;
         document.head.appendChild(style);
     }
 
-    // Переносим панель в body, применяем inline-стили и добавляем spacer
-    function hardFixSettingsPosition() {
-        const panels = Array.from(document.querySelectorAll('.settings__content, .selectbox__content.layer--height'));
-
-        panels.forEach(panel => {
-            try {
-                // Если панель вложена в контейнер с transform, fixed будет "привязан" к нему.
-                // Перенесём саму панель в body, чтобы fixed работал корректно.
-                if (panel.parentNode && panel.parentNode !== document.body) {
-                    document.body.appendChild(panel);
-                }
-
-                // Я всё равно ставлю инлайн-стили — это помогает при первой отрисовке
-                panel.style.position = 'fixed';
-                panel.style.top = '1.5em';
-                panel.style.bottom = '1.5em';
-                panel.style.right = '0.8em';
-                panel.style.left = 'auto';
-                panel.style.width = '36%';
-                panel.style.maxWidth = '42em';
-                panel.style.boxSizing = 'border-box';
-                panel.style.padding = '1em';
-                panel.style.paddingBottom = '7.5em';
-                panel.style.display = 'flex';
-                panel.style.flexDirection = 'column';
-                panel.style.justifyContent = 'flex-start';
-                panel.style.overflowY = 'auto';
-                panel.style.webkitOverflowScrolling = 'touch';
-                panel.style.scrollPaddingBottom = '8.5em';
-                panel.style.transform = 'none';
-                panel.style.zIndex = '99999';
-
-                // Удалим max-height, если он там был
-                panel.style.removeProperty('max-height');
-
-                // Спейсер в конце
-                const spacerId = 'maxmenu-bottom-spacer';
-                if (!panel.querySelector(`#${spacerId}`)) {
-                    const spacer = document.createElement('div');
-                    spacer.id = spacerId;
-                    spacer.style.height = '8.5em';
-                    spacer.style.minHeight = '8.5em';
-                    spacer.style.flexShrink = '0';
-                    panel.appendChild(spacer);
-                }
-            } catch (e) {
-                // не критично, но логируем
-                log('hardFixSettingsPosition error', e);
-            }
-        });
-    }
-
-    function addSettingsSafetyCSS() {
-        const styleId = 'maxcolor-settings-safety';
-        if (document.getElementById(styleId)) return;
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            @media screen and (min-width: 360px) {
-                body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
-                    box-sizing: border-box !important;
-                }
-
-                body.settings--open .settings__content .selector:last-child,
-                body.selectbox--open .selectbox__content.layer--height .selector:last-child {
-                    margin-bottom: 7.5em !important;
-                }
-
-                body.settings--open .settings__content .selector:focus,
-                body.selectbox--open .selectbox__content.layer--height .selector:focus {
-                    scroll-margin-bottom: 8.5em !important;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
+    /* ----------------------------------------------------
+       ОБЩАЯ ФУНКЦИЯ ОБНОВЛЕНИЯ
+    ---------------------------------------------------- */
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        injectForceCSS();        // самый важный — CSS с !important
-        hardFixSettingsPosition(); // перенос в body + inline-стили
-        addSettingsSafetyCSS();
+        fixMenu();
     }
 
+    /* ----------------------------------------------------
+       OBSERVER
+    ---------------------------------------------------- */
     function startObserver() {
-        const obs = new MutationObserver(() => {
-            // запускаем с небольшим дебаунсом, чтобы не дергать Lampa постоянно
-            try {
-                applyStyles();
-            } catch (e) {
-                log('applyStyles error', e);
-            }
-        });
+        const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
-        // первичный вызов
         applyStyles();
-        log('Observer started (v4.8)');
+        log('Observer started (v5.0)');
     }
 
+    /* ----------------------------------------------------
+       РЕГИСТРАЦИЯ ПЛАГИНА
+    ---------------------------------------------------- */
     function register() {
         if (window.app && app.plugins && typeof app.plugins.add === 'function') {
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.8',
+                version: '5.0',
                 author: 'maxi3219',
-                description: 'Fix: одинаковые отступы, перемещение панели в body, сильный CSS, защита нижнего отступа для пульта',
+                description: 'Цвет сидов, скругления блоков, новый фон + фиксированное правое меню без обрезания',
                 init: startObserver
             });
-            log('Registered with Lampa');
+            log('Registered');
         } else {
             log('Standalone mode');
             startObserver();
