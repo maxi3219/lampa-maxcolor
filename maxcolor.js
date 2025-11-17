@@ -9,7 +9,7 @@
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
-    // Окраска сидов
+    // окраска сидов
     function recolorSeedNumbers() {
         document.querySelectorAll('.torrent-item__seeds').forEach(block => {
             const span = block.querySelector('span');
@@ -24,7 +24,7 @@
         });
     }
 
-    // Скругления блоков
+    // скругления
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -32,7 +32,7 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // Фон приложения
+    // фон
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -41,7 +41,7 @@
         }
     }
 
-    // Кнопки
+    // кнопки
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -63,9 +63,9 @@
         document.head.appendChild(style);
     }
 
-    // CSS для панели настроек и селектбокса
-    function injectSettingsCSS() {
-        const styleId = 'maxcolor-settings-css';
+    // фикс меню
+    function fixSettingsBlock() {
+        const styleId = 'maxcolor-settings-fix';
         if (document.getElementById(styleId)) return;
         const style = document.createElement('style');
         style.id = styleId;
@@ -76,92 +76,43 @@
                     position: fixed !important;
                     top: 1em !important;
                     bottom: 1em !important;
-
-                    /* реальный сдвиг вправо и сброс конфликтов */
-                    right: 4em !important;
+                    right: 3em !important;          /* сдвиг вправо */
                     left: auto !important;
-                    inset: auto !important;
-                    transform: none !important;
-                    margin: 0 !important;
 
                     width: 35% !important;
                     max-width: 40em !important;
                     max-height: calc(100vh - 2em) !important;
 
                     overflow-y: auto !important;
-                    overflow-x: hidden !important;
                     box-sizing: border-box !important;
 
                     background: rgb(33 33 33 / 98%) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
 
-                    /* внутренний отступ + прокрутка с запасом снизу */
-                    padding: 1em 1em 3.5em 1em !important;
+                    padding: 1em 1em 3.5em 1em !important; /* запас снизу */
                     scroll-padding-bottom: 3.5em !important;
-                    overscroll-behavior: contain !important;
 
                     display: flex !important;
                     flex-direction: column !important;
                 }
 
-                /* страховка видимости: не прячем панель в открытом состоянии */
-                body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                }
-
-                /* доп. запас последнему реальному пункту */
+                /* запасной отступ последнему пункту */
                 .settings__content .selector:last-child,
                 .selectbox__content.layer--height .selector:last-child {
                     margin-bottom: 2em !important;
                 }
+
+                /* невидимый спейсер для фокуса пультом */
+                .settings__content::after,
+                .selectbox__content.layer--height::after {
+                    content: '' !important;
+                    display: block !important;
+                    height: 2.5em !important;
+                }
             }
         `;
         document.head.appendChild(style);
-    }
-
-    // Фокусируемый «стоп-элемент» в конце, чтобы навигация пультом не обрезала последний пункт
-    function ensureBottomFocusStop() {
-        const panels = document.querySelectorAll('.settings__content, .selectbox__content.layer--height');
-        panels.forEach(panel => {
-            const stopId = 'max-bottom-focus-stop';
-            if (!panel.querySelector('#' + stopId)) {
-                const stop = document.createElement('div');
-                stop.id = stopId;
-                stop.className = 'settings-param selector'; // чтобы вписаться в поток фокуса
-                stop.tabIndex = 0;
-                stop.setAttribute('aria-hidden', 'false');
-                stop.style.minHeight = '2.5em';
-                stop.style.height = '2.5em';
-                stop.style.marginTop = '0.5em';
-                stop.style.marginBottom = '0.5em';
-                stop.style.opacity = '0';        // невидимка
-                stop.style.pointerEvents = 'none';
-                // pointerEvents: none, но для ТВ фокуса иногда нужно true — оставим фокус через DOM, но без клика
-                stop.style.pointerEvents = 'auto';
-                panel.appendChild(stop);
-            }
-        });
-    }
-
-    // Перестраховка на событии открытия, чтобы все правки применялись после рендера
-    function hookOpenEvents() {
-        if (window.Lampa && typeof Lampa.Listener === 'object') {
-            Lampa.Listener.follow('app', e => {
-                if (e.type === 'settings_open' || e.type === 'selectbox_open' || e.type === 'ready') {
-                    setTimeout(() => {
-                        injectSettingsCSS();
-                        ensureBottomFocusStop();
-                    }, 0);
-                }
-            });
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            injectSettingsCSS();
-            ensureBottomFocusStop();
-        });
     }
 
     function applyStyles() {
@@ -169,18 +120,14 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        injectSettingsCSS();
-        ensureBottomFocusStop();
+        fixSettingsBlock();
     }
 
     function startObserver() {
-        const obs = new MutationObserver(() => {
-            applyStyles();
-        });
+        const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        hookOpenEvents();
-        log('Observer started (v4.7)');
+        log('Observer started (v4.8)');
     }
 
     function register() {
@@ -188,9 +135,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.7',
+                version: '4.8',
                 author: 'maxi3219',
-                description: 'Фикс меню для ТВ: отступ снизу при навигации пультом, реальный сдвиг вправо, без подсветок',
+                description: 'Цвет сидов, скругления блоков, новый фон и фикс меню (отступ снизу + вправо)',
                 init: startObserver
             });
             log('Registered with Lampa');
