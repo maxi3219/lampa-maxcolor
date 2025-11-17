@@ -59,9 +59,9 @@
             // Стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 2em)';
+                panel.style.maxHeight = 'calc(100vh - 1.8em)';
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
             }
             // Стили для .selectbox__content (новый запрос)
             else if (panel.classList.contains('selectbox__content')) {
