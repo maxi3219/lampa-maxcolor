@@ -9,7 +9,7 @@
     };
 
     const BLOCK_RADIUS = '0.9em';
-    const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
+    const GRADIENT_APP_BG = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
@@ -44,8 +44,8 @@
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
-            backgroundBlock.style.background = GRADIENT;
-            backgroundBlock.style.setProperty('background', GRADIENT, 'important');
+            backgroundBlock.style.background = GRADIENT_APP_BG;
+            backgroundBlock.style.setProperty('background', GRADIENT_APP_BG, 'important');
         }
 
         // Прозрачность подложки меню и кастомные стили
@@ -71,7 +71,7 @@
         });
     }
 
-    // Внедрение стилей для :hover и .focus (скругление кнопок и тень для элементов списков)
+    // Внедрение стилей для :hover и .focus
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         
@@ -80,17 +80,18 @@
             oldStyle.remove();
         }
 
-        // --- ОБНОВЛЕННЫЕ ПРАВИЛА ---
-        // Новый цвет тени: rgb(57 148 188 / 30%)
-        const SHADOW_COLOR = '0 4px 15px rgb(127 172 192 / 30%)';
+        // Цвет тени: rgb(57 148 188 / 30%)
+        const SHADOW_COLOR = '0 4px 15px rgb(57 148 188 / 30%)';
+        // Градиент для фона кнопок наведения
+        const GRADIENT_HOVER_BG = 'linear-gradient(to right, #9cc1bc, #536976)';
 
         const cssRules = `
-            /* Скругление кнопок на главной странице фильма */
+            /* Градиентный фон для кнопок на странице фильма при наведении/фокусе */
             .full-start__button.selector:hover,
             .full-start__button.selector.focus {
                 border-radius: 0.5em !important;
-                /* ДОБАВЛЕНИЕ ЭФФЕКТА ТЕНИ К ЭТИМ КНОПКАМ */
                 box-shadow: ${SHADOW_COLOR} !important;
+                background: ${GRADIENT_HOVER_BG} !important; /* НОВОЕ ПРАВИЛО */
             }
 
             /* Тень для элементов в Selectbox (Источник) */
@@ -113,7 +114,6 @@
         styleElement.innerHTML = cssRules;
         document.head.appendChild(styleElement);
     }
-    // --- КОНЕЦ БЛОКА ---
 
     function applyStyles() {
         recolorSeedNumbers();
