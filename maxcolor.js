@@ -2,14 +2,19 @@
     const plugin_id = 'maxcolor';
     const plugin_name = 'MaxColor';
 
-    const COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
+    const COLORS = {
+        low: '#ff3333',
+        mid: '#ffcc00',
+        high: '#00ff00'
+    };
+
     const BLOCK_RADIUS = '0.9em';
     const ACTIVE_RADIUS = '0.6em';
     const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
 
     function log(...a) { try { console.log(`[${plugin_name}]`, ...a); } catch (e) {} }
 
-    // окраска сидов
+    // Окраска сидов
     function recolorSeedNumbers() {
         document.querySelectorAll('.torrent-item__seeds').forEach(block => {
             const span = block.querySelector('span');
@@ -24,7 +29,7 @@
         });
     }
 
-    // скругления
+    // Скругления блоков
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -32,7 +37,7 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // фон
+    // Фон подложки приложения
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -41,7 +46,7 @@
         }
     }
 
-    // кнопки
+    // Стили кнопок
     function enforceButtonsRadius() {
         const styleId = 'maxcolor-button-states';
         if (document.getElementById(styleId)) return;
@@ -63,52 +68,67 @@
         document.head.appendChild(style);
     }
 
-    // фикс меню
-    function fixSettingsBlock() {
-        const styleId = 'maxcolor-settings-fix';
+    // Новая версия — фикс меню + правильное поведение на пульте
+    function hardFixSettingsPosition() {
+        const panels = document.querySelectorAll('.settings__content, .selectbox__content.layer--height');
+        panels.forEach(panel => {
+            // Аккуратный сдвиг вправо
+            panel.style.setProperty('right', '1.5em', 'important');
+
+            // Позиционирование
+            panel.style.setProperty('position', 'fixed', 'important');
+            panel.style.setProperty('top', '1.5em', 'important');
+            panel.style.setProperty('bottom', '1.5em', 'important');
+
+            // Размеры
+            panel.style.setProperty('width', '36%', 'important');
+            panel.style.setProperty('max-width', '42em', 'important');
+
+            // Внутренние отступы
+            panel.style.setProperty('padding', '1em', 'important');
+            panel.style.setProperty('padding-bottom', '5em', 'important');
+
+            // Стили
+            panel.style.setProperty('overflow-y', 'auto', 'important');
+            panel.style.setProperty('border-radius', '1.2em', 'important');
+            panel.style.setProperty('background', 'rgb(33 33 33 / 98%)', 'important');
+            panel.style.setProperty('box-shadow', '0 8px 24px rgba(0,0,0,0.8)', 'important');
+            panel.style.setProperty('display', 'flex', 'important');
+            panel.style.setProperty('flex-direction', 'column', 'important');
+
+            // ——— КЛЮЧЕВОЕ — убираем ограничение по высоте, чтобы не резало на пульте
+            panel.style.removeProperty('max-height');
+
+            // Спейсер для нижней части (100% не режет элементы)
+            const spacerId = 'maxmenu-bottom-spacer';
+            if (!panel.querySelector(`#${spacerId}`)) {
+                const spacer = document.createElement('div');
+                spacer.id = spacerId;
+                spacer.style.height = '5em';
+                spacer.style.minHeight = '5em';
+                spacer.style.flexShrink = '0';
+                panel.appendChild(spacer);
+            }
+        });
+    }
+
+    // CSS-страховка
+    function addSettingsSafetyCSS() {
+        const styleId = 'maxcolor-settings-safety';
         if (document.getElementById(styleId)) return;
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
             @media screen and (min-width: 480px) {
-                .settings__content,
-                .selectbox__content.layer--height {
-                    position: fixed !important;
-                    top: 1em !important;
-                    bottom: 1em !important;
-                    right: 3em !important;          /* сдвиг вправо */
-                    left: auto !important;
-
-                    width: 35% !important;
-                    max-width: 40em !important;
-                    max-height: calc(100vh - 2em) !important;
-
-                    overflow-y: auto !important;
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
                     box-sizing: border-box !important;
-
-                    background: rgb(33 33 33 / 98%) !important;
-                    border-radius: 1.2em !important;
-                    box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
-
-                    padding: 1em 1em 3.5em 1em !important; /* запас снизу */
-                    scroll-padding-bottom: 3.5em !important;
-
-                    display: flex !important;
-                    flex-direction: column !important;
                 }
 
-                /* запасной отступ последнему пункту */
-                .settings__content .selector:last-child,
-                .selectbox__content.layer--height .selector:last-child {
-                    margin-bottom: 2em !important;
-                }
-
-                /* невидимый спейсер для фокуса пультом */
-                .settings__content::after,
-                .selectbox__content.layer--height::after {
-                    content: '' !important;
-                    display: block !important;
-                    height: 2.5em !important;
+                /* улучшенный нижний отступ для пульта */
+                body.settings--open .settings__content .selector:last-child,
+                body.selectbox--open .selectbox__content.layer--height .selector:last-child {
+                    margin-bottom: 4em !important;
                 }
             }
         `;
@@ -120,14 +140,15 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        fixSettingsBlock();
+        hardFixSettingsPosition();
+        addSettingsSafetyCSS();
     }
 
     function startObserver() {
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.8)');
+        log('Observer started (v4.6)');
     }
 
     function register() {
@@ -135,9 +156,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.8',
+                version: '4.6',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон и фикс меню (отступ снизу + вправо)',
+                description: 'Цвет сидов, скругления блоков, новый фон, фиксация меню, правый отступ, исправление обрезания для пульта',
                 init: startObserver
             });
             log('Registered with Lampa');
