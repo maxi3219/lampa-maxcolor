@@ -34,7 +34,7 @@
 
     // Скругления блоков
     function roundCorners() {
-        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
+        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render, .online.selector')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
         document.querySelectorAll('.watched-history.selector')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -54,24 +54,17 @@
             panel.style.background = 'rgba(33,33,33,0.98)';
             panel.style.setProperty('background', 'rgba(33,33,33,0.98)', 'important');
 
-            // Стили для .settings__content
-            if (panel.classList.contains('settings__content')) {
-                panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
-                panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
-            }
-            // Стили для .selectbox__content
-            else if (panel.classList.contains('selectbox__content')) {
-                panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
-                panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
-            }
+            // Стили для .settings__content и .selectbox__content
+            const newMaxHeight = 'calc(100vh - 1.8em)';
+            const newLeft = '99%';
+            panel.style.left = newLeft;
+            panel.style.maxHeight = newMaxHeight;
+            panel.style.setProperty('left', newLeft, 'important');
+            panel.style.setProperty('max-height', newMaxHeight, 'important');
         });
     }
 
-    // Внедрение стилей для :hover и .focus
+    // Внедрение стилей для :hover и .focus, а также статических стилей
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
@@ -108,9 +101,14 @@
 
         // --- СТАТИЧЕСКИЕ ПРАВИЛА ---
         const staticCss = `
-            /* Новый фон для элементов списка торрентов */
-            .torrent-item.selector {
+            /* Новый фон для элементов списка торрентов и онлайн-источников */
+            .torrent-item.selector,
+            .online.selector {
                 background-color: rgb(68 68 69 / 13%) !important;
+            }
+            /* Новый фон для кнопки парсеров, чтобы она соответствовала стилю фильтров */
+            .simple-button--filter.filter--parser {
+                 background-color: rgb(68 68 69 / 13%) !important;
             }
         `;
         
@@ -128,12 +126,69 @@
         staticStyleElement.innerHTML = staticCss;
         document.head.appendChild(staticStyleElement);
     }
+    
+    // ДОБАВЛЕНА: Функция для добавления кнопки выбора парсеров
+    function addParserButton() {
+        const filterBlock = document.querySelector('.torrent-filter');
+        const existingParserButton = document.querySelector('.simple-button--filter.filter--parser');
+
+        // Проверяем, существует ли блок фильтров и не добавлена ли уже кнопка
+        if (filterBlock && !existingParserButton) {
+            // Создаем HTML-разметку для новой кнопки
+            const parserButtonHTML = `
+                <div class="simple-button simple-button--filter selector filter--parser" data-type="parser">
+                    <span>Парсеры</span>
+                    <div class="parser-name">
+                        ${Lampa.Storage.get('parser_use') === 'no_parser' ? 'Не выбран' : Lampa.Storage.get('parser_use')}
+                    </div>
+                </div>
+            `;
+            
+            // Находим кнопку "Фильтр", после которой нужно вставить новую кнопку
+            const filterButton = filterBlock.querySelector('.filter--filter');
+            
+            if (filterButton) {
+                // Вставляем кнопку после кнопки "Фильтр"
+                filterButton.insertAdjacentHTML('afterend', parserButtonHTML);
+
+                // Получаем только что созданный DOM-элемент кнопки
+                const newParserButton = document.querySelector('.simple-button--filter.filter--parser');
+
+                if (newParserButton) {
+                    // Привязываем обработчик события
+                    newParserButton.addEventListener('click', () => {
+                        log('Parser button clicked');
+                        // Вызываем вашу функцию для открытия меню парсеров
+                        // Предполагается, что ваша функция _0x514713 доступна в глобальной области видимости
+                        if (typeof _0x514713 === 'function') {
+                            _0x514713();
+                        } else {
+                            // Если функция не найдена (например, из-за обфускации или области видимости)
+                            Lampa.Noty.show('Функция выбора парсеров не найдена.');
+                        }
+                    });
+
+                    // Также привязываем к обработчику Lampa для фокуса
+                    Lampa.Controller.add('parser_button', {
+                        toggle: (params) => {
+                            if (params.name === 'parser_button') {
+                                Lampa.Controller.collection = newParserButton;
+                                Lampa.Controller.active(newParserButton, true);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
+
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectInteractionStyles(); // Внедряем стили
+        injectInteractionStyles(); // Внедряем стили и статический фон
+        addParserButton(); // ДОБАВЛЕНО: Добавляем кнопку парсеров
     }
 
     function startObserver() {
@@ -149,9 +204,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.0',
+                version: '1.1', // Обновил версию
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и визуальные эффекты фокуса',
+                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню, эффекты фокуса и кнопка парсеров',
                 init: startObserver
             });
             log('Registered with Lampa');
