@@ -75,13 +75,13 @@
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         
-        // Удаляем старые стили, если они были, чтобы применить новые
         const oldStyle = document.getElementById(styleId);
         if (oldStyle) {
             oldStyle.remove();
         }
 
-        // -- ОБНОВЛЕННЫЕ ПРАВИЛА --
+        // --- ОБНОВЛЕННЫЕ ПРАВИЛА ---
+        // Новый цвет тени: rgb(57 148 188 / 30%)
         const SHADOW_COLOR = '0 4px 15px rgb(57 148 188 / 30%)';
 
         const cssRules = `
@@ -89,6 +89,8 @@
             .full-start__button.selector:hover,
             .full-start__button.selector.focus {
                 border-radius: 0.5em !important;
+                /* ДОБАВЛЕНИЕ ЭФФЕКТА ТЕНИ К ЭТИМ КНОПКАМ */
+                box-shadow: ${SHADOW_COLOR} !important;
             }
 
             /* Тень для элементов в Selectbox (Источник) */
@@ -111,7 +113,7 @@
         styleElement.innerHTML = cssRules;
         document.head.appendChild(styleElement);
     }
-    // -- КОНЕЦ БЛОКА --
+    // --- КОНЕЦ БЛОКА ---
 
     function applyStyles() {
         recolorSeedNumbers();
