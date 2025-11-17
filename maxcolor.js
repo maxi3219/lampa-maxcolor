@@ -57,9 +57,9 @@
             // Стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
+                panel.style.maxHeight = 'calc(100vh - 2em)';
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
             }
             // Стили для .selectbox__content
             else if (panel.classList.contains('selectbox__content')) {
@@ -71,7 +71,7 @@
         });
     }
 
-    // Внедрение стилей для :hover и .focus
+    // Внедрение стилей для :hover и .focus, а также статических стилей
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
@@ -108,8 +108,9 @@
 
         // --- СТАТИЧЕСКИЕ ПРАВИЛА ---
         const staticCss = `
-            /* Новый фон для элементов списка торрентов */
-            .torrent-item.selector {
+            /* Новый фон для элементов списка торрентов и онлайн-источников */
+            .torrent-item.selector,
+            .online.selector { /* ДОБАВЛЕНО: .online.selector */
                 background-color: rgb(68 68 69 / 13%) !important;
             }
         `;
