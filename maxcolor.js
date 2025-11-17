@@ -8,7 +8,7 @@
         high: '#00ff00'
     };
 
-    const BLOCK_RADIUS = '0.9em'; // Используемый радиус скругления
+    const BLOCK_RADIUS = '0.9em';
     const GRADIENT_APP_BG = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
 
     function log(...a) {
@@ -32,10 +32,9 @@
         });
     }
 
-    // Скругления блоков (ОБНОВЛЕНО)
+    // Скругления блоков
     function roundCorners() {
-        // Применяем скругление к элементам торрентов, истории просмотра И ОНЛАЙН-ИСТОЧНИКАМ
-        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render, .online.selector')
+        document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
         document.querySelectorAll('.watched-history.selector')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -58,9 +57,9 @@
             // Стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
+                panel.style.maxHeight = 'calc(100vh - 2em)';
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
             }
             // Стили для .selectbox__content
             else if (panel.classList.contains('selectbox__content')) {
@@ -72,7 +71,7 @@
         });
     }
 
-    // Внедрение стилей для :hover и .focus, а также статических стилей
+    // Внедрение стилей для :hover и .focus
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
@@ -109,9 +108,8 @@
 
         // --- СТАТИЧЕСКИЕ ПРАВИЛА ---
         const staticCss = `
-            /* Новый фон для элементов списка торрентов и онлайн-источников */
-            .torrent-item.selector,
-            .online.selector {
+            /* Новый фон для элементов списка торрентов */
+            .torrent-item.selector {
                 background-color: rgb(68 68 69 / 13%) !important;
             }
         `;
@@ -133,14 +131,15 @@
 
     function applyStyles() {
         recolorSeedNumbers();
-        roundCorners(); // Вызываем обновленную функцию
+        roundCorners();
         changeBackground();
-        injectInteractionStyles();
+        injectInteractionStyles(); // Внедряем стили
     }
 
     function startObserver() {
         applyStyles(); // сразу применяем
         const obs = new MutationObserver(applyStyles);
+        // Наблюдаем за изменениями в DOM
         obs.observe(document.body, { childList: true, subtree: true });
         log('Observer started (v1.0, упрощённая версия)');
     }
