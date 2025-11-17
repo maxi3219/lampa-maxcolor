@@ -54,8 +54,6 @@
             panel.style.background = 'rgba(33,33,33,0.98)';
             panel.style.setProperty('background', 'rgba(33,33,33,0.98)', 'important');
 
-            // -- НАЧАЛО ИЗМЕНЕНИЙ --
-
             // Стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
@@ -63,21 +61,56 @@
                 panel.style.setProperty('left', '99%', 'important');
                 panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
             }
-            // Стили для .selectbox__content (новый запрос)
+            // Стили для .selectbox__content
             else if (panel.classList.contains('selectbox__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)'; // Твое новое значение
+                panel.style.maxHeight = 'calc(100vh - 1.8em)';
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important'); // Твое новое значение
+                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
             }
-            // -- КОНЕЦ ИЗМЕНЕНИЙ --
         });
     }
+
+    // -- НОВЫЙ БЛОК --
+    // Внедрение стилей для псевдо-элементов (::after)
+    function injectCustomStyles() {
+        const styleId = 'maxcolor-focus-styles';
+        // Проверяем, не был ли стиль уже добавлен
+        if (document.getElementById(styleId)) return; 
+
+        // Все селекторы, которые ты указал
+        const cssRules = `
+            .ad-bot.focus .ad-bot__content::after,
+            .ad-bot.hover .ad-bot__content::after,
+            .card-episode.focus .full-episode::after,
+            .register.focus::after,
+            .season-episode.focus::after,
+            .full-episode.focus::after,
+            .full-review-add.focus::after,
+            .card.focus .card__view::after,
+            .card.hover .card__view::after,
+            .extensions__item.focus:after,
+            .torrent-item.focus::after,
+            .extensions__block-add.focus:after {
+                border-color: #387172 !important;
+                box-shadow: 0 0 5px rgb(57 149 142), 0 0 10px rgb(71 155 149 / 50%) !important;
+            }
+        `;
+
+        // Создаем тег <style> и добавляем его в <head>
+        const styleElement = document.createElement('style');
+        styleElement.id = styleId;
+        styleElement.type = 'text/css';
+        styleElement.innerHTML = cssRules;
+        document.head.appendChild(styleElement);
+    }
+    // -- КОНЕЦ НОВОГО БЛОКА --
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
+        injectCustomStyles(); // -- ДОБАВЛЕНО --
     }
 
     function startObserver() {
