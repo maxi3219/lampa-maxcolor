@@ -82,7 +82,7 @@
         }
 
         // -- ОБНОВЛЕННЫЕ ПРАВИЛА --
-        const SHADOW_COLOR = '0 4px 15px rgb(59 171 147 / 30%)';
+        const SHADOW_COLOR = '0 4px 15px rgb(57 148 188 / 30%)';
 
         const cssRules = `
             /* Скругление кнопок на главной странице фильма */
