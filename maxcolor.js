@@ -48,19 +48,27 @@
             backgroundBlock.style.setProperty('background', GRADIENT, 'important');
         }
 
-        // Прозрачность подложки меню
+        // Прозрачность подложки меню и кастомные стили
         document.querySelectorAll('.settings__content, .selectbox__content.layer--height').forEach(panel => {
+            // Общий стиль для обоих
             panel.style.background = 'rgba(33,33,33,0.98)';
             panel.style.setProperty('background', 'rgba(33,33,33,0.98)', 'important');
 
             // -- НАЧАЛО ИЗМЕНЕНИЙ --
-            // Добавляем твои стили для .settings__content
+
+            // Стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
-                // Используем setProperty, чтобы добавить !important и гарантированно перекрыть стили
+                panel.style.maxHeight = 'calc(100vh - 2em)';
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
+            }
+            // Стили для .selectbox__content (новый запрос)
+            else if (panel.classList.contains('selectbox__content')) {
+                panel.style.left = '99%';
+                panel.style.maxHeight = 'calc(100vh - 1.8em)'; // Твое новое значение
+                panel.style.setProperty('left', '99%', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important'); // Твое новое значение
             }
             // -- КОНЕЦ ИЗМЕНЕНИЙ --
         });
