@@ -1,4 +1,343 @@
 (() => {
+    // === НАЧАЛО: Обфусцированный код парсеров (интегрирован) ===
+
+    // Я удаляю обфусцированную самовызывающуюся функцию (IIFE)
+    // (() => { ... })()
+    // и оставляю только ее содержимое.
+
+    'использовать строгий';
+    // функция _0x4d55(_0x47eb77,_0xec5b89){var _0x2d0bcc=_0x31e0();возврат _0x4d55=функция(_0x20b19e,_0xc0c906){_0x20b19e=_0x20b19e-0xd6;var _0x108920=_0x2d0bcc[_0x20b19e];возврат _0x108920;},_0x4d55(_0x47eb77,_0xec5b89);}
+    function _0x31e0() {
+        var _0x3831b5 = ['status', 'listener', '</span>', 'Меню\x20смены\x20парсера', 'Ошибка\x20доступа', 'hide', 'toString', '__ proto__', '2229824SOaFxp', 'toggle', 'Jacred\x20RU', 'origin', 'history', 'catch', 'jacred_xyz', 'div[data-children=\ x22parser\x22]', 'Noty', '777', 'jackett_key', 'jackett_interview', '68HnxRrm', '<span\x20style=\x22color:\x20#64e364;\x22>✔  ', 'table', 'timeout', 'div[data-name=\x22jackett_urltwo\x22]', 'get', 'follow', 'Jacre d.xyz', 'bylampa', '222141IOsooZ', 'url_two', 'no_parser', 'jac_lang', '299011eRBDdL', 'jr.maxvol.pro', 'http://', '84FGRzOd', 'parse_in_search', 'parser_torrent_type', 'SettingsApi', 'Lampa32', 'parser_use', 'activity', 'info', 'field ', '62.60.149.237:2601', '42556644hJOGbz', 'текст', 'наблюдение', 'Манифест', 'parse_lang', 'jacred.xyz', 'ложь', 'Настройки', 'Контроллер', '62.60.149.237:9117', 'div[data-name=\x22jackett_url\x22]', 'bylampa_jackett', 'поиск', '(((.+) +)+)+$', '[data-name=\x22jackett_url_two\x22]', 'hover:enter', '.settings-param__name', 'Jac\x20Black', 'Activity', 'jackett_url', 'jac_int', 'push', 'jac_lampa32_ru', 'all', 'url', 'jac_key', 'jackett', 'https:', 'settings_component ', 'ByLampa\x20Jackett', 'ff2121', '.empty__title', 'div[data-name=\x22parser_torrent_type\x22]', 'bind', 'exception', 'color', 'apply', 'html', 'jacred_viewbox_dev', 'title', 'jacred.viewbox.dev', '7530327ymMkST', 'disconnect', 'htt ps://', 'parser', 'body', 'constructor', 'true', 'return\x20(function()\x20', 'undefined', 'update', 'Jacred\x20Pro', 'jacred_ru', 'active', 'open', 'jac_black', 'find', 'viewbox', 'healthy', 'Storage', 'show', 'log', 'name', 'enabled', '2 329934iiwjqP', 'map', 'Jacred\x20Maxvol\x20Pro', 'jacblack.ru:9117', 'jr_maxvol_pro', '<span\x20style=\x22color:\x20#ff2121;\x22>✘  ', 'Нажмите\x20для\x20выбора\x20парсера\x20из\x20списка', 'then', 'set', 'GET', 'css', '94115jRFQfs', 'Viewbox', 'console', 'error', 'warn', 'forEach', 'jacred.pro', 'jackett_urltwo', 'ffffff', 'trace', '<div\x20class=\x22settings-folder\x22\x20style=\x22padding:0!important\x22><div\x20style=\x22width:1.3em;height:1.3em;padding-right:.1em\x22><svg\x20height=\x22256px\x22\x20width=\x22256px\x22\x20version=\x221.1\x22\x20 id=\x22Layer_1\x22\x20xmlns=\x22http://www.w3.org/2000/svg\x22\x20xmlns:xlink=\x22http://www.w3.org/1999/xlink\x22\x20viewBox=\x220\x200\x20512\x20512\x22\x20xml:spac e=\x22preserve\x22\x20fill=\x22#000000\x22><g\x20id=\x22SVGRepo_bgCarrier\x22\x20stroke-width=\x220\x22></g><g\x20id=\x22SVGRepo_tracerCarrier\x22\x20stroke-linecap=\x22round\x22\x20stroke-linejoin=\x22round\x22></g><g\x20id=\x22SVGRepo_iconCarrier\x22>\x20<polygon\x20style=\x22fill:#074761;\x22\x20points=\x22187.305,27.642\x20324. 696,27.642\x20256,236.716\x20\x22></полигон>\x20<полигон\x20style=\x22fill:#10BAFC;\x22\x20points=\x22187.305,27.642\x20256,236.716\x20163.005,151.035\x20196.964,151.0 35\x20110.934,49.96\x20\x22></полигон>\x20<g>\x20<полигон\x20style=\x22fill:#0084FF;\x22\x20points=\x2266.917,62.218\x2010.45,434.55\x2066.917,451.922\x20117.726,217. 908\x20\x22></полигон>\x20<полигон\x20style=\x22fill:#0084FF;\x22\x20points=\x22163.005,151.035\x20196.964,151.035\x20110.934,49.96\x2066.917,62.218\x20117.726,217.908 \x20117,726,484,356\x20256,484,356\x20256,236,716\x20\x22></полигон>\x20</g>\x20<полигон\x20style=\x22fill:#10BAFC;\x22\x20points=\x22324,696,27,642\x20256,236,716\x2 0348,996,151,035\x20315,037,151,035\x20401,067,49,96\x20\x22></полигон>\x20<g>\x20<полигон\x20style=\x22fill:#0084FF;\x22\x20points=\x22445,084,62,218\x20501,551,434,5 5\x20445.084,451.922\x20394.275,217.908\x20\x22></полигон>\x20<полигон\x20style=\x22fill:#0084FF;\x22\x20points=\x22348.996,151.035\x20315.037,151.035\x20401.067,49.9 6\x20445.084,62.218\x20394.275,217.908\x20394.275,484.356\x20256,484.356\x20256,236.716\x20\x22></полигон>\x20</g>\x20<путь\x20d=\x22M291.559,308.803c-7.49,0-13.584-6. 094-13.584-13.584c0-7.49,6.094-13.584,13.584-13.584s13.584,6.094,13.584,13.584\x20C305.143,302.71,299.049,308.803,291.559,308.803z\x22></path>\x20<path\x20d=\x22M291. 559,427.919c-7.49,0-13.584-6.094-13.584-13.584s6.094-13.584,13.584-13.584s13.584,6.094,13.584,13.584\x20S299.049,427.919,291.559,427.919z\x22></path>\x20<path\x20d=\x2 2M291.559,368.405c-7.49,0-13.584-6.094-13.584-13.584s6.094-13.584,13.584-13.584s13.584,6.094,13.584,13.584\x20S299.049,368.405,291.559,368.405z\x22></путь>\x20<путь\x 20d=\x22M225.677,424.785h-4.678c-5.77,0-10.449-4.679-10.449-10.449s4.679-10.449,10. 449-10.449х4.678\x20c5.771,0,10.449,4.679,10.449,10.449S231.448,424.785,225.677,424.785z\x22></путь>\x20<путь\x20d=\x22M384.063,220.125c8.948-1.219,5.008,7.842,10.646,6.617c5.637-1.225,8.551-16.691,9.775-11.052\x22></путь>\x20<путь\x20d=\x22M511.881,432.984L4 55,414,60,652c-0,004-0,001-0,008-0,001-0,013-0,002c-0,178-1,166-0,541-2,306-1,109-3,367\x20c-1,346-2,513-3,66-4,367-6,407-5,131L327,627,17,613c-0,976-0,284-1,961-0,416-2,931-0. 416c0-0,001-137,391-0,001-137,391-0,001\x20c-0,97,0,001-1,955,0,132-2,931,0,417L64,114,52,152c-2,747,0,766-5,061,2,619-6,407,5,131c-0,569,1,064-0,933,2,208-1,11,3,377\x20c-0,00 4-0,002-0,007-0,006-0,011-0,009L0,119,432,984c-0,776,5,117,2,311,10,032,7,258,11,553l56,467,17,371\x20c1,005,0,309,2,041,0,462,3,072,0,462c1,836,0,3,659-0,484,5,276-1,429c2,524 -1,476,4,315-3,943,4,936-6,802l30,149-138,858v169,075\x20c0,5,771,4,679,10,449,10,449,10,449h276,548c5,77,0,10,449-4,678,10,449-10,449V315,281l30,148,138,858\x20c0,621,2,858,2 .412,5.326,4.936,6.802c1.616,0.946,3.44,1.429,5.276,1.429c1.031,0,2.067-0.154,3.072-0.462l56.467-17.371\x20C509.571,443.015,512.658,438.101,511.881,432.984z\x20M331.467,40.507l 51.19,14.959l-75.578,88.795\x20c-2.64,3.102-3.237,7.457-1.529,11.155c1.709,3.698,5.411,6.067,9.486,6.067h7.198l-43.765,40.324L331.467,40.507z\x20M180.533,40.507\x20l52.998,161. 3л-43.765-40.324х7.198с4.074,0,7.776-2.369,9.486-6.067с1.708-3.698,1.112-8.053-1.529-11. 155л-75.578-88.795\х20Л180.533,40.507з\х20М59.119,438.59л-36.987-11.379л48.512-319.89л36 .269,111.136L59.119,438.59z\x20М245.552,473.907H128.175v-49.123\x20h59.02c5.77,0,10.449-4.679,10.449-10.449s-4.679-10.449-10.449-10.449h-59.02V217.908c0-1.101-0.174-2.195-0.51 5-3.242\x20L80.238,69.355l27.068-7.539l67.043,78.769h-11.343c-4.304,0-8.168,2.638-9.733, 6.649c-1.565,4.009-0.512,8.568,2.653,11.484\x20l89.627,82.578L245.552,473.907L245.552,47 3.907z\x20M201.736,38.092h108.528L256,203.243L201.736,38.092z\x20M384.341,214.666\x20c-0 .341,1.047-0.515,2.141-0.515,3.242v255.999H266.449V241.297l89.627-82.578c3.165-2.916,4.2 18-7.475,2.653-11.484\x20c-1.565-4.01-5.429-6.649-9.733-6.649h-11.343l67.043-78.769l27.0 68,7.539L384.341,214.666z\x20M452.882,438.59l-47.795-220.132\x20l36.268-111.136l48.515,3 19,89L452,882,438,59z\x22></путь>\x20<путь\x20d=\x22M353,197,262,86h-61,637c-5,77,0-10,449-4,679-10,449-10,449c0-5,771,4,679-10,449,10,449-10,449h61,637\x20c5,77,0,10,449,4,67 8,10.449,10.449C363.646,258.182,358.968,262.86,353.197,262.86z\x22></path>\x20</g></svg></div><div\x20style=\x22font-size:1.0em\x22><div\x20style=\x22padding:\x200.3em\x200.3em ;\x20padding-top:\x200;\x22><div\x20style=\x22background:\x20#d99821;\x20padding:\x200.5em;\x20border-radius:\x200.4em;\x22><div\x20style=\x22line-height:\x200.3;\x22>Выбрать\x20парсер</div></div></div></div></div>', 'jack', 'jac-red.ru', '/api/v2.0/indexers/status:healthy/results?apikey=', 'jacred_pro', 'ontimeout', 'onerror', 'protocol', 'Свой\x20вариант', 'прототип', 'выбрать', 'удалить', 'onload', '✔  ', 'div[data-name=\x22jackett_key\x22]', '✘  ', '000'];
+        _0x31e0 = function() {
+            return _0x3831b5;
+        };
+        return _0x31e0();
+    } (function(_0x863d3a, _0x245758) {
+        var _0x39db49 = _0x4d55,
+            _0x356942 = _0x863d3a();
+        while (!![]) {
+            try {
+                var _0x486981 = -parseInt(_0x39db49(0x10c)) / 0x1 + -parseInt(_0x39db49(0x159)) / 0x2 + -parseInt(_0x39db49(0x108)) / 0x3 * (parseInt(_0x39db49(0xff)) / 0x4) + parseInt(_0x39db49(0x164)) / 0x5 * (-parseInt(_0x39db49(0x10f)) / 0x6) + -parseInt(_0x39db49(0x142)) / 0x7 + parseInt(_0x39db49(0xf3)) / 0x8 + parseInt(_0x39db49(0x119)) / 0x9;
+                if (_0x486981 === _0x245758) break;
+                else _0x356942['push'](_0x356942['shift']());
+            } catch (_0x38058b) {
+                _0x356942['push'](_0x356942['shift']());
+            }
+        }
+    }(_0x31e0, 0xe6c20), (function() {
+        var _0x3347c3 = _0x4d55,
+            _0x4bfc71 = (function() {
+                var _0x568e3f = !![];
+                return function(_0x15bb59, _0x2ed53e) {
+                    var _0x4e3ed1 = _0x568e3f ? function() {
+                        var _0x27878a = _0x4d55;
+                        if (_0x2ed53e) {
+                            var _0x4960ee = _0x2ed53e[_0x27878a(0x13d)](_0x15bb59, arguments);
+                            return _0x2ed53e = null, _0x4960ee;
+                        }
+                    } : function() {};
+                    return _0x568e3f = ![], _0x4e3ed1;
+                };
+            }()),
+            _0x6335be = _0x4bfc71(this, function() {
+                var _0x26aa98 = _0x4d55;
+                return _0x6335be[_0x26aa98(0xf1)]()['поиск'](_0x26aa98(0x126))[_0x26aa98(0xf1)]()[_0x26aa98(0x147)](_0x6335be)[_0x26aa98(0x125)]('(((.+)+)+)+$');
+            });
+        _0x6335be();
+        var _0x55c5d8 = (function() {
+                var _0x5a107c = !![];
+                return function(_0xa0d3bc, _0x2e9a50) {
+                    var _0x2bae6b = _0x5a107c ? function() {
+                        var _0x4a86e4 = _0x4d55;
+                        if (_0x2e9a50) {
+                            var _0x31d0d1 = _0x2e9a50[_0x4a86e4(0x13d)](_0xa0d3bc, arguments);
+                            return _0x2e9a50 = null, _0x31d0d1;
+                        }
+                    } : function() {};
+                    return _0x5a107c = ![], _0x2bae6b;
+                };
+            }()),
+            _0x342a66 = _0x55c5d8(this, function() {
+                var _0x4ff3bc = _0x4d55,
+                    _0x360885;
+                try {
+                    var _0xbb497b = Function(_0x4ff3bc(0x149) + '{}.constructor(\x22return\x20this\x22)(\x20)' + ');');
+                    _0x360885 = _0xbb497b();
+                } catch (_0x312d87) {
+                    _0x360885 = window;
+                }
+                var _0x29b8d9 = _0x360885[_0x4ff3bc(0x166)] = _0x360885[_0x4ff3bc(0x166)] || {},
+                    _0x2fde00 = [_0x4ff3bc(0x156), _0x4ff3bc(0x168), _0x4ff3bc(0x116), _0x4ff3bc(0x167), _0x4ff3bc(0x13b), _0x4ff3bc(0x101), _0x4ff3bc(0xd9)];
+                for (var _0x199105 = 0x0; _0x199105 < _0x2fde00['длина']; _0x199105++) {
+                    var _0x262d05 = _0x55c5d8[_0x4ff3bc(0x147)][_0x4ff3bc(0xe3)]['bind'](_0x55c5d8),
+                        _0x271a68 = _0x2fde00[_0x199105],
+                        _0x196966 = _0x29b8d9[_0x271a68] || _0x262d05;
+                    _0x262d05[_0x4ff3bc(0xf2)] = _0x55c5d8[_0x4ff3bc(0x13a)](_0x55c5d8), _0x262d05[_0x4ff3bc(0xf1)] = _0x196966[_0x4ff3bc(0xf1)][_0x4ff3bc(0x13a)](_0x196966), _0x29b8d9[_0x271a68] = _0x262d05;
+                }
+            });
+        _0x342a66();
+        'использовать строгий';
+        if (Lampa[_0x3347c3(0x11c)][_0x3347c3(0xf6)] !== _0x3347c3(0x107)) {
+            Lampa[_0x3347c3(0xfb)][_0x3347c3(0x155)](_0x3347c3(0xef));
+            return;
+        }
+        Lampa[_0x3347c3(0x154)][_0x3347c3(0x161)](_0x3347c3(0x114), !![]);
+        var _0x195e50 = location[_0x3347c3(0xe1)] === 'https:' ? 'https://' : 'http://',
+            _0x12a7aa = ['62.60.149.237:2601', _0x3347c3(0x122), _0x3347c3(0x11e), _0x3347c3(0x10d), 'jac-red.ru', _0x3347c3(0x141), _0x3347c3(0xd6), _0x3347c3(0x15c)],
+            _0x21599a = [_0x3347c3(0x113), _0x3347c3(0x136), _0x3347c3(0x106), 'Jacred\x20Maxvol\x20Pro', 'Jacred\x20RU', 'Viewbox', _0x3347c3(0x14c), _0x3347c3(0x12a)];
+
+        function _0x53c4db(_0x468f81) {
+            setTimeout(function() {
+                var _0x3ab997 = _0x4d55,
+                    _0xbf47e = '';
+                if (_0x12a7aa[_0x468f81] == '62.60.149.237:9117') var _0xbf47e = _0x3ab997(0xfc);
+                var _0x1951c1 = _0x468f81 + 0x2;
+                if (_0x12a7aa[_0x468f81] == 'jr.maxvol.pro') _0x195e50 = 'https://';
+                else _0x195e50 = _0x3ab997(0x10e);
+                var _0x403d3f = 'body\x20>\x20div.selectbox\x20>\x20div.selectbox__content.layer--height\x20>\x20div.selectbox__body.layer--wheight\x20>\x20div\x20>\x20div\x20>\x20div\x20>\x20div:nth-child(' + _0x1951c1 + ')\x20>\x20div';
+                if ($('body\x20>\ x20div.selectbox\x20>\x20div.selectbox__content.layer--height\x20>\x20div.selectbox__body.layer--wheight\x20>\x20div\x20>\x20div\x20>\x20div\x20>\x20div:nth-child(1)\x20>\x20div')[_0x3ab997(0x11a)]() !== _0x3ab997(0xe2)) return;
+                var _0x2a6a91 = _0x195e50 + _0x12a7aa[_0x468f81] + _0x3ab997(0xdd) + _0xbf47e,
+                    _0x3d9d69 = new XMLHttpRequest();
+                _0x3d9d69[_0x3ab997(0x102)] = 0xbb8, _0x3d9d69[_0x3ab997(0x14f)]('GET', _0x2a6a91, !![]), _0x3d9d69['send'](), _0x3d9d69[_0x3ab997(0xdf)] = function() {
+                    var _0xa6c896 = _0x3ab997;
+                    if ($(_0x403d3f)[_0xa6c896(0x11a)]() == _0x21599a[_0x468f81])$(_0x403d3f)[_0xa6c896(0x13e)](_0xa6c896(0xe9) + $(_0x403d3f)['текст']())[_0xa6c896(0x163)]('цвет', _0xa6c896(0x137));
+                }, _0x3d9d69[_0x3ab997(0xe0)] = function() {
+                    var _0x37a4d2 = _0x3ab997;
+                    if ($(_0x403d3f)[_0x37a4d2(0x11a)]() == _0x21599a[_0x468f81])$(_0x403d3f)[_0x37a4d2(0x13e)](_0x37a4d2(0xe9) + $(_0x403d3f)['текст']())[_0x37a4d2(0x163)](_0x37a4d2(0x13c), _0x37a4d2(0x137));
+                }, _0x3d9d69[_0x3ab997(0xe6)] = function() {
+                    var _0x581b87 = _0x3ab997;
+                    if (_0x3d9d69[_0x581b87(0xeb)] == 0xc8) {
+                        if ($(_0x403d3f)['текст']() == _0x21599a[_0x468f81])$(_0x403d3f)['html'](_0x581b87(0xe7) + $(_0x403d3f)[_0x581b87(0x11a)]())['css']('color', '64e364');
+                    } else {
+                        if ($(_0x403d3f)[_0x581b87(0x11a)]() == _0x21599a[_0x468f81])$(_0x403d3f)[_0x581b87(0x13e)]('✘  ' + $(_0x403d3f)[_0x581b87(0x11a)]())[_0x581b87(0x163)]('цвет', _0x581b87(0x137));
+                    }
+                    if (_0x3d9d69[_0x581b87(0xeb)] == 0x191) {
+                        if ($(_0x403d3f)[_0x581b87(0x11a)]() == _0x21599a[_0x468f81])$(_0x403d3f)[_0x581b87(0x13e)]('✘  ' + $(_0x403d3f)[_0x581b87(0x11a)]())[_0x581b87(0x163)](_0x581b87(0x13c), _0x581b87(0xea));
+                    }
+                };
+            }, 0x3e8);
+        }
+
+        function _0x11a564() {
+            for (var _0x142732 = 0x0; _0x142732 <= _0x12a7aa['length'] - 0x1; _0x142732++) {
+                _0x53c4db(_0x142732);
+            }
+        }
+        Lampa[_0x3347c3(0x121)][_0x3347c3(0xec)][_0x3347c3(0x105)]('toggle', function(_0x26dc84) {
+            var _0x55bd4b = _0x3347c3;
+            _0x26dc84[_0x55bd4b(0x157)] == 'select' && setTimeout(function() {
+                var _0x10be67 = _0x11a564();
+            }, 0xa);
+        });
+
+        function _0xbd7f9() {
+            var _0x57eae1 = _0x3347c3;
+            if (Lampa['Хранилище'][_0x57eae1(0x104)](_0x57eae1(0xd7)) == 'no_parser') Lampa[_0x57eae1(0x154)]['set']('jackett_url', '') & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa['Хранилище']['установка'](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x110), ![]) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x11d), 'lg');
+            if (Lampa['Хранилище'][_0x57eae1(0x104)](_0x57eae1(0xd7)) == _0x57eae1(0x12f)) Lampa[_0x57eae1(0x154)]['set'](_0x57eae1(0x12c), _0x57eae1(0x118)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)]['set'](_0x57eae1(0x110), !![]) & Lampa['Хранилище'][_0x57eae1(0x161)]('parse_lang', 'lg');
+            if (Lampa[_0x57eae1(0x154)]['get'](_0x57eae1(0xd7)) == _0x57eae1(0xde)) Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('jackett_url', _0x57eae1(0xd6)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x11d), 'lg');
+            if (Lampa['Хранилище'][_0x57eae1(0x104)](_0x57eae1(0xd7)) == 'jacred_xyz') Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('jackett_url', _0x57eae1(0x11e)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x153)) & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa[_0x57eae1(0x154)]['set'](_0x57eae1(0x11d), 'lg');
+            if (Lampa['Хранилище'][_0x57eae1(0x104)](_0x57eae1(0xd7)) == _0x57eae1(0x15d)) Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x12c), _0x57eae1(0x10d)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x153)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('parse_lang', 'df');
+            if (Lampa[_0x57eae1(0x154)][_0x57eae1(0x104)](_0x57eae1(0xd7)) == _0x57eae1(0x150)) Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x12c), 'jacblack.ru:9117') & Lampa[_0x57eae1(0x154)]['set'](_0x57eae1(0xfd), '') & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa['Хранилище']['установка'](_0x57eae1(0x11d), 'lg');
+            if (Lampa[_0x57eae1(0x154)][_0x57eae1(0x104)](_0x57eae1(0xd7)) == _0x57eae1(0x14d)) Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('jackett_url', _0x57eae1(0xdc)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), '') & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('parse_lang', 'lg');
+            if (Lampa[_0x57eae1(0x154)][_0x57eae1(0x104)](_0x57eae1(0xd7)) == 'jacred_viewbox_dev') Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('jackett_url', _0x57eae1(0x141)) & Lampa['Хранилище']['set']('jackett_key', _0x57eae1(0x152)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfe), _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x110), !![]) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0x11d), 'lg');
+            if (Lampa[_0x57eae1(0x154)][_0x57eae1(0x104)](_0x57eae1(0xd7)) == 'bylampa_jackett') Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)]('jackett_url', _0x57eae1(0x122)) & Lampa[_0x57eae1(0x154)][_0x57eae1(0x161)](_0x57eae1(0xfd), _0x57eae1(0xfc)) & Lampa[_0x57eae1(0x154)]['set']('jackett_interview', _0x57eae1(0x130)) & Lampa[_0x57eae1(0x154)]['set'](_0x57eae1(0x110), !![]) & Lampa['Хранилище'][_0x57eae1(0x161)](_0x57eae1(0x11d), 'df');
+            return;
+        }
+        Lampa[_0x3347c3(0x112)]['addParam']({
+            'component': _0x3347c3(0x145),
+            'param': {
+                'name': _0x3347c3(0xd7),
+                'type': _0x3347c3(0xe4),
+                'values': {
+                    'no_parser': _0x3347c3(0xe2),
+                    'jac_lampa32_ru': _0x3347c3(0x113),
+                    'bylampa_jackett': _0x3347c3(0x136),
+                    'jacred_xyz': _0x3347c3(0x106),
+                    'jr_maxvol_pro': _0x3347c3(0x15b),
+                    'jacred_ru': _0x3347c3(0xf5),
+                    'jacred_viewbox_dev': _0x3347c3(0x165),
+                    'jacred_pro': _0x3347c3(0x14c),
+                    'jac_black': _0x3347c3(0x12a)
+                },
+                'default': _0x3347c3(0xf9)
+            },
+            'field': {
+                'name': _0x3347c3(0xda),
+                'description': _0x3347c3(0x15f)
+            },
+            'onChange': function(_0x4e4908) {
+                var _0x5fbe = _0x3347c3;
+                _0xbd7f9(), Lampa[_0x5fbe(0x120)][_0x5fbe(0x14b)]();
+            },
+            'onRender': function(_0x4fdff0) {
+                setTimeout(function() {
+                    var _0x5bda8e = _0x4d55;
+                    $(_0x5bda8e(0xfa))['on'](_0x5bda8e(0x128), function() {
+                        var _0x3666ff = _0x5bda8e;
+                        Lampa[_0x3666ff(0x120)][_0x3666ff(0x14b)]();
+                    });
+                    localStorage['getItem'](_0x5bda8e(0xd7)) !== _0x5bda8e(0x10a) && ($( _0x5bda8e(0x123))[_0x5bda8e(0xf0)](), $(_0x5bda8e(0xe8))[_0x5bda8e(0xf0)](), Lampa[_0x5bda8e(0x121)]['toggle'](_0x5bda8e(0x135)));
+                    if (Lampa['Storage'][_0x5bda8e(0x117)]('parser_use') && Lampa[_0x5bda8e(0x154)][_0x5bda8e(0x117)](_0x5bda8e(0x111)) == _0x5bda8e(0x133)) _0x4fdff0['show']() & $(_0x5bda8e(0x129), _0x4fdff0)[_0x5bda8e(0x163)]('color', _0x5bda8e(0xd8)) & $(_0x5bda8e(0x103))['insertAfter']('div[data-name=\x22parser_torrent_type\x22]');
+                    else _0x4fdff0[_0x5bda8e(0xf0)]();
+                }, 0x5);
+            }
+        }), Lampa['Настройки']['слушатель']['следовать']('открыть', function(_0x5c710b) {
+            var _0xe8fcfa = _0x3347c3;
+            _0x5c710b[_0xe8fcfa(0x157)] == _0xe8fcfa(0x145) && (_0x5c710b['body']['find']('[data-name=\x22jackett_url2\x22]')[_0xe8fcfa(0xe5)](), _0x5c710b[_0xe8fcfa(0x146)][_0xe8fcfa(0x151)](_0xe8fcfa(0x127))[_0xe8fcfa(0xe5)]());
+        }), Lampa['Хранилище'][_0x3347c3(0xec)]['follow']('change', function(_0x1c3e48) {
+            var _0x2d32ef = _0x3347c3;
+            Lampa['Хранилище'][_0x2d32ef(0x117)](_0x2d32ef(0x111)) !== _0x2d32ef(0x133) ? $('div[data-name=\x22jackett_urltwo\x22]')[_0x2d32ef(0xf0)]() : ($('div[data-name=\x22jackett_urltwo\x22]')[_0x2d32ef(0x155)](), $('div[data-name=\x22jackett_urltwo\x22]')['вставитьпосле'](_0x2d32ef(0x139)));
+        });
+        var _0x50916e = setInterval(function() {
+            var _0x2becdf = _0x3347c3;
+            if (typeof Lampa !== _0x2becdf(0x14a)) {
+                clearInterval(_0x50916e);
+                if (!Lampa[_0x2becdf(0x154)]['get'](_0x2becdf(0xdb), _0x2becdf(0x11f))) _0x79e885();
+            }
+        }, 0x64);
+
+        function _0x79e885() {
+            var _0x5cf9b2 = _0x3347c3;
+            Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)](_0x5cf9b2(0xdb), _0x5cf9b2(0x148)), Lampa['Хранилище'][_0x5cf9b2(0x161)](_0x5cf9b2(0x12c), 'jacred.xyz'), Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)](_0x5cf9b2(0xd7), _0x5cf9b2(0xf9)), Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)](_0x5cf9b2(0x110), !![]), Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)](_0x5cf9b2(0xfd), ''), Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)]('jackett_interview', _0x5cf9b2(0x153)), Lampa[_0x5cf9b2(0x154)][_0x5cf9b2(0x161)](_0x5cf9b2(0x11d), 'lg');
+        }
+        // ПЕРЕИМЕНОВАНА: _0x514713 -> openParserMenu
+        window.openParserMenu = function _0x514713() {
+            var _0x139eaa = _0x3347c3,
+                _0x24a917 = Lampa[_0x139eaa(0x121)][_0x139eaa(0x158)]()[_0x139eaa(0x157)],
+                _0xffdbf8 = [];
+            _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': _0x139eaa(0x113),
+                'url': _0x139eaa(0x118),
+                'url_two': _0x139eaa(0x12f),
+                'jac_key': '',
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': ' lg'
+            }), _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': _0x139eaa(0x136),
+                'url': '62.60.149.237:9117',
+                'url_two': _0x139eaa(0x124),
+                'jac_key': _0x139eaa(0xfc),
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': 'df'
+            }), _0xffdbf8['push']({
+                'title': _0x139eaa(0x106),
+                'url': _0x139eaa(0x11e),
+                'url_two': _0x139eaa(0xf9),
+                'jac_key': '',
+                'jac_int': 'здоровый',
+                'jac_lang': 'lg'
+            }), _0xffdbf8['нажать']({
+                'title': _0x139eaa(0x15b),
+                'url': _0x139eaa(0x10d),
+                'url_two': _0x139eaa(0x15d),
+                'jac_key': '',
+                'jac_int': _0x139eaa(0x153),
+                'jac_lang': 'lg'
+            }), _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': _0x139eaa(0xf5),
+                'url': _0x139eaa(0xdc),
+                'url_two': _0x139eaa(0x14d),
+                'jac_key': '',
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': 'lg'
+            }), _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': _0x139eaa(0x165),
+                'url': 'jacred.viewbox.dev',
+                'url_two': _0x139eaa(0x13f),
+                'jac_key': _0x139eaa(0x152),
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': 'lg'
+            }), _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': _0x139eaa(0x14c),
+                'url': _0x139eaa(0xd6),
+                'url_two': _0x139eaa(0xde),
+                'jac_key': '',
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': 'lg'
+            }), _0xffdbf8[_0x139eaa(0x12e)]({
+                'title': 'Jac\x20Black',
+                'url': _0x139eaa(0x15c),
+                'url_two': 'jac_black',
+                'jac_key': '',
+                'jac_int': _0x139eaa(0x130),
+                'jac_lang': 'lg'
+            }), _0x1f9e14(_0xffdbf8)[_0x139eaa(0x160)](function(_0x1a722b) {
+                var _0x56f735 = _0x139eaa;
+                Lampa['Выбрать']['показать']({
+                    'title': _0x56f735(0xee),
+                    'items': _0x1a722b[_0x56f735(0x15a)](function(_0x66ef57) {
+                        var _0x4f059b = _0x56f735;
+                        return {
+                            'title': _0x66ef57[_0x4f059b(0x140)],
+                            'url': _0x66ef57[_0x4f059b(0x131)],
+                            'url_two': _0x66ef57[_0x4f059b(0x109)],
+                            'jac_key': _0x66ef57[_0x4f059b(0x132)],
+                            'jac_int': _0x66ef57[_0x4f059b(0x12d)],
+                            'jac_lang': _0x66ef57[_0x4f059b(0x10b)]
+                        };
+                    }),
+                    'onBack': function _0x47d54e() {
+                        var _0x131e00 = _0x56f735;
+                        Lampa[_0x131e00(0x121)][_0x131e00(0xf4)](_0x24a917);
+                    },
+                    'onSelect': function _0x758965(_0x2480c6) {
+                        var _0x1d727b = _0x56f735;
+                        Lampa[_0x1d727b(0x154)][_0x1d727b(0x161)](_0x1d727b(0x12c), _0x2480c6[_0x1d727b(0x131)]) & Lampa[_0x1d727b(0x154)]['set'](_0x1d727b(0xd7), _0x2480c6['url_two']) & Lampa['Хранилище'][_0x1d727b(0x161)](_0x1d727b(0xfd), _0x2480c6[_0x1d727b(0x132)]) & Lampa[_0x1d727b(0x154)][_0x1d727b(0x161)](_0x1d727b(0xfe), _0x2480c6[_0x1d727b(0x12d)]) & Lampa[_0x1d727b(0x154)]['set'](_0x1d727b(0x11d), _0x2480c6['jac_lang']) & Lampa['Storage'][_0x1d727b(0x161)](_0x1d727b(0x110), !![]), Lampa[_0x1d727b(0x121)][_0x1d727b(0xf4)](_0x24a917);
+                        var _0x7c5b8c = Lampa[_0x1d727b(0x154)][_0x1d727b(0x104)](_0x1d727b(0x115));
+                        setTimeout(function() {
+                            var _0x1ecc55 = _0x1d727b;
+                            window[_0x1ecc55(0xf7)]['назад']();
+                        }, 0x3e8), setTimeout(function() {
+                            var _0x3e87b8 = _0x1d727b;
+                            Lampa[_0x3e87b8(0x12b)]['нажать'](_0x7c5b8c);
+                        }, 0x7d0);
+                    }
+                });
+            })[_0x139eaa(0xf8)](function(_0x36be81) {
+                var _0x3edb25 = _0x139eaa;
+                console[_0x3edb25(0x167)]('Ошибка:', _0x36be81);
+            });
+        }
+
+        function _0x1f9e14(_0x30d23e) {
+            var _0x4d8c48 = _0x3347c3,
+                _0x1edab6 = [];
+            for (var _0x262de3 = 0x0; _0x262de3 < _0x30d23e['длина']; _0x262de3++) {
+                var _0x545d0c = _0x30d23e[_0x262de3]['url'];
+                _0x1edab6[_0x4d8c48(0x12e)]((function(_0x4d55, _0x2d907f, _0x57042e) {
+                    return new Promise(function(_0x406893, _0x430b99) {
+                        var _0x395a17 = _0x4d55,
+                            _0x4be656 = location[_0x395a17(0xe1)] === _0x395a17(0x134) ? _0x395a17(0x144) : _0x395a17(0x10e),
+                            _0x4f89eb = '';
+                        if (_0x4d55 == _0x395a17(0x122)) var _0x4f89eb = _0x395a17(0xfc);
+                        if (_0x4d55 == 'jr.maxvol.pro') _0x4be656 = 'https://';
+                        else _0x4be656 = 'http://';
+                        var _0x59a779 = _0x4be656 + _0x4d55 + '/api/v2.0/индексаторы/статус:здоровый/результаты?apikey=' + _0x4f89eb,
+                            _0x256f4e = new XMLHttpRequest();
+                        _0x256f4e['открыть'](_0x395a17(0x162), _0x59a779, !![]), _0x256f4e['тайм-аут'] = 0xbb8, _0x256f4e[_0x395a17(0xe6)] = function() {
+                            var _0x73d5fd = _0x395a17;
+                            _0x256f4e[_0x73d5fd(0xeb)] === 0xc8 ? (_0x57042e['title'] = _0x73d5fd(0x100) + _0x2d907f + _0x73d5fd(0xed), _0x406893(_0x57042e)) : (_0x57042e[_0x73d5fd(0x140)] = _0x73d5fd(0x15e) + _0x2d907f + _0x73d5fd(0xed), _0x406893(_0x57042e));
+                        }, _0x256f4e[_0x395a17(0xe0)] = function() {
+                            var _0x41847e = _0x395a17;
+                            _0x57042e[_0x41847e(0x140)] = _0x41847e(0x15e) + _0x2d907f + _0x41847e(0xed), _0x406893(_0x57042e);
+                        }, _0x256f4e['ontimeout'] = function() {
+                            var _0x495fd2 = _0x395a17;
+                            _0x57042e['title'] = '<span\x20style=\x22color:\x20#ff2121;\x22>✘\x20\x20' + _0x2d907f + _0x495fd2(0xed), _0x406893(_0x57042e);
+                        }, _0x256f4e['send']();
+                    });
+                })(_0x545d0c, _0x30d23e[_0x262de3][_0x4d8c48(0x140)], _0x30d23e[_0x262de3]));
+            }
+            return Promise['all'](_0x1edab6);
+        }
+
+    })());
+
+    // === КОНЕЦ: Обфусцированный код парсеров ===
+    
+    
+    // ====================================================================
+
     const plugin_id = 'maxcolor';
     const plugin_name = 'MaxColor';
 
@@ -127,19 +466,31 @@
         document.head.appendChild(staticStyleElement);
     }
     
-    // ДОБАВЛЕНА: Функция для добавления кнопки выбора парсеров
+    // Функция для добавления кнопки выбора парсеров
     function addParserButton() {
         const filterBlock = document.querySelector('.torrent-filter');
         const existingParserButton = document.querySelector('.simple-button--filter.filter--parser');
 
         // Проверяем, существует ли блок фильтров и не добавлена ли уже кнопка
         if (filterBlock && !existingParserButton) {
+            // Определяем текущий парсер для отображения в кнопке
+            let parserName = Lampa.Storage.get('parser_use');
+            if (parserName === 'no_parser') {
+                 parserName = 'Не выбран';
+            } else if (parserName) {
+                 // Тут лучше использовать понятное имя, но пока оставим как есть, т.к. в Lampa.Storage может храниться 'jacred.xyz' и т.д.
+                 parserName = Lampa.Storage.get('parser_use');
+            } else {
+                 parserName = 'Выбрать';
+            }
+
+
             // Создаем HTML-разметку для новой кнопки
             const parserButtonHTML = `
                 <div class="simple-button simple-button--filter selector filter--parser" data-type="parser">
                     <span>Парсеры</span>
                     <div class="parser-name">
-                        ${Lampa.Storage.get('parser_use') === 'no_parser' ? 'Не выбран' : Lampa.Storage.get('parser_use')}
+                        ${parserName}
                     </div>
                 </div>
             `;
@@ -158,13 +509,11 @@
                     // Привязываем обработчик события
                     newParserButton.addEventListener('click', () => {
                         log('Parser button clicked');
-                        // Вызываем вашу функцию для открытия меню парсеров
-                        // Предполагается, что ваша функция _0x514713 доступна в глобальной области видимости
-                        if (typeof _0x514713 === 'function') {
-                            _0x514713();
+                        // Вызываем интегрированную функцию
+                        if (typeof window.openParserMenu === 'function') {
+                            window.openParserMenu();
                         } else {
-                            // Если функция не найдена (например, из-за обфускации или области видимости)
-                            Lampa.Noty.show('Функция выбора парсеров не найдена.');
+                            Lampa.Noty.show('Ошибка: Функция выбора парсеров недоступна.');
                         }
                     });
 
@@ -187,16 +536,15 @@
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectInteractionStyles(); // Внедряем стили и статический фон
-        addParserButton(); // ДОБАВЛЕНО: Добавляем кнопку парсеров
+        injectInteractionStyles();
+        addParserButton();
     }
 
     function startObserver() {
-        applyStyles(); // сразу применяем
+        applyStyles();
         const obs = new MutationObserver(applyStyles);
-        // Наблюдаем за изменениями в DOM
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.0, упрощённая версия)');
+        log('Observer started (v1.1, с интегрированным кодом парсеров)');
     }
 
     function register() {
@@ -204,7 +552,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1', // Обновил версию
+                version: '1.2', // Обновил версию
                 author: 'maxi3219',
                 description: 'Цвет сидов, скругления блоков, фон, прозрачность меню, эффекты фокуса и кнопка парсеров',
                 init: startObserver
