@@ -60,7 +60,7 @@
                 panel.style.maxHeight = 'calc(100vh - 1.8em)';
                 // Используем setProperty, чтобы добавить !important и гарантированно перекрыть стили
                 panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
+                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
             }
             // -- КОНЕЦ ИЗМЕНЕНИЙ --
         });
