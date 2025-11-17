@@ -107,14 +107,13 @@
     }
 
     // --- Меню выбора парсеров ---
-    async function getParsers() {
-        // Здесь можно подгружать с Jackett.js
-        return [
-            { id: 'rutracker', name: 'Rutracker' },
-            { id: 'nnmclub', name: 'NNM-Club' },
-            { id: 'tfile', name: 'TFile' }
-        ];
-    }
+    const parsers = [
+        { id: 'bylampa', name: 'ByLampa Jackett' },
+        { id: 'jacred_xyz', name: 'Jacred.xyz' },
+        { id: 'jacred_maxvol', name: 'Jacred Maxvol Pro' },
+        { id: 'jacred_ru', name: 'Jacred Ru' },
+        { id: 'jac_black', name: 'Jac Black' }
+    ];
 
     function injectParserButton() {
         const filterBlock = document.querySelector('.torrent-filter');
@@ -133,12 +132,11 @@
             // Открываем стандартное меню Lampa
             Lampa.Controller.toggle('settings');
 
-            setTimeout(async () => {
+            setTimeout(() => {
                 const settingsPanel = document.querySelector('.settings__content');
                 if (!settingsPanel) return;
                 settingsPanel.innerHTML = '';
 
-                const parsers = await getParsers();
                 parsers.forEach(parser => {
                     const item = document.createElement('div');
                     item.className = 'settings-folder selector';
@@ -168,7 +166,7 @@
         applyStyles();
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.1, с выбором парсеров)');
+        log('Observer started (v1.2, с кастомными парсерами)');
     }
 
     function register() {
@@ -176,9 +174,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1',
+                version: '1.2',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и выбор парсеров',
+                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и выбор кастомных парсеров',
                 init: startObserver
             });
             log('Registered with Lampa');
