@@ -13,21 +13,20 @@
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
     }
 
-    // Список парсеров (точно как в твоём «стандартном» скрипте + «Без парсера»)
     const parserList = [
-        {title: 'Без парсера',        key: 'no_parser',          url: '',                     apikey: '', statusType: 'false', protocol: 'http', lang: 'lg'},
-        {title: 'Jacred RU',          key: 'jac_lampa32_ru',     url: '62.60.149.237:2601',    apikey: '', statusType: 'false', protocol: 'http', lang: 'lg'},
-        {title: 'ByLampa Jackett',    key: 'bylampa_jackett',    url: '62.60.149.237:9117',    apikey: '777', statusType: 'false', protocol: 'http', lang: 'df'},
-        {title: 'Jacred.xyz',         key: 'jacred_xyz',         url: 'jacred.xyz',           apikey: '', statusType: 'healthy', protocol: 'https', lang: 'lg'},
-        {title: 'Jacred Maxvol Pro',  key: 'jr_maxvol_pro',      url: 'jr.maxvol.pro',        apikey: '', statusType: 'healthy', protocol: 'https', lang: 'lg'},
-        {title: 'Jacred RU',          key: 'jacred_ru',         url: 'jac-red.ru',           apikey: '', statusType: 'false', protocol: 'http', lang: 'lg'},
-        {title: 'Jacred Viewbox Dev', key: 'jacred_viewbox_dev', url: 'jacred.viewbox.dev',   apikey: '7530327ymMkST', statusType: 'false', protocol: 'https', lang: 'lg'},
-        {title: 'Jacred Pro',         key: 'jacred_pro',         url: 'jacred.pro',           apikey: '', statusType: 'healthy', protocol: 'https', lang: 'lg'},
-        {title: 'Jac Black',          key: 'jac_black',          url: 'jacblack.ru:9117',     apikey: '', statusType: 'false', protocol: 'http', lang: 'lg'},
+        {title: 'Без парсера',   key: 'no_parser',          url: '',                   apikey: '', statusType: 'false',   protocol: 'http', lang: 'lg'},
+        {title: 'Jacred Lampa32', key: 'jac_lampa32_ru',  url: '62.60.149.237:2601',  apikey: '', statusType: 'false',   protocol: 'http', lang: 'lg'},
+        {title: 'ByLampa Jackett', key: 'bylampa_jackett', url: '62.60.149.237:9117', apikey: '777', statusType: 'false',protocol: 'http', lang: 'df'},
+        {title: 'Jacred.xyz',      key: 'jacred_xyz',      url: 'jacred.xyz',         apikey: '', statusType: 'healthy',  protocol: 'https', lang: 'lg'},
+        {title: 'Jacred Maxvol Pro', key: 'jr_maxvol_pro', url: 'jr.maxvol.pro',      apikey: '', statusType: 'healthy',  protocol: 'https', lang: 'lg'},
+        {title: 'Jacred RU',       key: 'jacred_ru',        url: 'jac-red.ru',         apikey: '', statusType: 'false',   protocol: 'http', lang: 'lg'},
+        {title: 'Jacred Viewbox Dev', key: 'jacred_viewbox_dev', url: 'jacred.viewbox.dev', apikey: '7530327ymMkST', statusType: 'false',protocol: 'https', lang: 'lg'},
+        {title: 'Jacred Pro',     key: 'jacred_pro',      url: 'jacred.pro',         apikey: '', statusType: 'healthy',  protocol: 'https', lang: 'lg'},
+        {title: 'Jac Black',       key: 'jac_black',       url: 'jacblack.ru:9117',   apikey: '', statusType: 'false',   protocol: 'http', lang: 'lg'},
     ];
 
     function getCurrentParserTitle() {
-        const key = Lampa.Storage.get('parser_torrent_type', 'no_parser');
+        const key = Lampa.Storage.get('parser_torrent_type','no_parser');
         const item = parserList.find(p => p.key === key);
         return item ? item.title : 'Стандартный';
     }
@@ -36,7 +35,8 @@
         return new Promise(resolve => {
             if (p.key === 'no_parser') return resolve(p.title);
 
-            const url = p.protocol + '://' + p.url + '/api/v2.0/indexers/' + p.statusType + '/results?apikey=' + (p.apikey || '');
+            const protocol = p.protocol || 'http';
+            const url = `${protocol}://` + p.url + '/api/v2.0/indexers/' + p.statusType + '/results?apikey=' + (p.apikey || '');
 
             const xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
@@ -63,23 +63,41 @@
                 items: items,
                 onSelect: (item) => {
                     const p = item.parser;
-                    Lampa.Storage.set('jackett_url', p.url);
-                    Lampa.Storage.set('parser_torrent_type', p.key);
-                    Lampa.Storage.set('jackett_key', p.apikey);
-                    Lampa.Storage.set('jackett_interview', p.statusType === 'healthy' ? 'healthy' : 'false');
-                    Lampa.Storage.set('parse_lang', p.lang);
-                    Lampa.Storage.set('parser_use', true);
 
-                    // Обновляем текст кнопки + перезагружаем торренты
-                    applyStyles();
-                    Lampa.Activity.reload();
+                    // Правильно устанавливаем все параметры
+                    if (p.key === 'no_parser') {
+                        Lampa.Storage.set('parser_use', false);
+                        Lampa.Storage.set('jackett_url', '');
+                        Lampa.Storage.set('jackett_key', '');
+                        Lampa.Storage.set('jackett_interview', 'false');
+                        Lampa.Storage.set('parse_lang', 'lg');
+                    } else {
+                        Lampa.Storage.set('parser_use', true);
+                        Lampa.Storage.set('jackett_url', p.url);
+                        Lampa.Storage.set('jackett_key', p.apikey);
+                        Lampa.Storage.set('jackett_interview', p.statusType);
+                        Lampa.Storage.set('parse_lang', p.lang);
+                    }
+                    Lampa.Storage.set('parser_torrent_type', p.key);
+
+                    // Сразу обновляем текст кнопки
+                    document.querySelectorAll('.filter--parser div:last-child').forEach(el => {
+                        el.textContent = p.title;
+                    });
+
+                    // Перезагружаем текущий компонент (это обновит список торрентов на лету)
+                    const activity = Lampa.Activity.active();
+                    if (activity && activity.component && typeof activity.component.reload === 'function') {
+                        activity.component.reload();
+                    } else {
+                        Lampa.Activity.reload();
+                    }
                 },
                 onBack: () => Lampa.Controller.toggle('content')
             });
         });
     }
 
-    // Добавляем кнопку «Парсер» в панель торрентов
     function addParserButton() {
         const container = document.querySelector('.torrent-filter');
         if (!container || container.querySelector('.filter--parser')) return;
@@ -88,11 +106,9 @@
         button.className = 'simple-button simple-button--filter selector filter--parser';
         button.innerHTML = `<span>Парсер</span><div class="">${getCurrentParserTitle()}</div>`;
 
-        // Вставляем сразу после кнопки «Фильтр»
         const filterBtn = container.querySelector('.filter--filter');
         if (filterBtn) filterBtn.after(button);
 
-        // Наведение/фокус/клик — открываем меню
         button.addEventListener('click', showParserMenu);
     }
 
@@ -111,7 +127,7 @@
         });
     }
 
-    // Скругления блоков
+    // Остальные функции без изменений...
     function roundCorners() {
         document.querySelectorAll('.torrent-item.selector.layer--visible.layer--render')
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
@@ -119,7 +135,6 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // Фон и прозрачность
     function changeBackground() {
         const backgroundBlock = document.querySelector('.background');
         if (backgroundBlock) {
@@ -144,7 +159,6 @@
         });
     }
 
-    // Стили взаимодействия (добавил тень для новой кнопки)
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
@@ -157,11 +171,7 @@
 
         const interactionCss = `
             .full-start__button.selector:hover,
-            .full-start__button.selector.focus {
-                border-radius: 0.5em !important;
-                box-shadow: ${SHADOW_COLOR} !important;
-                background: ${GRADIENT_HOVER_BG} !important;
-            }
+            .full-start__button.selector.focus,
             .selectbox-item.selector:hover,
             .selectbox-item.selector.focus,
             .settings-folder.selector:hover,
@@ -194,14 +204,14 @@
         roundCorners();
         changeBackground();
         injectInteractionStyles();
-        addParserButton(); // <— новая кнопка
+        addParserButton();
     }
 
     function startObserver() {
         applyStyles();
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.1 — добавлен выбор парсера в торрентах)');
+        log('Observer started (v1.2 — парсер теперь меняется на лету + фикс no_parser)');
     }
 
     function register() {
@@ -209,9 +219,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1',
-                author: 'maxi3219',
-                description: 'Цвет сидов, скругления, фон, эффекты + выбор парсера в торрентах',
+                version: '1.2',
+                author: 'maxi3219 + фикс',
+                description: 'Цвет сидов, скругления, фон, эффекты + выбор парсера в торрентах (работает на лету)',
                 init: startObserver
             });
             log('Registered with Lampa');
