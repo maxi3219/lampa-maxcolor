@@ -71,8 +71,7 @@
         });
     }
 
-    // -- НОВЫЙ БЛОК --
-    // Внедрение стилей для :hover и .focus на кнопках
+    // Внедрение стилей для :hover и .focus (скругление кнопок и тень для элементов списков)
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         
@@ -82,11 +81,26 @@
             oldStyle.remove();
         }
 
-        // Новые правила для скругления кнопок при наведении/фокусе
+        // -- ОБНОВЛЕННЫЕ ПРАВИЛА --
+        const SHADOW_COLOR = '0 4px 15px rgb(59 171 147 / 30%)';
+
         const cssRules = `
+            /* Скругление кнопок на главной странице фильма */
             .full-start__button.selector:hover,
             .full-start__button.selector.focus {
                 border-radius: 0.5em !important;
+            }
+
+            /* Тень для элементов в Selectbox (Источник) */
+            .selectbox-item.selector:hover,
+            .selectbox-item.selector.focus {
+                box-shadow: ${SHADOW_COLOR} !important;
+            }
+
+            /* Тень для элементов в меню Настроек */
+            .settings-folder.selector:hover,
+            .settings-folder.selector.focus {
+                box-shadow: ${SHADOW_COLOR} !important;
             }
         `;
 
@@ -97,13 +111,13 @@
         styleElement.innerHTML = cssRules;
         document.head.appendChild(styleElement);
     }
-    // -- КОНЕЦ НОВОГО БЛОКА --
+    // -- КОНЕЦ БЛОКА --
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectInteractionStyles(); // -- ОБНОВЛЕНО --
+        injectInteractionStyles();
     }
 
     function startObserver() {
@@ -120,7 +134,7 @@
                 name: plugin_name,
                 version: '1.0',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон и прозрачность меню (упрощённая версия)',
+                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и визуальные эффекты фокуса',
                 init: startObserver
             });
             log('Registered with Lampa');
