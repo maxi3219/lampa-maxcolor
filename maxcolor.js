@@ -72,28 +72,21 @@
     }
 
     // -- НОВЫЙ БЛОК --
-    // Внедрение стилей для псевдо-элементов (::after)
-    function injectCustomStyles() {
-        const styleId = 'maxcolor-focus-styles';
-        // Проверяем, не был ли стиль уже добавлен
-        if (document.getElementById(styleId)) return; 
+    // Внедрение стилей для :hover и .focus на кнопках
+    function injectInteractionStyles() {
+        const styleId = 'maxcolor-interaction-styles';
+        
+        // Удаляем старые стили, если они были, чтобы применить новые
+        const oldStyle = document.getElementById(styleId);
+        if (oldStyle) {
+            oldStyle.remove();
+        }
 
-        // Все селекторы, которые ты указал
+        // Новые правила для скругления кнопок при наведении/фокусе
         const cssRules = `
-            .ad-bot.focus .ad-bot__content::after,
-            .ad-bot.hover .ad-bot__content::after,
-            .card-episode.focus .full-episode::after,
-            .register.focus::after,
-            .season-episode.focus::after,
-            .full-episode.focus::after,
-            .full-review-add.focus::after,
-            .card.focus .card__view::after,
-            .card.hover .card__view::after,
-            .extensions__item.focus:after,
-            .torrent-item.focus::after,
-            .extensions__block-add.focus:after {
-                border-color: #387172 !important;
-                box-shadow: 0 0 5px rgb(57 149 142), 0 0 10px rgb(71 155 149 / 50%) !important;
+            .full-start__button.selector:hover,
+            .full-start__button.selector.focus {
+                border-radius: 0.5em !important;
             }
         `;
 
@@ -110,7 +103,7 @@
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectCustomStyles(); // -- ДОБАВЛЕНО --
+        injectInteractionStyles(); // -- ОБНОВЛЕНО --
     }
 
     function startObserver() {
