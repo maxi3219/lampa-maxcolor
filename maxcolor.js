@@ -57,7 +57,7 @@
             // Добавляем твои стили для .settings__content
             if (panel.classList.contains('settings__content')) {
                 panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 2em)';
+                panel.style.maxHeight = 'calc(95vh - 1.5em)';
                 // Используем setProperty, чтобы добавить !important и гарантированно перекрыть стили
                 panel.style.setProperty('left', '99%', 'important');
                 panel.style.setProperty('max-height', 'calc(100vh - 2em)', 'important');
