@@ -2,12 +2,7 @@
     const plugin_id = 'maxcolor';
     const plugin_name = 'MaxColor';
 
-    const COLORS = {
-        low: '#ff3333',
-        mid: '#ffcc00',
-        high: '#00ff00'
-    };
-
+    const COLORS = { low: '#ff3333', mid: '#ffcc00', high: '#00ff00' };
     const BLOCK_RADIUS = '0.9em';
     const ACTIVE_RADIUS = '0.6em';
     const GRADIENT = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
@@ -68,11 +63,10 @@
         document.head.appendChild(style);
     }
 
-    // Фикс меню: реальный сдвиг вправо, сброс transform/left/inset и нижний спейсер
-    function fixSettingsBlock() {
-        const styleId = 'maxcolor-settings-fix';
+    // CSS для панели настроек и селектбокса
+    function injectSettingsCSS() {
+        const styleId = 'maxcolor-settings-css';
         if (document.getElementById(styleId)) return;
-
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
@@ -83,7 +77,7 @@
                     top: 1em !important;
                     bottom: 1em !important;
 
-                    /* Жёсткий сдвиг вправо и сброс конфликтов */
+                    /* реальный сдвиг вправо и сброс конфликтов */
                     right: 4em !important;
                     left: auto !important;
                     inset: auto !important;
@@ -95,40 +89,79 @@
                     max-height: calc(100vh - 2em) !important;
 
                     overflow-y: auto !important;
+                    overflow-x: hidden !important;
                     box-sizing: border-box !important;
 
                     background: rgb(33 33 33 / 98%) !important;
                     border-radius: 1.2em !important;
                     box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important;
 
-                    padding: 1em 1em 3.5em 1em !important; /* запас снизу внутри */
+                    /* внутренний отступ + прокрутка с запасом снизу */
+                    padding: 1em 1em 3.5em 1em !important;
+                    scroll-padding-bottom: 3.5em !important;
+                    overscroll-behavior: contain !important;
+
                     display: flex !important;
                     flex-direction: column !important;
                 }
 
-                /* Гарантированный нижний "спейсер" через псевдоэлемент контейнера */
-                .settings__content::after,
-                .selectbox__content.layer--height::after {
-                    content: '' !important;
-                    display: block !important;
-                    height: 2.5em !important;
-                    flex: 0 0 auto !important;
+                /* страховка видимости: не прячем панель в открытом состоянии */
+                body.settings--open .settings__content,
+                body.selectbox--open .selectbox__content.layer--height {
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
 
-                /* Доп. запас последнему реальному пункту на случай агрессивных тем */
+                /* доп. запас последнему реальному пункту */
                 .settings__content .selector:last-child,
                 .selectbox__content.layer--height .selector:last-child {
                     margin-bottom: 2em !important;
                 }
-
-                /* Страховка против анимаций, которые оставляют "хвост" сбоку */
-                body.settings--open .settings__content,
-                body.selectbox--open .selectbox__content.layer--height {
-                    transform: none !important;
-                }
             }
         `;
         document.head.appendChild(style);
+    }
+
+    // Фокусируемый «стоп-элемент» в конце, чтобы навигация пультом не обрезала последний пункт
+    function ensureBottomFocusStop() {
+        const panels = document.querySelectorAll('.settings__content, .selectbox__content.layer--height');
+        panels.forEach(panel => {
+            const stopId = 'max-bottom-focus-stop';
+            if (!panel.querySelector('#' + stopId)) {
+                const stop = document.createElement('div');
+                stop.id = stopId;
+                stop.className = 'settings-param selector'; // чтобы вписаться в поток фокуса
+                stop.tabIndex = 0;
+                stop.setAttribute('aria-hidden', 'false');
+                stop.style.minHeight = '2.5em';
+                stop.style.height = '2.5em';
+                stop.style.marginTop = '0.5em';
+                stop.style.marginBottom = '0.5em';
+                stop.style.opacity = '0';        // невидимка
+                stop.style.pointerEvents = 'none';
+                // pointerEvents: none, но для ТВ фокуса иногда нужно true — оставим фокус через DOM, но без клика
+                stop.style.pointerEvents = 'auto';
+                panel.appendChild(stop);
+            }
+        });
+    }
+
+    // Перестраховка на событии открытия, чтобы все правки применялись после рендера
+    function hookOpenEvents() {
+        if (window.Lampa && typeof Lampa.Listener === 'object') {
+            Lampa.Listener.follow('app', e => {
+                if (e.type === 'settings_open' || e.type === 'selectbox_open' || e.type === 'ready') {
+                    setTimeout(() => {
+                        injectSettingsCSS();
+                        ensureBottomFocusStop();
+                    }, 0);
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            injectSettingsCSS();
+            ensureBottomFocusStop();
+        });
     }
 
     function applyStyles() {
@@ -136,14 +169,18 @@
         roundCorners();
         changeBackground();
         enforceButtonsRadius();
-        fixSettingsBlock();
+        injectSettingsCSS();
+        ensureBottomFocusStop();
     }
 
     function startObserver() {
-        const obs = new MutationObserver(applyStyles);
+        const obs = new MutationObserver(() => {
+            applyStyles();
+        });
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.6)');
+        hookOpenEvents();
+        log('Observer started (v4.7)');
     }
 
     function register() {
@@ -151,9 +188,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.6',
+                version: '4.7',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон и жёсткий фикс позиционирования меню',
+                description: 'Фикс меню для ТВ: отступ снизу при навигации пультом, реальный сдвиг вправо, без подсветок',
                 init: startObserver
             });
             log('Registered with Lampa');
