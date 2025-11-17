@@ -9,7 +9,7 @@
     };
 
     const BLOCK_RADIUS = '0.9em';
-    const GRADIENT_APP_BG = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14, 14, 14) 100%)';
+    const GRADIENT_APP_BG = 'linear-gradient(117deg, rgb(0 0 0) 0%, rgb(11 26 35) 50%, rgb(14 14 14) 100%)';
 
     function log(...a) {
         try { console.log(`[${plugin_name}]`, ...a); } catch (e) {}
@@ -59,11 +59,11 @@
         });
     }
 
-    // Стили фокуса / hover
+    // Внедрение стилей для :hover и .focus
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
-
+        
         document.getElementById(styleId)?.remove();
         document.getElementById(staticStyleId)?.remove();
 
@@ -77,12 +77,10 @@
                 box-shadow: ${SHADOW_COLOR} !important;
                 background: ${GRADIENT_HOVER_BG} !important;
             }
-
             .selectbox-item.selector:hover,
             .selectbox-item.selector.focus {
                 box-shadow: ${SHADOW_COLOR} !important;
             }
-
             .settings-folder.selector:hover,
             .settings-folder.selector.focus {
                 box-shadow: ${SHADOW_COLOR} !important;
@@ -94,46 +92,66 @@
                 background-color: rgb(68 68 69 / 13%) !important;
             }
         `;
-
+        
         const interactionStyleElement = document.createElement('style');
         interactionStyleElement.id = styleId;
+        interactionStyleElement.type = 'text/css';
         interactionStyleElement.innerHTML = interactionCss;
         document.head.appendChild(interactionStyleElement);
 
         const staticStyleElement = document.createElement('style');
         staticStyleElement.id = staticStyleId;
+        staticStyleElement.type = 'text/css';
         staticStyleElement.innerHTML = staticCss;
         document.head.appendChild(staticStyleElement);
     }
 
-    // 🔥 ДОБАВЛЯЕМ КНОПКУ ВЫБОРА ПАРСЕРА
+    // --- Меню выбора парсеров ---
+    async function getParsers() {
+        // Здесь можно подгружать с Jackett.js
+        return [
+            { id: 'rutracker', name: 'Rutracker' },
+            { id: 'nnmclub', name: 'NNM-Club' },
+            { id: 'tfile', name: 'TFile' }
+        ];
+    }
+
     function injectParserButton() {
         const filterBlock = document.querySelector('.torrent-filter');
         if (!filterBlock) return;
-
         if (filterBlock.querySelector('.filter--parser')) return;
 
         const btn = document.createElement('div');
         btn.className = 'simple-button simple-button--filter selector filter--parser';
-
-        btn.innerHTML = `
-            <span>Парсер</span>
-            <div class="">Выбрать</div>
-        `;
+        btn.innerHTML = `<span>Парсер</span><div>Выбрать</div>`;
 
         const filterBtn = filterBlock.querySelector('.filter--filter');
         if (filterBtn) filterBtn.after(btn);
         else filterBlock.appendChild(btn);
 
         btn.addEventListener('click', () => {
+            // Открываем стандартное меню Lampa
             Lampa.Controller.toggle('settings');
 
-            setTimeout(() => {
-                const parserMenu = document.querySelector('div[data-children="parser"]');
-                if (parserMenu) {
-                    parserMenu.classList.add('focus');
-                    parserMenu.click();
-                }
+            setTimeout(async () => {
+                const settingsPanel = document.querySelector('.settings__content');
+                if (!settingsPanel) return;
+                settingsPanel.innerHTML = '';
+
+                const parsers = await getParsers();
+                parsers.forEach(parser => {
+                    const item = document.createElement('div');
+                    item.className = 'settings-folder selector';
+                    item.textContent = parser.name;
+
+                    item.addEventListener('click', () => {
+                        app.storage.set('selected_parser', parser.id);
+                        Lampa.Controller.toggle('settings');
+                        Lampa.Api.notify('Парсер выбран: ' + parser.name);
+                    });
+
+                    settingsPanel.appendChild(item);
+                });
             }, 120);
         });
     }
@@ -143,14 +161,14 @@
         roundCorners();
         changeBackground();
         injectInteractionStyles();
-        injectParserButton(); // ← ДОБАВЛЕНО
+        injectParserButton();
     }
 
     function startObserver() {
         applyStyles();
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.1 + parser button)');
+        log('Observer started (v1.1, с выбором парсеров)');
     }
 
     function register() {
@@ -160,11 +178,12 @@
                 name: plugin_name,
                 version: '1.1',
                 author: 'maxi3219',
-                description: 'Цвет сидов, фон, скругления и кнопка выбора парсера',
+                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и выбор парсеров',
                 init: startObserver
             });
             log('Registered with Lampa');
         } else {
+            log('Standalone mode');
             startObserver();
         }
     }
