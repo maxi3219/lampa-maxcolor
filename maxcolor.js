@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Lampa Custom UI
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Кастомизация Lampa: фон, скругления, прозрачность меню, подсветка раздающих, смещение меню
 // @match        *://*/*
 // @grant        none
@@ -12,9 +12,9 @@
 
     const style = document.createElement('style');
     style.innerHTML = `
-        /* Смена фона */
+        /* Смена фона — оставляем градиент как у тебя */
         body {
-            background: #1e1e1e !important;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%) !important;
         }
 
         /* Скругление углов у торрентов */
