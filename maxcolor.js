@@ -68,67 +68,93 @@
         document.head.appendChild(style);
     }
 
-    // Новая версия — фикс меню + правильное поведение на пульте
+    // Новая версия — фикс меню + поведение для пульта
     function hardFixSettingsPosition() {
         const panels = document.querySelectorAll('.settings__content, .selectbox__content.layer--height');
         panels.forEach(panel => {
-            // Аккуратный сдвиг вправо
-            panel.style.setProperty('right', '1.5em', 'important');
+            // === РОВНЫЕ внешние отступы сверху/снизу/справа ===
+            // top и bottom — одинаковые, right — немного меньше чтобы панель была ближе к правому краю
+            const outerGap = '1.5em';   // запас сверху/снизу
+            const rightGap = '0.8em';   // запас справа (меньше => ближе к правому краю)
 
-            // Позиционирование
             panel.style.setProperty('position', 'fixed', 'important');
-            panel.style.setProperty('top', '1.5em', 'important');
-            panel.style.setProperty('bottom', '1.5em', 'important');
+            panel.style.setProperty('top', outerGap, 'important');
+            panel.style.setProperty('bottom', outerGap, 'important');
+            panel.style.setProperty('right', rightGap, 'important');
+            panel.style.setProperty('left', 'auto', 'important');
 
-            // Размеры
+            // Размеры — гибкие, не жёсткие
             panel.style.setProperty('width', '36%', 'important');
             panel.style.setProperty('max-width', '42em', 'important');
+            panel.style.setProperty('box-sizing', 'border-box', 'important');
 
-            // Внутренние отступы
-            panel.style.setProperty('padding', '1em', 'important');
-            panel.style.setProperty('padding-bottom', '5em', 'important');
+            // Внутренние отступы — большой запас снизу для пульта
+            panel.style.setProperty('padding-top', '1em', 'important');
+            panel.style.setProperty('padding-right', '1em', 'important');
+            panel.style.setProperty('padding-left', '1em', 'important');
+            panel.style.setProperty('padding-bottom', '6.5em', 'important'); // крупный запас
 
-            // Стили
+            // Поведение прокрутки и видимости элемента при фокусе
             panel.style.setProperty('overflow-y', 'auto', 'important');
+            // scroll-padding-bottom помогает при scrollIntoView / фокусе пульта
+            panel.style.setProperty('scroll-padding-bottom', '7.5em', 'important');
+            panel.style.setProperty('overscroll-behavior', 'contain', 'important');
+
+            // Выравнивание содержимого — начало, чтобы не прижималось к низу
+            panel.style.setProperty('display', 'flex', 'important');
+            panel.style.setProperty('flex-direction', 'column', 'important');
+            panel.style.setProperty('justify-content', 'flex-start', 'important');
+            panel.style.setProperty('align-items', 'stretch', 'important');
+
+            // Визуальные стили
             panel.style.setProperty('border-radius', '1.2em', 'important');
             panel.style.setProperty('background', 'rgb(33 33 33 / 98%)', 'important');
             panel.style.setProperty('box-shadow', '0 8px 24px rgba(0,0,0,0.8)', 'important');
-            panel.style.setProperty('display', 'flex', 'important');
-            panel.style.setProperty('flex-direction', 'column', 'important');
 
-            // ——— КЛЮЧЕВОЕ — убираем ограничение по высоте, чтобы не резало на пульте
+            // Убираем жесткие ограничения по высоте — это источник обрезания
             panel.style.removeProperty('max-height');
 
-            // Спейсер для нижней части (100% не режет элементы)
+            // Спейсер в конце — дополнительная гарантия, что последний пункт не окажется скрыт
             const spacerId = 'maxmenu-bottom-spacer';
             if (!panel.querySelector(`#${spacerId}`)) {
                 const spacer = document.createElement('div');
                 spacer.id = spacerId;
-                spacer.style.height = '5em';
-                spacer.style.minHeight = '5em';
+                spacer.style.height = '7.5em';
+                spacer.style.minHeight = '7.5em';
                 spacer.style.flexShrink = '0';
                 panel.appendChild(spacer);
             }
         });
     }
 
-    // CSS-страховка
+    // CSS-страховки (в том числе для фокуса по пульту)
     function addSettingsSafetyCSS() {
         const styleId = 'maxcolor-settings-safety';
         if (document.getElementById(styleId)) return;
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            @media screen and (min-width: 480px) {
+            @media screen and (min-width: 360px) {
                 body.settings--open .settings__content,
                 body.selectbox--open .selectbox__content.layer--height {
                     box-sizing: border-box !important;
                 }
 
-                /* улучшенный нижний отступ для пульта */
+                /* явный большой нижний отступ у последнего селектора (на всякий случай) */
                 body.settings--open .settings__content .selector:last-child,
                 body.selectbox--open .selectbox__content.layer--height .selector:last-child {
-                    margin-bottom: 4em !important;
+                    margin-bottom: 6.5em !important;
+                }
+
+                /* при фокусе (пульт/клавиатура) даём дополнительный scroll-margin */
+                body.settings--open .settings__content .selector:focus,
+                body.selectbox--open .selectbox__content.layer--height .selector:focus {
+                    scroll-margin-bottom: 7.5em !important;
+                }
+
+                /* если тема жестко обрезает padding, добавим внутренний spacer-элемент */
+                #maxmenu-bottom-spacer {
+                    display: block;
                 }
             }
         `;
@@ -148,7 +174,7 @@
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
         applyStyles();
-        log('Observer started (v4.6)');
+        log('Observer started (v4.7)');
     }
 
     function register() {
@@ -156,9 +182,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '4.6',
+                version: '4.7',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, новый фон, фиксация меню, правый отступ, исправление обрезания для пульта',
+                description: 'Цвет сидов, скругления блоков, фон, фикс меню: равные отступы сверху/снизу/справа, исправление обрезания для пульта',
                 init: startObserver
             });
             log('Registered with Lampa');
