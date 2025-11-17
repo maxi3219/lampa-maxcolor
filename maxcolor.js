@@ -74,24 +74,23 @@
     // Внедрение стилей для :hover и .focus
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
+        const staticStyleId = 'maxcolor-static-styles';
         
-        const oldStyle = document.getElementById(styleId);
-        if (oldStyle) {
-            oldStyle.remove();
-        }
+        // Удаляем старые стили, если они были
+        document.getElementById(styleId)?.remove();
+        document.getElementById(staticStyleId)?.remove();
 
-        // Цвет тени: rgb(57 148 188 / 30%)
+        // --- ПРАВИЛА ВЗАИМОДЕЙСТВИЯ (:hover, .focus) ---
         const SHADOW_COLOR = '0 4px 15px rgb(57 148 188 / 30%)';
-        // Градиент для фона кнопок наведения
         const GRADIENT_HOVER_BG = 'linear-gradient(to right, #9cc1bc, #536976)';
 
-        const cssRules = `
-            /* Градиентный фон для кнопок на странице фильма при наведении/фокусе */
+        const interactionCss = `
+            /* Градиентный фон и тень для кнопок на странице фильма при наведении/фокусе */
             .full-start__button.selector:hover,
             .full-start__button.selector.focus {
                 border-radius: 0.5em !important;
                 box-shadow: ${SHADOW_COLOR} !important;
-                background: ${GRADIENT_HOVER_BG} !important; /* НОВОЕ ПРАВИЛО */
+                background: ${GRADIENT_HOVER_BG} !important;
             }
 
             /* Тень для элементов в Selectbox (Источник) */
@@ -107,24 +106,40 @@
             }
         `;
 
-        // Создаем тег <style> и добавляем его в <head>
-        const styleElement = document.createElement('style');
-        styleElement.id = styleId;
-        styleElement.type = 'text/css';
-        styleElement.innerHTML = cssRules;
-        document.head.appendChild(styleElement);
+        // --- СТАТИЧЕСКИЕ ПРАВИЛА ---
+        const staticCss = `
+            /* Новый фон для элементов списка торрентов */
+            .torrent-item.selector {
+                background-color: rgb(68 68 69 / 13%) !important;
+            }
+        `;
+        
+        // Создаем тег <style> для интерактивных стилей
+        const interactionStyleElement = document.createElement('style');
+        interactionStyleElement.id = styleId;
+        interactionStyleElement.type = 'text/css';
+        interactionStyleElement.innerHTML = interactionCss;
+        document.head.appendChild(interactionStyleElement);
+
+        // Создаем тег <style> для статических стилей
+        const staticStyleElement = document.createElement('style');
+        staticStyleElement.id = staticStyleId;
+        staticStyleElement.type = 'text/css';
+        staticStyleElement.innerHTML = staticCss;
+        document.head.appendChild(staticStyleElement);
     }
 
     function applyStyles() {
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectInteractionStyles();
+        injectInteractionStyles(); // Внедряем стили
     }
 
     function startObserver() {
         applyStyles(); // сразу применяем
         const obs = new MutationObserver(applyStyles);
+        // Наблюдаем за изменениями в DOM
         obs.observe(document.body, { childList: true, subtree: true });
         log('Observer started (v1.0, упрощённая версия)');
     }
