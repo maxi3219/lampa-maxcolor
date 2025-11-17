@@ -33,7 +33,26 @@
         // Навешиваем обработчик
         parserBtn.addEventListener('hover:enter', () => {
             try {
-                Lampa.SettingsApi.open('parser'); // открываем стандартное меню выбора парсера
+                // стандартный вызов меню выбора парсера
+                Lampa.Select.show({
+                    title: 'Выбор парсера',
+                    items: [
+                        { title: 'Jacred RU', value: 'jacred_ru' },
+                        { title: 'Jacred Pro', value: 'jacred_pro' },
+                        { title: 'Jacred XYZ', value: 'jacred_xyz' },
+                        { title: 'Jac Black', value: 'jac_black' },
+                        { title: 'Viewbox', value: 'jacred_viewbox_dev' },
+                        { title: 'ByLampa Jackett', value: 'bylampa_jackett' },
+                        { title: 'Jac Lampa32 RU', value: 'jac_lampa32_ru' },
+                        { title: 'Maxvol Pro', value: 'jr_maxvol_pro' },
+                        { title: 'Нет парсера', value: 'no_parser' }
+                    ],
+                    onSelect: (choice) => {
+                        Lampa.Storage.set('parser_use', choice.value);
+                        log('Выбран парсер:', choice.value);
+                        Lampa.Activity.toggle(); // перезапуск активности
+                    }
+                });
             } catch (e) {
                 log('Ошибка открытия меню парсера', e);
             }
@@ -51,7 +70,7 @@
         applyStyles();
         const obs = new MutationObserver(applyStyles);
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.1 с кнопкой парсера)');
+        log('Observer started (v1.2 с рабочей кнопкой парсера)');
     }
 
     function register() {
@@ -59,7 +78,7 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.1',
+                version: '1.2',
                 author: 'maxi3219',
                 description: 'Добавляет кнопку выбора парсера в список фильтров',
                 init: startObserver
