@@ -40,34 +40,20 @@
             .forEach(item => item.style.borderRadius = BLOCK_RADIUS);
     }
 
-    // Фон подложки приложения и прозрачность меню
+    // Фон приложения (НОВАЯ ЛОГИКА ЧЕРЕЗ BODY)
     function changeBackground() {
-        const backgroundBlock = document.querySelector('.background');
-        if (backgroundBlock) {
-            backgroundBlock.style.background = GRADIENT_APP_BG;
-            backgroundBlock.style.setProperty('background', GRADIENT_APP_BG, 'important');
-        }
+        const body = document.body;
+        if (!body) return;
+
+        body.style.setProperty('background', GRADIENT_APP_BG, 'important');
+        body.style.setProperty('background-image', GRADIENT_APP_BG, 'important');
+        body.style.setProperty('background-color', 'transparent', 'important');
 
         // Прозрачность подложки меню и кастомные стили
         document.querySelectorAll('.settings__content, .selectbox__content.layer--height').forEach(panel => {
-            // Общий стиль для обоих
-            panel.style.background = 'rgba(33,33,33,0.98)';
             panel.style.setProperty('background', 'rgba(33,33,33,0.98)', 'important');
-
-            // Стили для .settings__content
-            if (panel.classList.contains('settings__content')) {
-                panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
-                panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
-            }
-            // Стили для .selectbox__content
-            else if (panel.classList.contains('selectbox__content')) {
-                panel.style.left = '99%';
-                panel.style.maxHeight = 'calc(100vh - 1.8em)';
-                panel.style.setProperty('left', '99%', 'important');
-                panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
-            }
+            panel.style.setProperty('left', '99%', 'important');
+            panel.style.setProperty('max-height', 'calc(100vh - 1.8em)', 'important');
         });
     }
 
@@ -75,17 +61,14 @@
     function injectInteractionStyles() {
         const styleId = 'maxcolor-interaction-styles';
         const staticStyleId = 'maxcolor-static-styles';
-        
-        // Удаляем старые стили, если они были
+
         document.getElementById(styleId)?.remove();
         document.getElementById(staticStyleId)?.remove();
 
-        // --- ПРАВИЛА ВЗАИМОДЕЙСТВИЯ (:hover, .focus) ---
         const SHADOW_COLOR = '0 4px 15px rgb(57 148 188 / 30%)';
         const GRADIENT_HOVER_BG = 'linear-gradient(to right, #9cc1bc, #536976)';
 
         const interactionCss = `
-            /* Градиентный фон и тень для кнопок на странице фильма при наведении/фокусе */
             .full-start__button.selector:hover,
             .full-start__button.selector.focus {
                 border-radius: 0.5em !important;
@@ -93,35 +76,29 @@
                 background: ${GRADIENT_HOVER_BG} !important;
             }
 
-            /* Тень для элементов в Selectbox (Источник) */
             .selectbox-item.selector:hover,
             .selectbox-item.selector.focus {
                 box-shadow: ${SHADOW_COLOR} !important;
             }
 
-            /* Тень для элементов в меню Настроек */
             .settings-folder.selector:hover,
             .settings-folder.selector.focus {
                 box-shadow: ${SHADOW_COLOR} !important;
             }
         `;
 
-        // --- СТАТИЧЕСКИЕ ПРАВИЛА ---
         const staticCss = `
-            /* Новый фон для элементов списка торрентов */
             .torrent-item.selector {
                 background-color: rgb(68 68 69 / 13%) !important;
             }
         `;
-        
-        // Создаем тег <style> для интерактивных стилей
+
         const interactionStyleElement = document.createElement('style');
         interactionStyleElement.id = styleId;
         interactionStyleElement.type = 'text/css';
         interactionStyleElement.innerHTML = interactionCss;
         document.head.appendChild(interactionStyleElement);
 
-        // Создаем тег <style> для статических стилей
         const staticStyleElement = document.createElement('style');
         staticStyleElement.id = staticStyleId;
         staticStyleElement.type = 'text/css';
@@ -133,15 +110,14 @@
         recolorSeedNumbers();
         roundCorners();
         changeBackground();
-        injectInteractionStyles(); // Внедряем стили
+        injectInteractionStyles();
     }
 
     function startObserver() {
-        applyStyles(); // сразу применяем
+        applyStyles();
         const obs = new MutationObserver(applyStyles);
-        // Наблюдаем за изменениями в DOM
         obs.observe(document.body, { childList: true, subtree: true });
-        log('Observer started (v1.0, упрощённая версия)');
+        log('Observer started (v1.1, body background fix)');
     }
 
     function register() {
@@ -149,9 +125,9 @@
             app.plugins.add({
                 id: plugin_id,
                 name: plugin_name,
-                version: '1.0',
+                version: '1.1',
                 author: 'maxi3219',
-                description: 'Цвет сидов, скругления блоков, фон, прозрачность меню и визуальные эффекты фокуса',
+                description: 'Цвет сидов, скругления блоков, фон через body, прозрачность меню и эффекты фокуса',
                 init: startObserver
             });
             log('Registered with Lampa');
